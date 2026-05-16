@@ -650,6 +650,17 @@
     nav { padding: 0 20px; }
     section { padding: 60px 24px; }
   }
+
+/* ─── SCROLL ANIMATION ─── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 </style>
 </head>
 <body>
@@ -675,7 +686,7 @@
 </div>
 
 <!-- HERO -->
-<section class="hero" id="home">
+<section class="hero fade-up" id="home">
   <div class="hero-content">
     <div class="hero-badge">MVP v1.0 · 서울 강남구 출시 예정</div>
     <h1><em>3초면 완성되는</em><br>우리 아이<br>학원 스케줄</h1>
@@ -1085,7 +1096,7 @@
 </section>
 
 <!-- HOW IT WORKS -->
-<section class="how-section" id="how">
+<section class="how-section fade-up" id="how">
   <div class="section-badge">이용 방법</div>
   <h2>3분이면<br>충분합니다</h2>
   <p>복잡한 설정 없이, 5단계로 아이의 완벽한 학원 스케줄을 만드세요.</p>
@@ -1119,7 +1130,7 @@
 </section>
 
 <!-- DEMO SECTION -->
-<section class="demo-section" id="demo">
+<section class="demo-section fade-up" id="demo">
   <div class="section-badge">인터랙티브 데모</div>
   <h2 style="color:#fff">직접 눌러보세요</h2>
   <p>실제 앱과 동일한 화면 흐름을 체험해 보세요.</p>
@@ -1342,7 +1353,7 @@
 </section>
 
 <!-- PRICING -->
-<section id="pricing">
+<section class="fade-up" id="pricing">
   <div class="section-badge">요금제</div>
   <h2>필요한 만큼만<br>사용하세요</h2>
   <p>핵심 기능은 무료로 제공합니다. 프리미엄으로 더 강력하게.</p>
@@ -1383,7 +1394,7 @@
 </section>
 
 <!-- KPI -->
-<section class="kpi-section">
+<section class="kpi-section fade-up">
   <div class="section-badge">성장 목표</div>
   <h2>단계별 성과 지표</h2>
   <p style="color:var(--gray-500)">강남구 출시를 시작으로 전국 확장까지 측정 가능한 목표로 성장합니다.</p>
@@ -1490,6 +1501,19 @@ setInterval(() => {
   heroIdx = (heroIdx + 1) % heroScreens.length;
   heroNav(heroScreens[heroIdx]);
 }, 3000);
+
+// Scroll animation
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+})();
 </script>
 
 </body>
