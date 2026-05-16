@@ -401,15 +401,34 @@
     font-size: 17px; color: var(--gray-500); line-height: 1.7;
     max-width: 520px; margin-bottom: 60px;
   }
-  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .feature-card {
-    background: var(--gray-50); border-radius: 20px; padding: 32px;
-    border: 1px solid var(--gray-100); transition: all .2s;
+
+  /* ─── FEATURES ─── */
+  .features { padding: 100px 40px; background: var(--bg-base); }
+  .features-inner { max-width: 1100px; margin: 0 auto; }
+  .features-label {
+    display: inline-block; background: var(--primary-light); color: var(--primary);
+    border-radius: 100px; padding: 5px 14px; font-size: 12px; font-weight: 700; margin-bottom: 16px;
   }
-  .feature-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); }
-  .feature-icon { font-size: 36px; margin-bottom: 16px; }
-  .feature-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: var(--gray-900); }
-  .feature-card p { font-size: 14px; color: var(--gray-500); line-height: 1.65; }
+  .features h2 { font-size: 36px; font-weight: 800; color: var(--text-main); letter-spacing: -1px; margin-bottom: 8px; }
+  .features-sub { font-size: 16px; color: var(--text-sub); margin-bottom: 56px; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .feature-card {
+    background: var(--bg-card); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .feature-card:hover { border-color: #FED7AA; box-shadow: 0 4px 20px rgba(249,115,22,0.08); }
+  .feature-icon {
+    font-size: 28px; margin-bottom: 16px; background: var(--primary-light);
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .feature-card h3 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
+  .feature-card p { font-size: 13px; color: var(--text-sub); line-height: 1.65; }
+  @media (max-width: 768px) {
+    .features { padding: 72px 20px; }
+    .features-grid { grid-template-columns: 1fr; gap: 14px; }
+  }
 
   /* ─── HOW IT WORKS ─── */
   .how-section { background: var(--gray-900); color: #fff; }
@@ -927,40 +946,42 @@
 </section>
 
 <!-- FEATURES -->
-<section id="features">
-  <div class="section-badge">핵심 기능</div>
-  <h2>학원 코디의<br>새로운 기준</h2>
-  <p>기존 지도 앱이 할 수 없던 일, 키즈루트가 합니다.</p>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">📍</div>
-      <h3>GPS 반경 학원 탐색</h3>
-      <p>거주지 또는 학교를 중심으로 500m~2km 반경 내 학원을 자동으로 수집합니다. 나이스(NEIS) 공공데이터 기반으로 정확한 정보를 제공합니다.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">⚡</div>
-      <h3>시간 충돌 자동 감지</h3>
-      <p>이동 시간 10분 버퍼를 포함해 학원 간 시간 충돌을 자동으로 검사합니다. 충돌 없는 조합만 추천해 학부모의 수동 확인 시간을 없앱니다.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏆</div>
-      <h3>과목 우선순위 조합</h3>
-      <p>수학·영어·예체능 등 원하는 과목의 우선순위를 설정하면, Greedy 알고리즘이 최적의 학원 조합을 순서대로 추천합니다.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📅</div>
-      <h3>주간 캘린더 시각화</h3>
-      <p>추천된 학원 조합을 주간 타임라인으로 한눈에 확인합니다. 월~금 블록 뷰로 아이의 하루 스케줄을 직관적으로 파악할 수 있습니다.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔐</div>
-      <h3>카카오/구글 소셜 로그인</h3>
-      <p>번거로운 회원가입 없이 카카오 또는 구글 계정으로 바로 시작하세요. JWT 기반 안전한 인증으로 개인정보를 보호합니다.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">💾</div>
-      <h3>스케줄 저장 & 관리</h3>
-      <p>마음에 드는 학원 조합을 저장하고 언제든지 다시 확인하세요. 아이별 프로필로 복수 자녀의 스케줄을 독립적으로 관리합니다.</p>
+<section class="features fade-up" id="features">
+  <div class="features-inner">
+    <div class="features-label">핵심 기능</div>
+    <h2>학원 코디의<br>새로운 기준</h2>
+    <p class="features-sub">기존 지도 앱이 할 수 없던 일, 키즈루트가 합니다.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📍</div>
+        <h3>GPS 반경 학원 탐색</h3>
+        <p>거주지 또는 학교를 중심으로 500m~2km 반경 내 학원을 자동으로 수집합니다. 나이스(NEIS) 공공데이터 기반으로 정확한 정보를 제공합니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>시간 충돌 자동 감지</h3>
+        <p>이동 시간 10분 버퍼를 포함해 학원 간 시간 충돌을 자동으로 검사합니다. 충돌 없는 조합만 추천해 학부모의 수동 확인 시간을 없앱니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>과목 우선순위 조합</h3>
+        <p>수학·영어·예체능 등 원하는 과목의 우선순위를 설정하면, Greedy 알고리즘이 최적의 학원 조합을 순서대로 추천합니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>주간 캘린더 시각화</h3>
+        <p>추천된 학원 조합을 주간 타임라인으로 한눈에 확인합니다. 월~금 블록 뷰로 아이의 하루 스케줄을 직관적으로 파악할 수 있습니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>카카오/구글 소셜 로그인</h3>
+        <p>번거로운 회원가입 없이 카카오 또는 구글 계정으로 바로 시작하세요. JWT 기반 안전한 인증으로 개인정보를 보호합니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <h3>스케줄 저장 & 관리</h3>
+        <p>마음에 드는 학원 조합을 저장하고 언제든지 다시 확인하세요. 아이별 프로필로 복수 자녀의 스케줄을 독립적으로 관리합니다.</p>
+      </div>
     </div>
   </div>
 </section>
