@@ -585,6 +585,34 @@
     .howto-num { flex-shrink: 0; }
   }
 
+  /* ─── REVIEWS ─── */
+  .reviews { padding: 100px 40px; background: #fff; }
+  .reviews-inner { max-width: 1100px; margin: 0 auto; }
+  .reviews-label {
+    display: inline-block; background: var(--primary-light); color: var(--primary);
+    border-radius: 100px; padding: 5px 14px; font-size: 12px; font-weight: 700; margin-bottom: 16px;
+  }
+  .reviews h2 { font-size: 36px; font-weight: 800; color: var(--text-main); letter-spacing: -1px; margin-bottom: 8px; }
+  .reviews-sub { font-size: 16px; color: var(--text-sub); margin-bottom: 56px; }
+  .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .review-card { background: var(--bg-base); border: 1.5px solid var(--border); border-radius: 16px; padding: 28px; }
+  .review-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .review-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; flex-shrink: 0;
+  }
+  .review-info { display: flex; flex-direction: column; gap: 2px; }
+  .review-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
+  .review-region { font-size: 12px; color: var(--text-muted); }
+  .review-stars { color: #F59E0B; font-size: 14px; margin-bottom: 12px; }
+  .review-text { font-size: 14px; color: var(--text-sub); line-height: 1.7; }
+  @media (max-width: 768px) {
+    .reviews { padding: 72px 20px; }
+    .reviews-grid { grid-template-columns: 1fr; gap: 14px; }
+  }
+
   @media (max-width: 900px) {
     .hero { flex-direction: column; padding: 90px 24px 60px; }
     .hero-phone { margin-left: 0; margin-top: 40px; }
@@ -981,6 +1009,50 @@
         <div class="feature-icon">💾</div>
         <h3>스케줄 저장 & 관리</h3>
         <p>마음에 드는 학원 조합을 저장하고 언제든지 다시 확인하세요. 아이별 프로필로 복수 자녀의 스케줄을 독립적으로 관리합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews fade-up" id="reviews">
+  <div class="reviews-inner">
+    <div class="reviews-label">베타 후기</div>
+    <h2>학부모들이 먼저 써봤어요</h2>
+    <p class="reviews-sub">강남구 베타 테스트에 참여한 학부모 100명의 실제 후기입니다</p>
+    <div class="reviews-grid">
+      <div class="review-card fade-up">
+        <div class="review-header">
+          <div class="review-avatar">이</div>
+          <div class="review-info">
+            <span class="review-name">이○○ 학부모</span>
+            <span class="review-region">강남구</span>
+          </div>
+        </div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"학원 시간표 맞추느라 매번 엑셀 쓰다가 이 앱 쓰고 해방됐어요. 이동 시간까지 계산해주는 게 진짜 신기했어요."</p>
+      </div>
+      <div class="review-card fade-up" style="transition-delay:0.1s">
+        <div class="review-header">
+          <div class="review-avatar">김</div>
+          <div class="review-info">
+            <span class="review-name">김○○ 학부모</span>
+            <span class="review-region">서초구</span>
+          </div>
+        </div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"수학 영어 피아노 세 개 겹치지 않게 짜주는 게 진짜 편해요. 아이도 덜 피곤해하는 것 같고요."</p>
+      </div>
+      <div class="review-card fade-up" style="transition-delay:0.2s">
+        <div class="review-header">
+          <div class="review-avatar">박</div>
+          <div class="review-info">
+            <span class="review-name">박○○ 학부모</span>
+            <span class="review-region">송파구</span>
+          </div>
+        </div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"베타 쓰면서 학원을 두 개 더 넣을 수 있는 여유 시간이 생겼어요. 강력 추천합니다!"</p>
       </div>
     </div>
   </div>
