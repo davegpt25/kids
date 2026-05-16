@@ -93,7 +93,7 @@
     content: '';
     position: absolute; top: -200px; right: -200px;
     width: 700px; height: 700px;
-    background: radial-gradient(circle, rgba(79,142,247,0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%);
     border-radius: 50%;
   }
   .hero-content { flex: 1; max-width: 560px; z-index: 1; }
@@ -190,21 +190,21 @@
   .screen-home { background: #fff; }
   .home-map {
     height: 180px;
-    background: linear-gradient(180deg, #E8F0FE 0%, #C7D7FB 100%);
+    background: linear-gradient(180deg, #FFF7ED 0%, #FED7AA 100%);
     position: relative; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
   }
   .map-grid {
     position: absolute; inset: 0;
     background-image:
-      linear-gradient(rgba(79,142,247,0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(79,142,247,0.1) 1px, transparent 1px);
+      linear-gradient(rgba(249,115,22,0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249,115,22,0.1) 1px, transparent 1px);
     background-size: 24px 24px;
   }
   .map-pin {
     width: 32px; height: 32px; background: var(--blue);
     border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
-    box-shadow: 0 4px 12px rgba(79,142,247,0.5);
+    box-shadow: 0 4px 12px rgba(249,115,22,0.5);
     position: relative; z-index: 2;
   }
   .map-pin::after {
@@ -214,7 +214,7 @@
   .map-radius {
     position: absolute;
     width: 120px; height: 120px;
-    border: 2px dashed rgba(79,142,247,0.4);
+    border: 2px dashed rgba(249,115,22,0.4);
     border-radius: 50%;
     left: 50%; top: 50%; transform: translate(-50%, -50%);
   }
@@ -224,7 +224,7 @@
     background: var(--blue);
     border-radius: 50%;
     border: 2px solid #fff;
-    box-shadow: 0 2px 6px rgba(79,142,247,0.5);
+    box-shadow: 0 2px 6px rgba(249,115,22,0.5);
   }
   .home-content { padding: 12px 14px; flex: 1; overflow-y: auto; }
   .home-loc-bar {
@@ -315,7 +315,7 @@
   .card-fee { font-size: 10px; color: var(--gray-700); }
   .card-slots { display: flex; gap: 4px; flex-wrap: wrap; }
   .slot-chip {
-    background: #EEF4FF; color: #2563EB; border-radius: 4px;
+    background: #FFF7ED; color: #EA6C0A; border-radius: 4px;
     padding: 2px 6px; font-size: 9px; font-weight: 600;
   }
   .no-slot { font-size: 10px; color: var(--gray-300); font-style: italic; }
@@ -369,7 +369,7 @@
   .login-screen {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    background: linear-gradient(160deg, #EEF4FF 0%, #fff 60%);
+    background: linear-gradient(160deg, #FFF7ED 0%, #fff 60%);
     padding: 20px;
   }
   .login-logo { font-size: 28px; font-weight: 900; color: var(--blue); margin-bottom: 4px; }
@@ -432,13 +432,13 @@
 
   /* ─── HOW IT WORKS ─── */
   .how-section { background: var(--gray-900); color: #fff; }
-  .how-section .section-badge { background: rgba(79,142,247,0.2); }
+  .how-section .section-badge { background: rgba(249,115,22,0.2); }
   .how-section h2 { color: #fff; }
   .how-section > p { color: rgba(255,255,255,0.6); }
   .steps { display: flex; gap: 0; position: relative; }
   .steps::before {
     content: ''; position: absolute; top: 28px; left: 60px; right: 60px; height: 2px;
-    background: linear-gradient(90deg, var(--blue) 0%, rgba(79,142,247,0.2) 100%);
+    background: linear-gradient(90deg, var(--blue) 0%, rgba(249,115,22,0.2) 100%);
   }
   .step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 16px; }
   .step-num {
@@ -447,7 +447,7 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 20px; font-weight: 900; margin-bottom: 20px;
     position: relative; z-index: 1;
-    box-shadow: 0 0 0 6px rgba(79,142,247,0.15);
+    box-shadow: 0 0 0 6px rgba(249,115,22,0.15);
   }
   .step h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
   .step p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
@@ -500,7 +500,7 @@
   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
   .kpi-card {
     background: #fff; border-radius: 16px; padding: 28px 24px;
-    border: 1px solid rgba(79,142,247,0.2);
+    border: 1px solid rgba(249,115,22,0.2);
     text-align: center;
   }
   .kpi-phase { font-size: 11px; font-weight: 700; color: var(--blue); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -521,7 +521,7 @@
     border-radius: 12px; cursor: pointer; transition: all .2s;
     border: 1.5px solid transparent;
   }
-  .demo-step.active { background: rgba(79,142,247,0.1); border-color: rgba(79,142,247,0.3); }
+  .demo-step.active { background: rgba(249,115,22,0.1); border-color: rgba(249,115,22,0.3); }
   .demo-step:hover:not(.active) { background: rgba(255,255,255,0.05); }
   .demo-step-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
   .demo-step h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
@@ -767,7 +767,7 @@
             <div class="radius-label" style="margin-bottom:6px">반경 내 학원 <span style="color:var(--blue);font-weight:800">8개</span> 발견</div>
             <div class="academy-mini-list">
               <div class="academy-mini">
-                <div class="academy-mini-icon" style="background:#EEF4FF">📐</div>
+                <div class="academy-mini-icon" style="background:#FFF7ED">📐</div>
                 <div class="academy-mini-info">
                   <div class="academy-mini-name">강남수학학원</div>
                   <div class="academy-mini-sub">수학 · 월수금 16:00~18:00</div>
@@ -1249,7 +1249,7 @@
               <div class="radius-label">반경 내 학원 <span style="color:var(--blue);font-weight:800">8개</span> 발견</div>
               <div class="academy-mini-list" style="margin-top:6px">
                 <div class="academy-mini">
-                  <div class="academy-mini-icon" style="background:#EEF4FF">📐</div>
+                  <div class="academy-mini-icon" style="background:#FFF7ED">📐</div>
                   <div class="academy-mini-info">
                     <div class="academy-mini-name">강남수학학원</div>
                     <div class="academy-mini-sub">수학 · 월수금</div>
