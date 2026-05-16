@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>키즈루트 — 우리 아이 학원, 충돌 없이 딱 맞게</title>
+<style>
+  :root {
+    --blue: #4F8EF7;
+    --blue-dark: #2563EB;
+    --blue-light: #EEF4FF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F3F4F6;
+    --gray-300: #D1D5DB;
+    --gray-500: #6B7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --green: #10B981;
+    --red: #EF4444;
+    --yellow: #F59E0B;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: #fff;
+    color: var(--gray-900);
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 64px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .nav-logo { font-size: 20px; font-weight: 800; color: var(--blue); letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--gray-900); }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { text-decoration: none; color: var(--gray-700); font-size: 14px; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--blue); }
+  .nav-cta {
+    background: var(--blue); color: #fff; border: none; border-radius: 8px;
+    padding: 8px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background .2s;
+  }
+  .nav-cta:hover { background: var(--blue-dark); }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    background: linear-gradient(135deg, #EEF4FF 0%, #F8F9FF 50%, #FFF 100%);
+    padding: 100px 40px 60px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -200px; right: -200px;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(79,142,247,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-content { flex: 1; max-width: 560px; z-index: 1; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--blue-light); color: var(--blue);
+    border-radius: 100px; padding: 6px 14px; font-size: 13px; font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .hero-badge::before { content: '🗺️'; font-size: 14px; }
+  .hero h1 {
+    font-size: 52px; font-weight: 900; line-height: 1.15;
+    letter-spacing: -1.5px; color: var(--gray-900);
+    margin-bottom: 20px;
+  }
+  .hero h1 em { color: var(--blue); font-style: normal; }
+  .hero p {
+    font-size: 18px; color: var(--gray-500); line-height: 1.7;
+    margin-bottom: 36px;
+  }
+  .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--blue); color: #fff; border: none;
+    padding: 16px 32px; border-radius: 12px; font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: all .2s; box-shadow: 0 4px 20px rgba(79,142,247,0.35);
+  }
+  .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(79,142,247,0.45); }
+  .btn-secondary {
+    background: #fff; color: var(--gray-700); border: 2px solid var(--gray-300);
+    padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-secondary:hover { border-color: var(--blue); color: var(--blue); }
+
+  .hero-stats {
+    display: flex; gap: 32px; margin-top: 48px;
+    padding-top: 32px; border-top: 1px solid var(--gray-300);
+  }
+  .stat-item { display: flex; flex-direction: column; gap: 4px; }
+  .stat-num { font-size: 28px; font-weight: 800; color: var(--gray-900); }
+  .stat-label { font-size: 13px; color: var(--gray-500); }
+
+  /* Phone mockup */
+  .hero-phone {
+    flex: 0 0 auto; position: relative; z-index: 1;
+    margin-left: 60px;
+  }
+  .phone-frame {
+    width: 300px; height: 620px;
+    background: var(--gray-900);
+    border-radius: 48px;
+    padding: 14px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1);
+    position: relative;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    background: #fff;
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+  }
+  .phone-notch {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    width: 100px; height: 30px;
+    background: var(--gray-900);
+    border-radius: 0 0 20px 20px;
+    z-index: 10;
+  }
+
+  /* App screens inside phone */
+  .app-screen {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column;
+    background: var(--gray-50);
+    font-size: 12px;
+    animation: slideIn .3s ease;
+  }
+  .app-screen.active { display: flex; }
+  @keyframes slideIn {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .app-status-bar {
+    height: 44px; background: #fff;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 16px 6px;
+    font-size: 10px; font-weight: 600; color: var(--gray-900);
+  }
+
+  /* Screen: Home */
+  .screen-home { background: #fff; }
+  .home-map {
+    height: 180px;
+    background: linear-gradient(180deg, #E8F0FE 0%, #C7D7FB 100%);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .map-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.1) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .map-pin {
+    width: 32px; height: 32px; background: var(--blue);
+    border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+    box-shadow: 0 4px 12px rgba(79,142,247,0.5);
+    position: relative; z-index: 2;
+  }
+  .map-pin::after {
+    content: ''; position: absolute; inset: 4px;
+    background: #fff; border-radius: 50%;
+  }
+  .map-radius {
+    position: absolute;
+    width: 120px; height: 120px;
+    border: 2px dashed rgba(79,142,247,0.4);
+    border-radius: 50%;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
+  }
+  .map-academy-dot {
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--blue);
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(79,142,247,0.5);
+  }
+  .home-content { padding: 12px 14px; flex: 1; overflow-y: auto; }
+  .home-loc-bar {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--gray-50); border-radius: 8px; padding: 8px 10px;
+    margin-bottom: 12px; border: 1px solid var(--gray-100);
+  }
+  .loc-icon { color: var(--blue); font-size: 14px; }
+  .loc-text { font-size: 11px; color: var(--gray-700); font-weight: 500; flex: 1; }
+  .loc-edit { font-size: 10px; color: var(--blue); font-weight: 600; }
+
+  .radius-label { font-size: 10px; color: var(--gray-500); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .radius-btns { display: flex; gap: 6px; margin-bottom: 14px; }
+  .radius-btn {
+    flex: 1; padding: 7px; border-radius: 8px; border: 1.5px solid var(--gray-300);
+    background: #fff; font-size: 11px; font-weight: 600; color: var(--gray-700);
+    cursor: pointer; text-align: center; transition: all .15s;
+  }
+  .radius-btn.active {
+    background: var(--blue); border-color: var(--blue); color: #fff;
+  }
+
+  .academy-mini-list { display: flex; flex-direction: column; gap: 8px; }
+  .academy-mini {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff; border-radius: 8px; padding: 8px 10px;
+    border: 1px solid var(--gray-100);
+  }
+  .academy-mini-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .academy-mini-info { flex: 1; }
+  .academy-mini-name { font-size: 11px; font-weight: 700; color: var(--gray-900); }
+  .academy-mini-sub { font-size: 10px; color: var(--gray-500); }
+  .academy-mini-dist { font-size: 10px; color: var(--blue); font-weight: 600; }
+
+  .app-btn {
+    margin: 10px 14px 14px;
+    background: var(--blue); color: #fff; border: none;
+    border-radius: 10px; padding: 12px; font-size: 12px; font-weight: 700;
+    cursor: pointer; text-align: center; transition: background .2s;
+  }
+  .app-btn:hover { background: var(--blue-dark); }
+  .app-btn.gray { background: var(--gray-300); color: var(--gray-600); }
+
+  /* Screen: Subject */
+  .screen-subject {}
+  .screen-header {
+    background: #fff; padding: 48px 14px 12px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .screen-back { font-size: 18px; color: var(--gray-700); cursor: pointer; margin-bottom: 4px; display: block; }
+  .screen-title { font-size: 16px; font-weight: 800; color: var(--gray-900); }
+  .screen-sub { font-size: 10px; color: var(--gray-500); margin-top: 2px; }
+  .subject-body { padding: 12px 14px; flex: 1; overflow-y: auto; }
+  .subject-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .s-tag {
+    padding: 6px 12px; border-radius: 100px;
+    border: 1.5px solid var(--gray-300);
+    background: #fff; font-size: 11px; font-weight: 600; color: var(--gray-700);
+    cursor: pointer; transition: all .15s;
+  }
+  .s-tag.sel { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .priority-box {
+    background: var(--blue-light); border-radius: 10px; padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .priority-title { font-size: 10px; font-weight: 700; color: var(--blue); margin-bottom: 6px; }
+  .priority-item { font-size: 11px; color: var(--gray-700); margin-bottom: 3px; }
+
+  /* Screen: Recommend */
+  .recommend-body { padding: 8px 14px 70px; flex: 1; overflow-y: auto; }
+  .recommend-header { padding: 48px 14px 10px; background: #fff; border-bottom: 1px solid var(--gray-100); }
+  .rec-meta { font-size: 10px; color: var(--gray-500); margin-top: 3px; }
+  .academy-card {
+    background: #fff; border-radius: 10px; padding: 10px 12px;
+    margin-bottom: 8px; border: 1px solid var(--gray-100);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+  .card-name { font-size: 12px; font-weight: 700; color: var(--gray-900); }
+  .card-dist { font-size: 10px; color: var(--gray-500); }
+  .card-addr { font-size: 10px; color: var(--gray-500); margin-bottom: 5px; }
+  .card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .card-subject { font-size: 10px; font-weight: 600; color: var(--blue); }
+  .card-fee { font-size: 10px; color: var(--gray-700); }
+  .card-slots { display: flex; gap: 4px; flex-wrap: wrap; }
+  .slot-chip {
+    background: #EEF4FF; color: #2563EB; border-radius: 4px;
+    padding: 2px 6px; font-size: 9px; font-weight: 600;
+  }
+  .no-slot { font-size: 10px; color: var(--gray-300); font-style: italic; }
+  .no-conflict-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #D1FAE5; color: #065F46;
+    border-radius: 100px; padding: 2px 8px; font-size: 9px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  /* Screen: Calendar */
+  .cal-header { padding: 48px 14px 10px; background: #fff; border-bottom: 1px solid var(--gray-100); }
+  .cal-body { flex: 1; overflow: auto; }
+  .cal-grid { display: flex; min-width: 100%; }
+  .cal-time-col { flex: 0 0 32px; }
+  .cal-day-col { flex: 1; min-width: 44px; }
+  .cal-day-header {
+    height: 28px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-100);
+    background: #fff; position: sticky; top: 0;
+  }
+  .cal-time-header { height: 28px; border-bottom: 1px solid var(--gray-100); background: #fff; position: sticky; top: 0; }
+  .cal-time-cell {
+    height: 44px; display: flex; align-items: flex-start; justify-content: flex-end;
+    padding: 3px 4px 0 0;
+    font-size: 8px; color: var(--gray-300); font-weight: 500;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .cal-cell {
+    height: 44px; border-left: 1px solid var(--gray-100); border-bottom: 1px solid var(--gray-100);
+    position: relative; padding: 2px;
+  }
+  .cal-block {
+    position: absolute; left: 2px; right: 2px;
+    background: var(--blue); border-radius: 4px; padding: 3px 4px;
+    display: flex; flex-direction: column; justify-content: center;
+    overflow: hidden;
+  }
+  .cal-block-name { font-size: 8px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cal-block-time { font-size: 7px; color: rgba(255,255,255,0.8); }
+  .cal-block.green { background: #10B981; }
+  .cal-block.purple { background: #8B5CF6; }
+  .cal-save-btn {
+    margin: 8px; background: #111; color: #fff; border: none;
+    border-radius: 10px; padding: 12px; font-size: 12px; font-weight: 700;
+    cursor: pointer; text-align: center;
+  }
+
+  /* Screen: Login */
+  .login-screen {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: linear-gradient(160deg, #EEF4FF 0%, #fff 60%);
+    padding: 20px;
+  }
+  .login-logo { font-size: 28px; font-weight: 900; color: var(--blue); margin-bottom: 4px; }
+  .login-tagline { font-size: 11px; color: var(--gray-500); text-align: center; margin-bottom: 32px; line-height: 1.5; }
+  .login-illust { font-size: 60px; margin-bottom: 24px; }
+  .login-btn {
+    width: 100%; padding: 11px; border-radius: 10px; border: none;
+    font-size: 12px; font-weight: 700; cursor: pointer; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity .2s;
+  }
+  .login-btn:hover { opacity: 0.85; }
+  .kakao-btn { background: #FEE500; color: #1A1A1A; }
+  .google-btn { background: #fff; color: #333; border: 1.5px solid var(--gray-300) !important; }
+
+  /* ─── FEATURES SECTION ─── */
+  section { padding: 100px 40px; }
+  .section-badge {
+    display: inline-block;
+    background: var(--blue-light); color: var(--blue);
+    border-radius: 100px; padding: 5px 14px; font-size: 13px; font-weight: 700;
+    margin-bottom: 16px;
+  }
+  section h2 {
+    font-size: 40px; font-weight: 900; line-height: 1.2;
+    letter-spacing: -1px; margin-bottom: 16px; color: var(--gray-900);
+  }
+  section > p {
+    font-size: 17px; color: var(--gray-500); line-height: 1.7;
+    max-width: 520px; margin-bottom: 60px;
+  }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .feature-card {
+    background: var(--gray-50); border-radius: 20px; padding: 32px;
+    border: 1px solid var(--gray-100); transition: all .2s;
+  }
+  .feature-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); }
+  .feature-icon { font-size: 36px; margin-bottom: 16px; }
+  .feature-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: var(--gray-900); }
+  .feature-card p { font-size: 14px; color: var(--gray-500); line-height: 1.65; }
+
+  /* ─── HOW IT WORKS ─── */
+  .how-section { background: var(--gray-900); color: #fff; }
+  .how-section .section-badge { background: rgba(79,142,247,0.2); }
+  .how-section h2 { color: #fff; }
+  .how-section > p { color: rgba(255,255,255,0.6); }
+  .steps { display: flex; gap: 0; position: relative; }
+  .steps::before {
+    content: ''; position: absolute; top: 28px; left: 60px; right: 60px; height: 2px;
+    background: linear-gradient(90deg, var(--blue) 0%, rgba(79,142,247,0.2) 100%);
+  }
+  .step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 16px; }
+  .step-num {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--blue); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900; margin-bottom: 20px;
+    position: relative; z-index: 1;
+    box-shadow: 0 0 0 6px rgba(79,142,247,0.15);
+  }
+  .step h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .step p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+  /* ─── PRICING ─── */
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 720px; }
+  .pricing-card {
+    background: var(--gray-50); border-radius: 20px; padding: 36px;
+    border: 1px solid var(--gray-200);
+  }
+  .pricing-card.highlight {
+    background: var(--blue); border-color: var(--blue);
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .pricing-card.highlight::before {
+    content: '추천'; position: absolute; top: 20px; right: -20px;
+    background: #FEE500; color: #1A1A1A; font-size: 11px; font-weight: 800;
+    padding: 4px 32px; transform: rotate(35deg);
+  }
+  .pricing-badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.2);
+    color: #fff; border-radius: 100px; padding: 3px 10px; margin-bottom: 16px;
+  }
+  .pricing-badge.free { background: var(--blue-light); color: var(--blue); }
+  .pricing-price { font-size: 36px; font-weight: 900; margin-bottom: 4px; }
+  .pricing-period { font-size: 13px; opacity: 0.7; margin-bottom: 24px; }
+  .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .pricing-features li {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: var(--gray-700);
+  }
+  .pricing-card.highlight .pricing-features li { color: rgba(255,255,255,0.9); }
+  .check { color: var(--green); font-weight: 700; }
+  .highlight .check { color: #fff; }
+  .cross { color: var(--gray-300); }
+  .pricing-cta {
+    margin-top: 28px; width: 100%; padding: 13px;
+    border-radius: 10px; font-size: 14px; font-weight: 700;
+    cursor: pointer; border: none; transition: all .2s;
+  }
+  .free-cta { background: var(--blue); color: #fff; }
+  .free-cta:hover { background: var(--blue-dark); }
+  .paid-cta { background: #fff; color: var(--blue-dark); }
+  .paid-cta:hover { background: var(--blue-light); }
+
+  /* ─── KPI SECTION ─── */
+  .kpi-section { background: var(--blue-light); }
+  .kpi-section h2 { color: var(--blue-dark); }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .kpi-card {
+    background: #fff; border-radius: 16px; padding: 28px 24px;
+    border: 1px solid rgba(79,142,247,0.2);
+    text-align: center;
+  }
+  .kpi-phase { font-size: 11px; font-weight: 700; color: var(--blue); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi-num { font-size: 32px; font-weight: 900; color: var(--gray-900); margin-bottom: 4px; }
+  .kpi-label { font-size: 13px; color: var(--gray-500); }
+
+  /* ─── DEMO SECTION ─── */
+  .demo-section { background: var(--gray-900); overflow: hidden; }
+  .demo-section h2 { color: #fff; }
+  .demo-section > p { color: rgba(255,255,255,0.6); }
+  .demo-container {
+    display: flex; gap: 60px; align-items: center; margin-top: 60px;
+  }
+  .demo-info { flex: 1; }
+  .demo-steps { display: flex; flex-direction: column; gap: 16px; }
+  .demo-step {
+    display: flex; gap: 16px; align-items: flex-start; padding: 16px;
+    border-radius: 12px; cursor: pointer; transition: all .2s;
+    border: 1.5px solid transparent;
+  }
+  .demo-step.active { background: rgba(79,142,247,0.1); border-color: rgba(79,142,247,0.3); }
+  .demo-step:hover:not(.active) { background: rgba(255,255,255,0.05); }
+  .demo-step-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  .demo-step h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .demo-step p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+  .demo-phone { flex-shrink: 0; }
+  .demo-phone .phone-frame { width: 260px; height: 540px; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--gray-900); color: rgba(255,255,255,0.5);
+    padding: 40px; display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .footer-logo { font-size: 18px; font-weight: 800; color: #fff; }
+  .footer-links { display: flex; gap: 20px; font-size: 13px; }
+  .footer-links a { color: rgba(255,255,255,0.4); text-decoration: none; }
+  .footer-links a:hover { color: #fff; }
+  .footer-copy { font-size: 12px; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .hero { flex-direction: column; padding: 90px 24px 60px; }
+    .hero-phone { margin-left: 0; margin-top: 40px; }
+    .features-grid, .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .steps { flex-wrap: wrap; gap: 32px; }
+    .steps::before { display: none; }
+    .demo-container { flex-direction: column; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    nav { padding: 0 20px; }
+    section { padding: 60px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">키즈<span>루트</span></div>
+  <div class="nav-links">
+    <a href="#features">기능</a>
+    <a href="#how">이용방법</a>
+    <a href="#pricing">요금제</a>
+    <a href="#demo" onclick="goDemo()">데모 체험</a>
+    <button class="nav-cta" onclick="goDemo()">무료 시작</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-content">
+    <div class="hero-badge">MVP v1.0 · 서울 강남구 출시 예정</div>
+    <h1>우리 아이 학원,<br><em>충돌 없이</em><br>딱 맞게</h1>
+    <p>GPS 반경 내 학원을 자동 수집하고,<br>시간 충돌 없는 최적 조합을 3초 만에 추천합니다.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="goDemo()">🗺️ 앱 데모 체험하기</button>
+      <button class="btn-secondary" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">서비스 소개 보기</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num">3초</span>
+        <span class="stat-label">최적 조합 추천</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">1km</span>
+        <span class="stat-label">기본 탐색 반경</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">충돌 0</span>
+        <span class="stat-label">스케줄 보장</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-phone">
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen" id="heroPhone">
+        <!-- Home Screen -->
+        <div class="app-screen active" id="hScreen-home">
+          <div class="app-status-bar">
+            <span>9:41</span><span>📶 🔋</span>
+          </div>
+          <div class="home-map">
+            <div class="map-grid"></div>
+            <div class="map-radius"></div>
+            <div class="map-pin"></div>
+            <div class="map-academy-dot" style="top:30%;left:60%"></div>
+            <div class="map-academy-dot" style="top:55%;left:35%"></div>
+            <div class="map-academy-dot" style="top:65%;left:65%"></div>
+            <div class="map-academy-dot" style="top:38%;left:28%"></div>
+          </div>
+          <div class="home-content">
+            <div class="home-loc-bar">
+              <span class="loc-icon">📍</span>
+              <span class="loc-text">서울 강남구 역삼동</span>
+              <span class="loc-edit">변경</span>
+            </div>
+            <div class="radius-label">탐색 반경</div>
+            <div class="radius-btns">
+              <div class="radius-btn" onclick="setRadius(this,500)">500m</div>
+              <div class="radius-btn active" onclick="setRadius(this,1000)">1km</div>
+              <div class="radius-btn" onclick="setRadius(this,2000)">2km</div>
+            </div>
+            <div class="radius-label" style="margin-bottom:6px">반경 내 학원 <span style="color:var(--blue);font-weight:800">8개</span> 발견</div>
+            <div class="academy-mini-list">
+              <div class="academy-mini">
+                <div class="academy-mini-icon" style="background:#EEF4FF">📐</div>
+                <div class="academy-mini-info">
+                  <div class="academy-mini-name">강남수학학원</div>
+                  <div class="academy-mini-sub">수학 · 월수금 16:00~18:00</div>
+                </div>
+                <div class="academy-mini-dist">350m</div>
+              </div>
+              <div class="academy-mini">
+                <div class="academy-mini-icon" style="background:#FFF7ED">🔤</div>
+                <div class="academy-mini-info">
+                  <div class="academy-mini-name">영어나라어학원</div>
+                  <div class="academy-mini-sub">영어 · 화목 18:30~20:00</div>
+                </div>
+                <div class="academy-mini-dist">520m</div>
+              </div>
+              <div class="academy-mini">
+                <div class="academy-mini-icon" style="background:#F0FDF4">🎨</div>
+                <div class="academy-mini-info">
+                  <div class="academy-mini-name">창의미술스튜디오</div>
+                  <div class="academy-mini-sub">미술 · 수금 15:00~17:00</div>
+                </div>
+                <div class="academy-mini-dist">780m</div>
+              </div>
+            </div>
+          </div>
+          <div class="app-btn" onclick="heroNav('subject')">과목 선택하기 →</div>
+        </div>
+
+        <!-- Subject Screen -->
+        <div class="app-screen" id="hScreen-subject">
+          <div class="screen-header">
+            <span class="screen-back" onclick="heroNav('home')">←</span>
+            <div class="screen-title">어떤 과목을 원하세요?</div>
+            <div class="screen-sub">선택 순서가 우선순위가 됩니다</div>
+          </div>
+          <div class="subject-body">
+            <div class="subject-tags">
+              <div class="s-tag sel" onclick="toggleTag(this)">수학</div>
+              <div class="s-tag sel" onclick="toggleTag(this)">영어</div>
+              <div class="s-tag" onclick="toggleTag(this)">국어</div>
+              <div class="s-tag" onclick="toggleTag(this)">과학</div>
+              <div class="s-tag" onclick="toggleTag(this)">미술</div>
+              <div class="s-tag" onclick="toggleTag(this)">음악</div>
+              <div class="s-tag" onclick="toggleTag(this)">체육</div>
+              <div class="s-tag" onclick="toggleTag(this)">코딩</div>
+              <div class="s-tag" onclick="toggleTag(this)">한자</div>
+            </div>
+            <div class="priority-box">
+              <div class="priority-title">선택된 우선순위</div>
+              <div class="priority-item">1. 수학</div>
+              <div class="priority-item">2. 영어</div>
+            </div>
+            <div style="background:var(--gray-50);border-radius:8px;padding:8px 10px;margin-bottom:10px">
+              <div style="font-size:10px;color:var(--gray-500);margin-bottom:4px">하교 시간</div>
+              <div style="font-size:13px;font-weight:700;color:var(--gray-900)">오후 2:30</div>
+            </div>
+          </div>
+          <div class="app-btn" onclick="heroNav('recommend')">추천 받기 →</div>
+        </div>
+
+        <!-- Recommend Screen -->
+        <div class="app-screen" id="hScreen-recommend">
+          <div class="recommend-header">
+            <span class="screen-back" onclick="heroNav('subject')">←</span>
+            <div class="screen-title">추천 학원 조합</div>
+            <div class="rec-meta">2개 충돌 없는 조합 · 반경 내 8개 학원</div>
+          </div>
+          <div class="recommend-body">
+            <div class="no-conflict-badge">✅ 시간 충돌 없음 · 이동 버퍼 10분 포함</div>
+            <div class="academy-card">
+              <div class="card-header">
+                <div class="card-name">강남수학학원</div>
+                <div class="card-dist">350m</div>
+              </div>
+              <div class="card-addr">강남구 역삼동 테헤란로 123</div>
+              <div class="card-row">
+                <div class="card-subject">📐 수학</div>
+                <div class="card-fee">30만원/월</div>
+              </div>
+              <div class="card-slots">
+                <div class="slot-chip">월 16:00~18:00</div>
+                <div class="slot-chip">수 16:00~18:00</div>
+                <div class="slot-chip">금 16:00~18:00</div>
+              </div>
+            </div>
+            <div class="academy-card">
+              <div class="card-header">
+                <div class="card-name">영어나라어학원</div>
+                <div class="card-dist">520m</div>
+              </div>
+              <div class="card-addr">강남구 역삼동 봉은사로 45</div>
+              <div class="card-row">
+                <div class="card-subject">🔤 영어</div>
+                <div class="card-fee">25만원/월</div>
+              </div>
+              <div class="card-slots">
+                <div class="slot-chip">화 18:30~20:00</div>
+                <div class="slot-chip">목 18:30~20:00</div>
+              </div>
+            </div>
+            <div style="background:var(--gray-50);border-radius:8px;padding:10px 12px;text-align:center">
+              <div style="font-size:10px;color:var(--gray-500);margin-bottom:4px">월 예상 학원비</div>
+              <div style="font-size:18px;font-weight:900;color:var(--blue)">55만원/월</div>
+            </div>
+          </div>
+          <div class="app-btn" style="position:absolute;bottom:0;left:0;right:0;margin:0;border-radius:0;padding:14px" onclick="heroNav('calendar')">캘린더로 확인 →</div>
+        </div>
+
+        <!-- Calendar Screen -->
+        <div class="app-screen" id="hScreen-calendar">
+          <div class="cal-header">
+            <span class="screen-back" onclick="heroNav('recommend')">←</span>
+            <div class="screen-title">주간 캘린더</div>
+            <div class="rec-meta">이번 주 학원 타임라인</div>
+          </div>
+          <div class="cal-body">
+            <div class="cal-grid">
+              <div class="cal-time-col">
+                <div class="cal-time-header"></div>
+                <div class="cal-time-cell">14:00</div>
+                <div class="cal-time-cell">15:00</div>
+                <div class="cal-time-cell">16:00</div>
+                <div class="cal-time-cell">17:00</div>
+                <div class="cal-time-cell">18:00</div>
+                <div class="cal-time-cell">19:00</div>
+                <div class="cal-time-cell">20:00</div>
+              </div>
+              <!-- 월 -->
+              <div class="cal-day-col">
+                <div class="cal-day-header">월</div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell" style="position:relative">
+                  <div class="cal-block" style="top:0;height:88px">
+                    <div class="cal-block-name">강남수학</div>
+                    <div class="cal-block-time">16:00~18:00</div>
+                  </div>
+                </div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+              </div>
+              <!-- 화 -->
+              <div class="cal-day-col">
+                <div class="cal-day-header">화</div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell" style="position:relative">
+                  <div class="cal-block green" style="top:0;height:66px">
+                    <div class="cal-block-name">영어나라</div>
+                    <div class="cal-block-time">18:30~20:00</div>
+                  </div>
+                </div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+              </div>
+              <!-- 수 -->
+              <div class="cal-day-col">
+                <div class="cal-day-header">수</div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell" style="position:relative">
+                  <div class="cal-block" style="top:0;height:88px">
+                    <div class="cal-block-name">강남수학</div>
+                    <div class="cal-block-time">16:00~18:00</div>
+                  </div>
+                </div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+              </div>
+              <!-- 목 -->
+              <div class="cal-day-col">
+                <div class="cal-day-header">목</div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell" style="position:relative">
+                  <div class="cal-block green" style="top:0;height:66px">
+                    <div class="cal-block-name">영어나라</div>
+                    <div class="cal-block-time">18:30~20:00</div>
+                  </div>
+                </div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+              </div>
+              <!-- 금 -->
+              <div class="cal-day-col">
+                <div class="cal-day-header">금</div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell" style="position:relative">
+                  <div class="cal-block" style="top:0;height:88px">
+                    <div class="cal-block-name">강남수학</div>
+                    <div class="cal-block-time">16:00~18:00</div>
+                  </div>
+                </div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+                <div class="cal-cell"></div>
+              </div>
+            </div>
+          </div>
+          <div class="cal-save-btn">이 스케줄 저장 ✓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-badge">핵심 기능</div>
+  <h2>학원 코디의<br>새로운 기준</h2>
+  <p>기존 지도 앱이 할 수 없던 일, 키즈루트가 합니다.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📍</div>
+      <h3>GPS 반경 학원 탐색</h3>
+      <p>거주지 또는 학교를 중심으로 500m~2km 반경 내 학원을 자동으로 수집합니다. 나이스(NEIS) 공공데이터 기반으로 정확한 정보를 제공합니다.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>시간 충돌 자동 감지</h3>
+      <p>이동 시간 10분 버퍼를 포함해 학원 간 시간 충돌을 자동으로 검사합니다. 충돌 없는 조합만 추천해 학부모의 수동 확인 시간을 없앱니다.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏆</div>
+      <h3>과목 우선순위 조합</h3>
+      <p>수학·영어·예체능 등 원하는 과목의 우선순위를 설정하면, Greedy 알고리즘이 최적의 학원 조합을 순서대로 추천합니다.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <h3>주간 캘린더 시각화</h3>
+      <p>추천된 학원 조합을 주간 타임라인으로 한눈에 확인합니다. 월~금 블록 뷰로 아이의 하루 스케줄을 직관적으로 파악할 수 있습니다.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔐</div>
+      <h3>카카오/구글 소셜 로그인</h3>
+      <p>번거로운 회원가입 없이 카카오 또는 구글 계정으로 바로 시작하세요. JWT 기반 안전한 인증으로 개인정보를 보호합니다.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💾</div>
+      <h3>스케줄 저장 & 관리</h3>
+      <p>마음에 드는 학원 조합을 저장하고 언제든지 다시 확인하세요. 아이별 프로필로 복수 자녀의 스케줄을 독립적으로 관리합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-badge">이용 방법</div>
+  <h2>3분이면<br>충분합니다</h2>
+  <p>복잡한 설정 없이, 5단계로 아이의 완벽한 학원 스케줄을 만드세요.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>위치 설정</h4>
+      <p>GPS 자동 감지 또는 주소 직접 입력으로 기준 위치를 설정합니다</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>반경 선택</h4>
+      <p>500m · 1km · 2km 중 원하는 탐색 반경을 선택합니다</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>과목 우선순위</h4>
+      <p>원하는 과목을 선택 순서대로 탭합니다. 순서가 곧 우선순위입니다</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h4>추천 확인</h4>
+      <p>충돌 없는 학원 조합 리스트와 예상 학원비를 한번에 확인합니다</p>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <h4>저장 완료</h4>
+      <p>주간 캘린더로 최종 확인 후 스케줄을 저장합니다</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO SECTION -->
+<section class="demo-section" id="demo">
+  <div class="section-badge">인터랙티브 데모</div>
+  <h2 style="color:#fff">직접 눌러보세요</h2>
+  <p>실제 앱과 동일한 화면 흐름을 체험해 보세요.</p>
+  <div class="demo-container">
+    <div class="demo-info">
+      <div class="demo-steps">
+        <div class="demo-step active" onclick="demoNav('login', this)">
+          <div class="demo-step-icon">🔐</div>
+          <div>
+            <h4>1. 소셜 로그인</h4>
+            <p>카카오 또는 구글 계정으로 간편 로그인</p>
+          </div>
+        </div>
+        <div class="demo-step" onclick="demoNav('home', this)">
+          <div class="demo-step-icon">📍</div>
+          <div>
+            <h4>2. 위치 & 반경 설정</h4>
+            <p>GPS 감지 후 탐색 반경 선택</p>
+          </div>
+        </div>
+        <div class="demo-step" onclick="demoNav('subject', this)">
+          <div class="demo-step-icon">🏷️</div>
+          <div>
+            <h4>3. 과목 우선순위 선택</h4>
+            <p>원하는 과목을 탭해 우선순위 설정</p>
+          </div>
+        </div>
+        <div class="demo-step" onclick="demoNav('recommend', this)">
+          <div class="demo-step-icon">✨</div>
+          <div>
+            <h4>4. 추천 조합 확인</h4>
+            <p>충돌 없는 학원 조합 & 예상 비용 확인</p>
+          </div>
+        </div>
+        <div class="demo-step" onclick="demoNav('calendar', this)">
+          <div class="demo-step-icon">📅</div>
+          <div>
+            <h4>5. 주간 캘린더 저장</h4>
+            <p>타임라인 확인 후 스케줄 최종 저장</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-phone">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen" id="demoPhone">
+
+          <!-- Login -->
+          <div class="app-screen login-screen active" id="dScreen-login">
+            <div class="app-status-bar" style="position:absolute;top:0;left:0;right:0;background:transparent">
+              <span>9:41</span><span>📶 🔋</span>
+            </div>
+            <div class="login-illust">🗺️</div>
+            <div class="login-logo">키즈루트</div>
+            <div class="login-tagline">하교 후 아이의 빈 시간을<br>학원으로 빈틈없이 채워주세요</div>
+            <button class="login-btn kakao-btn" onclick="demoNav('home', document.querySelectorAll('.demo-step')[1])">
+              <span>💬</span> 카카오로 시작하기
+            </button>
+            <button class="login-btn google-btn">
+              <span>🌐</span> 구글로 시작하기
+            </button>
+            <div style="font-size:10px;color:var(--gray-300);margin-top:12px;text-align:center">
+              가입 시 서비스 이용약관에 동의하게 됩니다
+            </div>
+          </div>
+
+          <!-- Home -->
+          <div class="app-screen" id="dScreen-home">
+            <div class="app-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+            <div class="home-map">
+              <div class="map-grid"></div>
+              <div class="map-radius"></div>
+              <div class="map-pin"></div>
+              <div class="map-academy-dot" style="top:30%;left:60%"></div>
+              <div class="map-academy-dot" style="top:55%;left:35%"></div>
+              <div class="map-academy-dot" style="top:65%;left:65%"></div>
+              <div class="map-academy-dot" style="top:38%;left:28%"></div>
+            </div>
+            <div class="home-content">
+              <div class="home-loc-bar">
+                <span class="loc-icon">📍</span>
+                <span class="loc-text">서울 강남구 역삼동</span>
+                <span class="loc-edit">변경</span>
+              </div>
+              <div class="radius-label">탐색 반경</div>
+              <div class="radius-btns">
+                <div class="radius-btn">500m</div>
+                <div class="radius-btn active">1km</div>
+                <div class="radius-btn">2km</div>
+              </div>
+              <div class="radius-label">반경 내 학원 <span style="color:var(--blue);font-weight:800">8개</span> 발견</div>
+              <div class="academy-mini-list" style="margin-top:6px">
+                <div class="academy-mini">
+                  <div class="academy-mini-icon" style="background:#EEF4FF">📐</div>
+                  <div class="academy-mini-info">
+                    <div class="academy-mini-name">강남수학학원</div>
+                    <div class="academy-mini-sub">수학 · 월수금</div>
+                  </div>
+                  <div class="academy-mini-dist">350m</div>
+                </div>
+                <div class="academy-mini">
+                  <div class="academy-mini-icon" style="background:#FFF7ED">🔤</div>
+                  <div class="academy-mini-info">
+                    <div class="academy-mini-name">영어나라</div>
+                    <div class="academy-mini-sub">영어 · 화목</div>
+                  </div>
+                  <div class="academy-mini-dist">520m</div>
+                </div>
+              </div>
+            </div>
+            <div class="app-btn" onclick="demoNav('subject', document.querySelectorAll('.demo-step')[2])">과목 선택하기 →</div>
+          </div>
+
+          <!-- Subject -->
+          <div class="app-screen" id="dScreen-subject">
+            <div class="screen-header">
+              <span class="screen-back" onclick="demoNav('home', document.querySelectorAll('.demo-step')[1])">←</span>
+              <div class="screen-title">어떤 과목을 원하세요?</div>
+              <div class="screen-sub">선택 순서 = 우선순위</div>
+            </div>
+            <div class="subject-body">
+              <div class="subject-tags" id="demoTags">
+                <div class="s-tag sel" onclick="toggleDemoTag(this)">수학</div>
+                <div class="s-tag sel" onclick="toggleDemoTag(this)">영어</div>
+                <div class="s-tag" onclick="toggleDemoTag(this)">국어</div>
+                <div class="s-tag" onclick="toggleDemoTag(this)">과학</div>
+                <div class="s-tag" onclick="toggleDemoTag(this)">미술</div>
+                <div class="s-tag" onclick="toggleDemoTag(this)">음악</div>
+                <div class="s-tag" onclick="toggleDemoTag(this)">체육</div>
+                <div class="s-tag" onclick="toggleDemoTag(this)">코딩</div>
+              </div>
+              <div class="priority-box">
+                <div class="priority-title">선택된 우선순위</div>
+                <div id="demoPriority">
+                  <div class="priority-item">1. 수학</div>
+                  <div class="priority-item">2. 영어</div>
+                </div>
+              </div>
+            </div>
+            <div class="app-btn" onclick="demoNav('recommend', document.querySelectorAll('.demo-step')[3])">추천 받기 →</div>
+          </div>
+
+          <!-- Recommend -->
+          <div class="app-screen" id="dScreen-recommend">
+            <div class="recommend-header">
+              <span class="screen-back" onclick="demoNav('subject', document.querySelectorAll('.demo-step')[2])">←</span>
+              <div class="screen-title">추천 학원 조합</div>
+              <div class="rec-meta">2개 충돌 없는 조합</div>
+            </div>
+            <div class="recommend-body">
+              <div class="no-conflict-badge">✅ 시간 충돌 없음 · 이동 버퍼 10분</div>
+              <div class="academy-card">
+                <div class="card-header">
+                  <div class="card-name">강남수학학원</div>
+                  <div class="card-dist">350m</div>
+                </div>
+                <div class="card-addr">역삼동 테헤란로 123</div>
+                <div class="card-row">
+                  <div class="card-subject">📐 수학</div>
+                  <div class="card-fee">30만원/월</div>
+                </div>
+                <div class="card-slots">
+                  <div class="slot-chip">월수금 16:00~18:00</div>
+                </div>
+              </div>
+              <div class="academy-card">
+                <div class="card-header">
+                  <div class="card-name">영어나라어학원</div>
+                  <div class="card-dist">520m</div>
+                </div>
+                <div class="card-addr">역삼동 봉은사로 45</div>
+                <div class="card-row">
+                  <div class="card-subject">🔤 영어</div>
+                  <div class="card-fee">25만원/월</div>
+                </div>
+                <div class="card-slots">
+                  <div class="slot-chip">화목 18:30~20:00</div>
+                </div>
+              </div>
+              <div style="background:var(--gray-50);border-radius:8px;padding:8px 10px;text-align:center">
+                <div style="font-size:9px;color:var(--gray-500)">월 예상 학원비</div>
+                <div style="font-size:16px;font-weight:900;color:var(--blue)">55만원/월</div>
+              </div>
+            </div>
+            <div class="app-btn" style="position:absolute;bottom:0;left:0;right:0;margin:0;border-radius:0;padding:14px" onclick="demoNav('calendar', document.querySelectorAll('.demo-step')[4])">캘린더로 확인 →</div>
+          </div>
+
+          <!-- Calendar -->
+          <div class="app-screen" id="dScreen-calendar">
+            <div class="cal-header">
+              <span class="screen-back" onclick="demoNav('recommend', document.querySelectorAll('.demo-step')[3])">←</span>
+              <div class="screen-title">주간 캘린더</div>
+            </div>
+            <div class="cal-body">
+              <div class="cal-grid">
+                <div class="cal-time-col">
+                  <div class="cal-time-header"></div>
+                  <div class="cal-time-cell">14:00</div>
+                  <div class="cal-time-cell">15:00</div>
+                  <div class="cal-time-cell">16:00</div>
+                  <div class="cal-time-cell">17:00</div>
+                  <div class="cal-time-cell">18:00</div>
+                  <div class="cal-time-cell">19:00</div>
+                  <div class="cal-time-cell">20:00</div>
+                </div>
+                <div class="cal-day-col"><div class="cal-day-header">월</div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell" style="position:relative"><div class="cal-block" style="top:0;height:88px"><div class="cal-block-name">강남수학</div><div class="cal-block-time">16~18</div></div></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div></div>
+                <div class="cal-day-col"><div class="cal-day-header">화</div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell" style="position:relative"><div class="cal-block green" style="top:0;height:66px"><div class="cal-block-name">영어나라</div><div class="cal-block-time">18:30~</div></div></div><div class="cal-cell"></div><div class="cal-cell"></div></div>
+                <div class="cal-day-col"><div class="cal-day-header">수</div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell" style="position:relative"><div class="cal-block" style="top:0;height:88px"><div class="cal-block-name">강남수학</div><div class="cal-block-time">16~18</div></div></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div></div>
+                <div class="cal-day-col"><div class="cal-day-header">목</div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell" style="position:relative"><div class="cal-block green" style="top:0;height:66px"><div class="cal-block-name">영어나라</div><div class="cal-block-time">18:30~</div></div></div><div class="cal-cell"></div><div class="cal-cell"></div></div>
+                <div class="cal-day-col"><div class="cal-day-header">금</div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell" style="position:relative"><div class="cal-block" style="top:0;height:88px"><div class="cal-block-name">강남수학</div><div class="cal-block-time">16~18</div></div></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div></div>
+              </div>
+            </div>
+            <div class="cal-save-btn" id="calSaveBtn" onclick="saveSchedule()">이 스케줄 저장</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-badge">요금제</div>
+  <h2>필요한 만큼만<br>사용하세요</h2>
+  <p>핵심 기능은 무료로 제공합니다. 프리미엄으로 더 강력하게.</p>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-badge free">무료</div>
+      <div class="pricing-price">₩0</div>
+      <div class="pricing-period">영원히 무료</div>
+      <ul class="pricing-features">
+        <li><span class="check">✓</span> GPS 반경 학원 탐색</li>
+        <li><span class="check">✓</span> 과목 우선순위 선택</li>
+        <li><span class="check">✓</span> 스케줄 조합 추천 1개</li>
+        <li><span class="check">✓</span> 주간 캘린더 뷰</li>
+        <li><span class="check">✓</span> 아이 프로필 1명</li>
+        <li><span class="cross">✗</span> <span style="color:var(--gray-300)">시간 충돌 알림</span></li>
+        <li><span class="cross">✗</span> <span style="color:var(--gray-300)">복수 자녀 관리</span></li>
+        <li><span class="cross">✗</span> <span style="color:var(--gray-300)">예산 필터</span></li>
+      </ul>
+      <button class="pricing-cta free-cta">무료로 시작하기</button>
+    </div>
+    <div class="pricing-card highlight">
+      <div class="pricing-badge">프리미엄</div>
+      <div class="pricing-price">₩9,900</div>
+      <div class="pricing-period">월간 구독 (Phase 2 출시 예정)</div>
+      <ul class="pricing-features">
+        <li><span class="check">✓</span> 무료 플랜 모든 기능</li>
+        <li><span class="check">✓</span> 스케줄 조합 무제한</li>
+        <li><span class="check">✓</span> 시간 충돌 알림</li>
+        <li><span class="check">✓</span> 복수 자녀 무제한</li>
+        <li><span class="check">✓</span> 예산 필터</li>
+        <li><span class="check">✓</span> 학원 시간표 변경 알림</li>
+        <li><span class="check">✓</span> 주간 캘린더 무제한</li>
+        <li><span class="check">✓</span> 우선 고객 지원</li>
+      </ul>
+      <button class="pricing-cta paid-cta">출시 알림 받기</button>
+    </div>
+  </div>
+</section>
+
+<!-- KPI -->
+<section class="kpi-section">
+  <div class="section-badge">성장 목표</div>
+  <h2>단계별 성과 지표</h2>
+  <p style="color:var(--gray-500)">강남구 출시를 시작으로 전국 확장까지 측정 가능한 목표로 성장합니다.</p>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-phase">Phase 1 · 0~3개월</div>
+      <div class="kpi-num">500명</div>
+      <div class="kpi-label">MAU 목표</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-phase">Phase 2 · 4~6개월</div>
+      <div class="kpi-num">5,000명</div>
+      <div class="kpi-label">MAU · 프리미엄 전환 10%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-phase">Phase 3 · 7~12개월</div>
+      <div class="kpi-num">30,000명</div>
+      <div class="kpi-label">MAU · MRR 5,000만원</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-phase">North Star</div>
+      <div class="kpi-num" style="font-size:22px">월간 스케줄<br>확정 수</div>
+      <div class="kpi-label">진짜 가치 전달 지표</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">키즈루트</div>
+  <div class="footer-links">
+    <a href="#">서비스 소개</a>
+    <a href="#">이용약관</a>
+    <a href="#">개인정보처리방침</a>
+    <a href="#">문의하기</a>
+  </div>
+  <div class="footer-copy">© 2026 KidsRoute. MVP v1.0</div>
+</footer>
+
+<script>
+// ─── Hero phone navigation ───
+function heroNav(screen) {
+  document.querySelectorAll('#heroPhone .app-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('hScreen-' + screen).classList.add('active');
+}
+
+function setRadius(el, val) {
+  el.closest('.radius-btns').querySelectorAll('.radius-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleTag(el) {
+  el.classList.toggle('sel');
+}
+
+// ─── Demo section navigation ───
+function demoNav(screen, stepEl) {
+  document.querySelectorAll('#demoPhone .app-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('dScreen-' + screen).classList.add('active');
+  if (stepEl) {
+    document.querySelectorAll('.demo-step').forEach(s => s.classList.remove('active'));
+    stepEl.classList.add('active');
+  }
+}
+
+function toggleDemoTag(el) {
+  el.classList.toggle('sel');
+  const selected = [...document.querySelectorAll('#demoTags .s-tag.sel')].map(t => t.textContent);
+  const box = document.getElementById('demoPriority');
+  box.innerHTML = selected.map((s, i) => `<div class="priority-item">${i+1}. ${s}</div>`).join('');
+}
+
+function saveSchedule() {
+  const btn = document.getElementById('calSaveBtn');
+  btn.textContent = '✅ 저장 완료!';
+  btn.style.background = '#10B981';
+  setTimeout(() => {
+    btn.textContent = '이 스케줄 저장';
+    btn.style.background = '#111';
+  }, 2000);
+}
+
+function goDemo() {
+  document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Auto-cycle hero phone
+let heroScreens = ['home', 'subject', 'recommend', 'calendar'];
+let heroIdx = 0;
+setInterval(() => {
+  heroIdx = (heroIdx + 1) % heroScreens.length;
+  heroNav(heroScreens[heroIdx]);
+}, 3000);
+</script>
+
+</body>
+</html>

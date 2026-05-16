@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kidsroute-mock",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "5500", "-s", "C:\\Users\\hwlll\\Startup\\kidsroute-mock"],
+      "port": 5500,
+      "autoPort": false
+    }
+  ]
+}
