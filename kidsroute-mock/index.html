@@ -523,6 +523,49 @@
   .footer-copy { font-size: 12px; }
 
   /* ─── RESPONSIVE ─── */
+  /* ─── HOW-TO ─── */
+  .howto { padding: 100px 40px; background: #fff; }
+  .howto-inner { max-width: 1100px; margin: 0 auto; }
+  .howto-label {
+    display: inline-block; background: var(--primary-light); color: var(--primary);
+    border-radius: 100px; padding: 5px 14px; font-size: 12px; font-weight: 700; margin-bottom: 16px;
+  }
+  .howto h2 { font-size: 36px; font-weight: 800; color: var(--text-main); letter-spacing: -1px; margin-bottom: 8px; }
+  .howto-sub { font-size: 16px; color: var(--text-sub); margin-bottom: 60px; }
+  .howto-steps {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0; position: relative;
+  }
+  .howto-steps::before {
+    content: ''; position: absolute; top: 28px; left: 10%; right: 10%;
+    border-top: 2px dashed var(--border); z-index: 0;
+  }
+  .howto-step {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 0 16px; position: relative; z-index: 1;
+  }
+  .howto-num {
+    width: 56px; height: 56px; background: #fff;
+    border: 2px solid #FED7AA; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 20px; position: relative;
+  }
+  .howto-step-num {
+    position: absolute; top: -8px; right: -8px;
+    background: var(--primary); color: #fff;
+    border-radius: 100px; font-size: 10px; font-weight: 800;
+    padding: 2px 7px; letter-spacing: 0.5px;
+  }
+  .howto-step h3 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
+  .howto-step p { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+  @media (max-width: 768px) {
+    .howto { padding: 72px 20px; }
+    .howto-steps { grid-template-columns: 1fr; gap: 32px; }
+    .howto-steps::before { display: none; }
+    .howto-step { flex-direction: row; text-align: left; align-items: flex-start; gap: 20px; }
+    .howto-num { flex-shrink: 0; }
+  }
+
   @media (max-width: 900px) {
     .hero { flex-direction: column; padding: 90px 24px 60px; }
     .hero-phone { margin-left: 0; margin-top: 40px; }
@@ -826,6 +869,57 @@
             </div>
           </div>
           <div class="cal-save-btn">이 스케줄 저장 ✓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW-TO -->
+<section class="howto fade-up" id="howto">
+  <div class="howto-inner">
+    <div class="howto-label">이용방법</div>
+    <h2>키즈루트 시작하기</h2>
+    <p class="howto-sub">단 4단계로 우리 아이 학원 스케줄이 완성됩니다</p>
+    <div class="howto-steps">
+      <div class="howto-step fade-up">
+        <div class="howto-num">
+          <span class="howto-step-num">01</span>
+          📱
+        </div>
+        <div>
+          <h3>앱 설치</h3>
+          <p>App Store 또는 Play Store에서 키즈루트를 설치하세요</p>
+        </div>
+      </div>
+      <div class="howto-step fade-up" style="transition-delay:0.1s">
+        <div class="howto-num">
+          <span class="howto-step-num">02</span>
+          📍
+        </div>
+        <div>
+          <h3>위치 설정</h3>
+          <p>GPS로 현재 위치를 감지하고 탐색 반경을 선택하세요</p>
+        </div>
+      </div>
+      <div class="howto-step fade-up" style="transition-delay:0.2s">
+        <div class="howto-num">
+          <span class="howto-step-num">03</span>
+          🏷️
+        </div>
+        <div>
+          <h3>과목 선택</h3>
+          <p>수학, 영어 등 원하는 과목 우선순위를 설정하세요</p>
+        </div>
+      </div>
+      <div class="howto-step fade-up" style="transition-delay:0.3s">
+        <div class="howto-num">
+          <span class="howto-step-num">04</span>
+          🗓️
+        </div>
+        <div>
+          <h3>스케줄 완성</h3>
+          <p>충돌 없는 최적 학원 조합이 3초 만에 완성됩니다</p>
         </div>
       </div>
     </div>
