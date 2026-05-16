@@ -3,29 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>키즈루트 — 우리 아이 학원, 충돌 없이 딱 맞게</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<title>키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄</title>
 <style>
   :root {
-    --blue: #4F8EF7;
-    --blue-dark: #2563EB;
-    --blue-light: #EEF4FF;
-    --gray-50: #F8F9FA;
-    --gray-100: #F3F4F6;
-    --gray-300: #D1D5DB;
-    --gray-500: #6B7280;
-    --gray-700: #374151;
-    --gray-900: #111827;
-    --green: #10B981;
-    --red: #EF4444;
-    --yellow: #F59E0B;
+    --primary:       #F97316;
+    --primary-dark:  #EA6C0A;
+    --primary-light: #FFF7ED;
+    --bg-base:       #FFFBF7;
+    --bg-card:       #FFFFFF;
+    --border:        #F5F0EB;
+    --text-main:     #1C1C1C;
+    --text-sub:      #78716C;
+    --text-muted:    #A8A29E;
+    /* 하위 호환 — 기존 var(--blue) 참조 섹션을 위해 유지 */
+    --blue:          #F97316;
+    --blue-dark:     #EA6C0A;
+    --blue-light:    #FFF7ED;
+    --gray-50:       #FFFBF7;
+    --gray-100:      #F5F0EB;
+    --gray-300:      #E7E5E4;
+    --gray-500:      #78716C;
+    --gray-700:      #44403C;
+    --gray-900:      #1C1C1C;
+    --green:         #10B981;
+    --red:           #EF4444;
+    --yellow:        #F59E0B;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    background: #fff;
-    color: var(--gray-900);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-main);
     overflow-x: hidden;
   }
 
