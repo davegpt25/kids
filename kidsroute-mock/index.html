@@ -651,6 +651,30 @@
     section { padding: 60px 24px; }
   }
 
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    padding: 100px 20px 60px;
+    text-align: center;
+    align-items: center;
+  }
+  .hero-content { max-width: 100%; }
+  .hero h1 { font-size: 36px; }
+  .hero p { font-size: 16px; }
+  .hero-btns { justify-content: center; }
+  .hero-stats { justify-content: center; }
+  .hero-phone { display: none; }
+
+  .demo-layout { flex-direction: column !important; align-items: center; }
+  .demo-steps { width: 100% !important; }
+  .demo-phone-wrap { width: 100% !important; display: flex; justify-content: center; }
+
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; }
+
+  .pricing-grid { grid-template-columns: 1fr !important; }
+}
+
 /* ─── SCROLL ANIMATION ─── */
 .fade-up {
   opacity: 0;
