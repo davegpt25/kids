@@ -16,7 +16,7 @@
 
 ## 디자인 시스템
 
-### 컬러
+### 컬러 — 현재 적용 (주황 B 스타일)
 ```css
 --primary:      #F97316;   /* 주황 — 버튼, 포인트 */
 --primary-dark: #EA6C0A;   /* 주황 hover */
@@ -28,6 +28,82 @@
 --text-sub:     #78716C;   /* 보조 */
 --text-muted:   #A8A29E;   /* 비활성 */
 ```
+
+### 컬러 — 대안 톤 후보 (학부모 신뢰 색상 검토 중)
+
+> 당근마켓 주황(#F97316)과 겹쳐 보인다는 피드백에 따라 아래 5개 후보를 미리보기로 검토함.
+> 미리보기 파일: `kidsroute-mock/tone-preview.html` (네이비/그린), `kidsroute-mock/tone-pink.html` (핑크/로즈 3종)
+
+#### 후보 A — 딥 네이비 (Deep Navy Trust)
+```css
+--primary:       #1B4F8A;
+--primary-dark:  #153D6F;
+--primary-light: #EBF2FB;
+--bg-base:       #F7FAFF;
+--border:        #DDE8F5;
+```
+- **키워드**: 전문성 · 안정감 · 신뢰 · 교육기관 느낌
+- **타깃**: 권위 있는 교육 서비스 인상, 40대 학부모
+
+#### 후보 B — 에메랄드 그린 (Warm Trust Green)
+```css
+--primary:       #059669;
+--primary-dark:  #047857;
+--primary-light: #ECFDF5;
+--bg-base:       #F7FBF9;
+--border:        #D1FAE5;
+```
+- **키워드**: 성장 · 건강 · 안전 · 육아 친화
+- **타깃**: 자연스러운 교육 성장 이미지, 에듀테크 앱 톤
+
+#### 후보 C — 소프트 로즈 (Soft Rose) ⭐ 30대 학부모 친화
+```css
+--primary:       #E05480;
+--primary-dark:  #C04060;
+--primary-light: #FFF0F4;
+--bg-base:       #FFF8FA;
+--border:        #FADADF;
+```
+- **키워드**: 따뜻함 · 친근감 · 배려 · 육아앱 친숙
+- **타깃**: 30대 엄마 선호, 맘카페·아이돌봄 계열 앱 톤
+- **미리보기**: `tone-pink.html` Tone 1
+
+#### 후보 D — 더스티 로즈 (Dusty Rose) ⭐ 프리미엄 신뢰
+```css
+--primary:       #B5446E;
+--primary-dark:  #963860;
+--primary-light: #FAEDF2;
+--bg-base:       #FDF5F8;
+--border:        #EFC8D6;
+```
+- **키워드**: 세련됨 · 신뢰 · 프리미엄 · 에듀테크
+- **타깃**: 40대 강남구 학부모, 글로벌 에듀테크 앱 톤
+- **미리보기**: `tone-pink.html` Tone 2 / `tone-2.html`
+
+#### 후보 E — 버건디 레드 (Burgundy Red) ⭐ 최고 신뢰도
+```css
+--primary:       #9B2042;
+--primary-dark:  #7D1A35;
+--primary-light: #F9EEF1;
+--bg-base:       #FBF4F6;
+--border:        #E8C0CC;
+```
+- **키워드**: 권위 · 전문성 · 명문 교육 · 성취감
+- **타깃**: 메가스터디·이투스·명문대 브랜드 색감, 신뢰 지수 최고
+- **미리보기**: `tone-pink.html` Tone 3 / `tone-3.html`
+
+---
+
+### 톤 선택 기준
+
+| 톤 | 색상 | 친근감 | 신뢰도 | 프리미엄 | 추천 대상 |
+|----|------|--------|--------|----------|-----------|
+| 현재 주황 | #F97316 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | 20~30대, 앱 첫인상 |
+| 딥 네이비 | #1B4F8A | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 40대, 교육 기관 신뢰 |
+| 에메랄드 | #059669 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | 교육 성장 이미지 |
+| 소프트 로즈 | #E05480 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | 30대 엄마, 육아앱 |
+| 더스티 로즈 | #B5446E | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 강남구 30~40대 |
+| 버건디 레드 | #9B2042 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 프리미엄 교육 서비스 |
 
 ### 타이포그래피
 - **폰트**: Pretendard (CDN: `https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css`)

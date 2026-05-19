@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tone 3 — 더스티 로즈</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:#EEECEC}
+:root{--p:#9B2042;--p-dark:#7D1A35;--p-light:#F9EEF1;--bg:#FBF4F6;--border:#E8C0CC;--shadow:rgba(155,32,66,0.20)}
+.wrap{max-width:980px;margin:20px auto 40px;border-radius:24px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.10)}
+.ttag{display:block;text-align:center;padding:16px 0;font-size:15px;font-weight:800;color:#fff;background:#9B2042}
+.dbox{background:#fff;padding:22px 40px 20px;border-bottom:1px solid #F0EBE8}
+.drow{display:flex;align-items:flex-start;gap:20px}
+.chip{width:52px;height:52px;border-radius:16px;flex-shrink:0;background:#9B2042;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.dt h3{font-size:16px;font-weight:800;color:#1C1C1C;margin-bottom:5px}
+.dt p{font-size:13px;color:#6B7280;line-height:1.65}
+.kws{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.kw{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;background:#F9EEF1;color:#9B2042}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;background:rgba(255,255,255,.97);border-bottom:1.5px solid var(--border)}
+.logo{font-size:19px;font-weight:800;color:var(--p);letter-spacing:-.5px}
+.nlinks{display:flex;gap:24px;align-items:center}
+.nlink{font-size:14px;font-weight:500;color:#6B7280}
+.ncta{background:var(--p);color:#fff;border:none;border-radius:100px;padding:9px 22px;font-size:13px;font-weight:700;font-family:'Pretendard',sans-serif}
+.hero{display:flex;align-items:center;gap:48px;padding:60px 40px 52px;background:linear-gradient(160deg,var(--bg) 0%,var(--p-light) 100%)}
+.hleft{flex:1}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--p-light);color:var(--p);border:1px solid var(--border);border-radius:100px;padding:5px 14px;font-size:12px;font-weight:700;margin-bottom:22px}
+.hero h1{font-size:42px;font-weight:800;line-height:1.22;letter-spacing:-1.5px;color:#1C1C1C;margin-bottom:16px}
+.hero h1 em{color:var(--p);font-style:normal}
+.hero p{font-size:15px;color:#6B7280;line-height:1.7;margin-bottom:28px}
+.btns{display:flex;gap:12px}
+.bp{background:var(--p);color:#fff;border:none;border-radius:100px;padding:15px 30px;font-size:15px;font-weight:700;font-family:'Pretendard',sans-serif;box-shadow:0 4px 20px var(--shadow)}
+.bs{background:#fff;color:#6B7280;border:1.5px solid #E5E7EB;border-radius:100px;padding:14px 24px;font-size:15px;font-weight:600;font-family:'Pretendard',sans-serif}
+.stats{display:flex;gap:32px;margin-top:32px}
+.sn{font-size:22px;font-weight:800;color:var(--p)}
+.sl{font-size:12px;color:#9CA3AF;margin-top:2px}
+.phone{width:200px;height:330px;flex-shrink:0;background:var(--p-light);border-radius:32px;border:2.5px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.pi{font-size:40px}.pl{font-size:11px;font-weight:700;color:var(--p)}
+.feats{padding:40px;background:#fff}
+.sec{font-size:17px;font-weight:800;color:#1C1C1C;margin-bottom:18px}
+.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.fc{background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:20px}
+.fi{width:44px;height:44px;background:var(--p-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+.fc h4{font-size:13px;font-weight:700;color:#1C1C1C;margin-bottom:5px}
+.fc p{font-size:11px;color:#9CA3AF;line-height:1.55}
+.revs{padding:40px;background:var(--bg)}
+.rg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rc{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:20px}
+.av{width:38px;height:38px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;margin-bottom:10px}
+.rn{font-size:12px;font-weight:700;color:#1C1C1C}.rr{font-size:11px;color:#9CA3AF}
+.rs{color:#FBBF24;font-size:12px;margin:7px 0 6px}
+.rt{font-size:11px;color:#6B7280;line-height:1.65}
+.ctas{padding:44px 40px;text-align:center;background:var(--p-light)}
+.ct{font-size:24px;font-weight:800;color:#1C1C1C;margin-bottom:8px;letter-spacing:-.5px}
+.cs{font-size:14px;color:#6B7280;margin-bottom:24px;line-height:1.6}
+.sbs{display:flex;gap:10px;justify-content:center}
+.sb{background:#1C1C1C;color:#fff;border:none;border-radius:100px;padding:13px 26px;font-size:13px;font-weight:700;font-family:'Pretendard',sans-serif}
+.sb.o{background:#fff;color:#1C1C1C;border:1.5px solid var(--border)}
+.cap{font-size:11px;color:#A8A29E;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="ttag">Tone 3 — 버건디 레드 (Burgundy Red) · #9B2042</div>
+<div class="dbox"><div class="drow"><div class="chip"></div><div class="dt"><h3>🍷 버건디 레드 — "믿을 수 있는 교육 전문 서비스"</h3><p>딥 레드는 <strong>권위·전문성·신뢰·성취</strong>를 상징합니다. 서울대·연세대 등 명문대 브랜드, 메가스터디·이투스가 쓰는 색. <strong>가장 높은 신뢰 지수</strong>를 가진 색상.</p>
+<nav><div class="logo">키즈루트</div><div class="nlinks"><span class="nlink">기능</span><span class="nlink">이용방법</span><span class="nlink">요금제</span><button class="ncta">사전예약</button></div></nav>
+<div class="hero"><div class="hleft"><div class="badge">🗺️ MVP v1.0 · 서울 강남구 출시 예정</div><h1><em>3초면 완성되는</em><br>우리 아이<br>학원 스케줄</h1><p>GPS 반경 내 학원을 자동으로 찾아주고,<br>시간 충돌 없는 최적 조합을 추천해요.</p><div class="btns"><button class="bp">🍎 App Store 사전예약</button><button class="bs">이용방법 보기</button></div><div class="stats"><div><div class="sn">3초</div><div class="sl">스케줄 완성</div></div><div><div class="sn">98%</div><div class="sl">충돌 방지율</div></div><div><div class="sn">500+</div><div class="sl">강남구 학원 DB</div></div></div></div><div class="phone"><div class="pi">📱</div><div class="pl">앱 미리보기</div></div></div>
+<div class="feats"><div class="sec">핵심 기능</div><div class="fg"><div class="fc"><div class="fi">🗺️</div><h4>GPS 반경 탐색</h4><p>반경 1~5km 학원 자동 수집</p></div><div class="fc"><div class="fi">⚡</div><h4>3초 스케줄</h4><p>충돌 없는 최적 조합 즉시 생성</p></div><div class="fc"><div class="fi">🚗</div><h4>이동 시간 고려</h4><p>실제 이동 시간 포함 계산</p></div></div></div>
+<div class="revs"><div class="sec">학부모들이 먼저 써봤어요</div><div class="rg"><div class="rc"><div class="av">이</div><div class="rn">이○○ 학부모</div><div class="rr">강남구</div><div class="rs">★★★★★</div><div class="rt">"엑셀 없이도 시간표 완성! 이동 시간까지 계산해줘요."</div></div><div class="rc"><div class="av">김</div><div class="rn">김○○ 학부모</div><div class="rr">서초구</div><div class="rs">★★★★★</div><div class="rt">"수학·영어·피아노 겹치지 않게 짜줘서 너무 편해요."</div></div><div class="rc"><div class="av">박</div><div class="rn">박○○ 학부모</div><div class="rr">송파구</div><div class="rs">★★★★★</div><div class="rt">"학원 두 개 더 넣을 여유 시간 생겼어요. 강추!"</div></div></div></div>
+<div class="ctas"><div class="ct">지금 사전예약하고 먼저 써보세요 🎉</div><div class="cs">출시 즉시 알림 · 얼리버드 3개월 프리미엄 무료</div><div class="sbs"><button class="sb">🍎 App Store 사전예약</button><button class="sb o">▶ Play Store 사전예약</button></div><div class="cap">*사전예약은 무료입니다</div></div>
+</div>
+</body></html>

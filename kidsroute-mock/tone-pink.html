@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>키즈루트 — 핑크/로즈 톤 제안</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Pretendard', -apple-system, sans-serif; background: #F2EEF0; }
+
+.page-title {
+  text-align: center; padding: 36px 0 8px;
+  font-size: 22px; font-weight: 800; color: #1C1C1C;
+}
+.page-sub {
+  text-align: center; padding: 0 0 32px;
+  font-size: 14px; color: #78716C; line-height: 1.6;
+}
+
+/* ─── 공통 레이아웃 ─── */
+.card-wrap {
+  max-width: 980px; margin: 0 auto 56px;
+  border-radius: 24px; overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.10);
+}
+
+/* ── 톤 태그 ── */
+.tone-tag {
+  display: block; text-align: center;
+  padding: 16px 0; font-size: 15px; font-weight: 800; color: #fff;
+  letter-spacing: -0.3px;
+}
+
+/* ── 설명 박스 ── */
+.desc-box {
+  background: #fff; padding: 22px 40px 20px;
+  border-bottom: 1px solid #F0EBE8;
+}
+.desc-row { display: flex; align-items: flex-start; gap: 20px; }
+.color-chip {
+  width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.desc-text h3 { font-size: 16px; font-weight: 800; color: #1C1C1C; margin-bottom: 5px; }
+.desc-text p { font-size: 13px; color: #6B7280; line-height: 1.65; }
+.desc-kws { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.kw { padding: 4px 12px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+
+/* ── NAV ── */
+.mock-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 64px;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid var(--border);
+}
+.mock-logo { font-size: 19px; font-weight: 800; color: var(--p); letter-spacing: -0.5px; }
+.mock-nav-links { display: flex; gap: 24px; align-items: center; }
+.mock-nav-link { font-size: 14px; font-weight: 500; color: #6B7280; }
+.mock-cta {
+  background: var(--p); color: #fff; border: none;
+  border-radius: 100px; padding: 9px 22px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* ── HERO ── */
+.mock-hero {
+  display: flex; align-items: center; gap: 48px;
+  padding: 60px 40px 52px;
+  background: linear-gradient(160deg, var(--bg) 0%, var(--p-light) 100%);
+}
+.mock-hero-left { flex: 1; }
+.mock-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--p-light); color: var(--p);
+  border: 1px solid var(--border); border-radius: 100px;
+  padding: 5px 14px; font-size: 12px; font-weight: 700; margin-bottom: 22px;
+}
+.mock-hero h1 {
+  font-size: 42px; font-weight: 800; line-height: 1.22;
+  letter-spacing: -1.5px; color: #1C1C1C; margin-bottom: 16px;
+}
+.mock-hero h1 em { color: var(--p); font-style: normal; }
+.mock-hero p { font-size: 15px; color: #6B7280; line-height: 1.7; margin-bottom: 28px; }
+.mock-btns { display: flex; gap: 12px; }
+.mock-btn-primary {
+  background: var(--p); color: #fff; border: none;
+  border-radius: 100px; padding: 15px 30px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: 'Pretendard', sans-serif;
+  box-shadow: 0 4px 20px var(--shadow);
+}
+.mock-btn-secondary {
+  background: #fff; color: #6B7280;
+  border: 1.5px solid #E5E7EB; border-radius: 100px;
+  padding: 14px 24px; font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: 'Pretendard', sans-serif;
+}
+.mock-stats { display: flex; gap: 32px; margin-top: 32px; }
+.stat-num { font-size: 22px; font-weight: 800; color: var(--p); }
+.stat-label { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+
+/* ── 폰 ── */
+.mock-phone {
+  width: 200px; height: 330px; flex-shrink: 0;
+  background: var(--p-light); border-radius: 32px;
+  border: 2.5px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+.phone-icon { font-size: 40px; }
+.phone-label { font-size: 11px; font-weight: 700; color: var(--p); }
+
+/* ── FEATURES ── */
+.mock-features {
+  padding: 40px; background: #fff;
+}
+.sec-title { font-size: 17px; font-weight: 800; color: #1C1C1C; margin-bottom: 18px; }
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.feat-card {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 20px;
+}
+.feat-icon {
+  width: 44px; height: 44px; background: var(--p-light);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 12px;
+}
+.feat-card h4 { font-size: 13px; font-weight: 700; color: #1C1C1C; margin-bottom: 5px; }
+.feat-card p { font-size: 11px; color: #9CA3AF; line-height: 1.55; }
+
+/* ── REVIEWS ── */
+.mock-reviews {
+  padding: 40px; background: var(--bg);
+}
+.reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.review-card {
+  background: #fff; border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 20px;
+}
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--p); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; margin-bottom: 10px;
+}
+.r-name { font-size: 12px; font-weight: 700; color: #1C1C1C; }
+.r-region { font-size: 11px; color: #9CA3AF; }
+.r-stars { color: #FBBF24; font-size: 12px; margin: 7px 0 6px; }
+.r-text { font-size: 11px; color: #6B7280; line-height: 1.65; }
+
+/* ── APP CTA ── */
+.mock-cta-sec {
+  padding: 44px 40px; text-align: center;
+  background: var(--p-light);
+}
+.cta-title { font-size: 24px; font-weight: 800; color: #1C1C1C; margin-bottom: 8px; letter-spacing: -0.5px; }
+.cta-sub { font-size: 14px; color: #6B7280; margin-bottom: 24px; line-height: 1.6; }
+.store-btns { display: flex; gap: 10px; justify-content: center; }
+.store-btn {
+  background: #1C1C1C; color: #fff; border: none;
+  border-radius: 100px; padding: 13px 26px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Pretendard', sans-serif;
+}
+.store-btn.outline {
+  background: #fff; color: #1C1C1C;
+  border: 1.5px solid var(--border);
+}
+.cta-caption { font-size: 11px; color: #A8A29E; margin-top: 14px; }
+
+
+/* ════════════════════════
+   TONE 1 — 소프트 로즈
+════════════════════════ */
+.tone-1 {
+  --p:       #E05480;
+  --p-dark:  #C04060;
+  --p-light: #FFF0F4;
+  --bg:      #FFF8FA;
+  --border:  #FADADF;
+  --shadow:  rgba(224,84,128,0.30);
+}
+
+/* ════════════════════════
+   TONE 2 — 더스티 로즈
+════════════════════════ */
+.tone-2 {
+  --p:       #B5446E;
+  --p-dark:  #963860;
+  --p-light: #FAEDF2;
+  --bg:      #FDF5F8;
+  --border:  #EFC8D6;
+  --shadow:  rgba(181,68,110,0.25);
+}
+
+/* ════════════════════════
+   TONE 3 — 버건디 레드
+════════════════════════ */
+.tone-3 {
+  --p:       #9B2042;
+  --p-dark:  #7D1A35;
+  --p-light: #F9EEF1;
+  --bg:      #FBF4F6;
+  --border:  #E8C0CC;
+  --shadow:  rgba(155,32,66,0.20);
+}
+</style>
+</head>
+<body>
+
+<div class="page-title">학부모 신뢰 — 핑크/로즈 계열 3가지 제안</div>
+<div class="page-sub">
+  당근 주황보다 부드럽고, 학부모(특히 엄마)에게 따뜻한 신뢰를 주는 색상을 엄선했습니다<br>
+  <strong>아래로 스크롤</strong>하며 비교해 보세요
+</div>
+
+<!-- ══════════════════════════════════
+     TONE 1 — 소프트 로즈
+══════════════════════════════════ -->
+<div class="card-wrap tone-1">
+  <div class="tone-tag" style="background:#E05480;">Tone 1 — 소프트 로즈 (Soft Rose) &nbsp;·&nbsp; #E05480</div>
+  <div class="desc-box">
+    <div class="desc-row">
+      <div class="color-chip" style="background:#E05480;"></div>
+      <div class="desc-text">
+        <h3>🌸 소프트 로즈 — "따뜻하고 친근한 엄마의 앱"</h3>
+        <p>로즈 핑크는 <strong>따뜻함·배려·친근감</strong>을 전달합니다. 당근 주황보다 10% 어둡고 차분해 "강하게 팔려는 앱"이 아닌 <strong>"나를 도와주는 앱"</strong> 인상을 줍니다. 국내 육아 앱(맘카페, 아이돌봄 계열)에서 가장 많이 쓰이는 톤.</p>
+        <div class="desc-kws">
+          <span class="kw" style="background:#FFF0F4;color:#E05480;">따뜻함</span>
+          <span class="kw" style="background:#FFF0F4;color:#E05480;">친근감</span>
+          <span class="kw" style="background:#FFF0F4;color:#E05480;">배려</span>
+          <span class="kw" style="background:#FFF0F4;color:#E05480;">육아앱 친숙</span>
+          <span class="kw" style="background:#FFF0F4;color:#E05480;">30대 엄마 선호</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="mock-nav">
+    <div class="mock-logo">키즈루트</div>
+    <div class="mock-nav-links">
+      <span class="mock-nav-link">기능</span>
+      <span class="mock-nav-link">이용방법</span>
+      <span class="mock-nav-link">요금제</span>
+      <button class="mock-cta">사전예약</button>
+    </div>
+  </nav>
+
+  <div class="mock-hero">
+    <div class="mock-hero-left">
+      <div class="mock-badge">🗺️ MVP v1.0 · 서울 강남구 출시 예정</div>
+      <h1><em>3초면 완성되는</em><br>우리 아이<br>학원 스케줄</h1>
+      <p>GPS 반경 내 학원을 자동으로 찾아주고,<br>시간 충돌 없는 최적 조합을 추천해요.</p>
+      <div class="mock-btns">
+        <button class="mock-btn-primary">🍎 App Store 사전예약</button>
+        <button class="mock-btn-secondary">이용방법 보기</button>
+      </div>
+      <div class="mock-stats">
+        <div><div class="stat-num">3초</div><div class="stat-label">스케줄 완성</div></div>
+        <div><div class="stat-num">98%</div><div class="stat-label">충돌 방지율</div></div>
+        <div><div class="stat-num">500+</div><div class="stat-label">강남구 학원 DB</div></div>
+      </div>
+    </div>
+    <div class="mock-phone">
+      <div class="phone-icon">📱</div>
+      <div class="phone-label">앱 미리보기</div>
+    </div>
+  </div>
+
+  <div class="mock-features">
+    <div class="sec-title">핵심 기능</div>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">🗺️</div><h4>GPS 반경 탐색</h4><p>반경 1~5km 학원 자동 수집</p></div>
+      <div class="feat-card"><div class="feat-icon">⚡</div><h4>3초 스케줄</h4><p>충돌 없는 최적 조합 즉시 생성</p></div>
+      <div class="feat-card"><div class="feat-icon">🚗</div><h4>이동 시간 고려</h4><p>실제 이동 시간 포함 계산</p></div>
+    </div>
+  </div>
+
+  <div class="mock-reviews">
+    <div class="sec-title">학부모들이 먼저 써봤어요</div>
+    <div class="reviews-grid">
+      <div class="review-card"><div class="avatar">이</div><div class="r-name">이○○ 학부모</div><div class="r-region">강남구</div><div class="r-stars">★★★★★</div><div class="r-text">"엑셀 없이도 시간표 완성! 이동 시간까지 계산해줘요."</div></div>
+      <div class="review-card"><div class="avatar">김</div><div class="r-name">김○○ 학부모</div><div class="r-region">서초구</div><div class="r-stars">★★★★★</div><div class="r-text">"수학·영어·피아노 겹치지 않게 짜줘서 너무 편해요."</div></div>
+      <div class="review-card"><div class="avatar">박</div><div class="r-name">박○○ 학부모</div><div class="r-region">송파구</div><div class="r-stars">★★★★★</div><div class="r-text">"학원 두 개 더 넣을 여유 시간 생겼어요. 강추!"</div></div>
+    </div>
+  </div>
+
+  <div class="mock-cta-sec">
+    <div class="cta-title">지금 사전예약하고 먼저 써보세요 🎉</div>
+    <div class="cta-sub">출시 즉시 알림 · 얼리버드 3개월 프리미엄 무료</div>
+    <div class="store-btns">
+      <button class="store-btn">🍎 App Store 사전예약</button>
+      <button class="store-btn outline">▶ Play Store 사전예약</button>
+    </div>
+    <div class="cta-caption">*사전예약은 무료입니다</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     TONE 2 — 더스티 로즈
+══════════════════════════════════ -->
+<div class="card-wrap tone-2">
+  <div class="tone-tag" style="background:#B5446E;">Tone 2 — 더스티 로즈 (Dusty Rose) &nbsp;·&nbsp; #B5446E</div>
+  <div class="desc-box">
+    <div class="desc-row">
+      <div class="color-chip" style="background:#B5446E;"></div>
+      <div class="desc-text">
+        <h3>🌹 더스티 로즈 — "세련되고 신뢰할 수 있는 프리미엄 앱"</h3>
+        <p>채도를 낮춘 로즈는 <strong>세련됨·안정감·신뢰</strong>를 동시에 줍니다. "값싼 앱"이 아닌 <strong>"프리미엄 교육 도구"</strong> 느낌. 강남구 타깃 학부모(특히 교육열 높은 40대)에게 강한 어필. 글로벌 에듀테크 앱(Khan Academy, Duolingo 프리미엄)이 선호하는 톤.</p>
+        <div class="desc-kws">
+          <span class="kw" style="background:#FAEDF2;color:#B5446E;">세련됨</span>
+          <span class="kw" style="background:#FAEDF2;color:#B5446E;">신뢰</span>
+          <span class="kw" style="background:#FAEDF2;color:#B5446E;">프리미엄</span>
+          <span class="kw" style="background:#FAEDF2;color:#B5446E;">교육 브랜드</span>
+          <span class="kw" style="background:#FAEDF2;color:#B5446E;">40대 학부모</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="mock-nav">
+    <div class="mock-logo">키즈루트</div>
+    <div class="mock-nav-links">
+      <span class="mock-nav-link">기능</span>
+      <span class="mock-nav-link">이용방법</span>
+      <span class="mock-nav-link">요금제</span>
+      <button class="mock-cta">사전예약</button>
+    </div>
+  </nav>
+
+  <div class="mock-hero">
+    <div class="mock-hero-left">
+      <div class="mock-badge">🗺️ MVP v1.0 · 서울 강남구 출시 예정</div>
+      <h1><em>3초면 완성되는</em><br>우리 아이<br>학원 스케줄</h1>
+      <p>GPS 반경 내 학원을 자동으로 찾아주고,<br>시간 충돌 없는 최적 조합을 추천해요.</p>
+      <div class="mock-btns">
+        <button class="mock-btn-primary">🍎 App Store 사전예약</button>
+        <button class="mock-btn-secondary">이용방법 보기</button>
+      </div>
+      <div class="mock-stats">
+        <div><div class="stat-num">3초</div><div class="stat-label">스케줄 완성</div></div>
+        <div><div class="stat-num">98%</div><div class="stat-label">충돌 방지율</div></div>
+        <div><div class="stat-num">500+</div><div class="stat-label">강남구 학원 DB</div></div>
+      </div>
+    </div>
+    <div class="mock-phone">
+      <div class="phone-icon">📱</div>
+      <div class="phone-label">앱 미리보기</div>
+    </div>
+  </div>
+
+  <div class="mock-features">
+    <div class="sec-title">핵심 기능</div>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">🗺️</div><h4>GPS 반경 탐색</h4><p>반경 1~5km 학원 자동 수집</p></div>
+      <div class="feat-card"><div class="feat-icon">⚡</div><h4>3초 스케줄</h4><p>충돌 없는 최적 조합 즉시 생성</p></div>
+      <div class="feat-card"><div class="feat-icon">🚗</div><h4>이동 시간 고려</h4><p>실제 이동 시간 포함 계산</p></div>
+    </div>
+  </div>
+
+  <div class="mock-reviews">
+    <div class="sec-title">학부모들이 먼저 써봤어요</div>
+    <div class="reviews-grid">
+      <div class="review-card"><div class="avatar">이</div><div class="r-name">이○○ 학부모</div><div class="r-region">강남구</div><div class="r-stars">★★★★★</div><div class="r-text">"엑셀 없이도 시간표 완성! 이동 시간까지 계산해줘요."</div></div>
+      <div class="review-card"><div class="avatar">김</div><div class="r-name">김○○ 학부모</div><div class="r-region">서초구</div><div class="r-stars">★★★★★</div><div class="r-text">"수학·영어·피아노 겹치지 않게 짜줘서 너무 편해요."</div></div>
+      <div class="review-card"><div class="avatar">박</div><div class="r-name">박○○ 학부모</div><div class="r-region">송파구</div><div class="r-stars">★★★★★</div><div class="r-text">"학원 두 개 더 넣을 여유 시간 생겼어요. 강추!"</div></div>
+    </div>
+  </div>
+
+  <div class="mock-cta-sec">
+    <div class="cta-title">지금 사전예약하고 먼저 써보세요 🎉</div>
+    <div class="cta-sub">출시 즉시 알림 · 얼리버드 3개월 프리미엄 무료</div>
+    <div class="store-btns">
+      <button class="store-btn">🍎 App Store 사전예약</button>
+      <button class="store-btn outline">▶ Play Store 사전예약</button>
+    </div>
+    <div class="cta-caption">*사전예약은 무료입니다</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     TONE 3 — 버건디 레드
+══════════════════════════════════ -->
+<div class="card-wrap tone-3" style="margin-bottom:64px;">
+  <div class="tone-tag" style="background:#9B2042;">Tone 3 — 버건디 레드 (Burgundy Red) &nbsp;·&nbsp; #9B2042</div>
+  <div class="desc-box">
+    <div class="desc-row">
+      <div class="color-chip" style="background:#9B2042;"></div>
+      <div class="desc-text">
+        <h3>🍷 버건디 레드 — "믿을 수 있는 교육 전문 서비스"</h3>
+        <p>딥 레드 계열은 <strong>권위·전문성·신뢰·성취</strong>를 상징합니다. "이 앱은 제대로 된 교육 서비스"라는 인상. 서울대·연세대 등 명문대 브랜드 컬러, 국내 대형 교육기업(메가스터디, 이투스)이 즐겨 쓰는 색감. 가장 높은 신뢰 지수를 가진 색상.</p>
+        <div class="desc-kws">
+          <span class="kw" style="background:#F9EEF1;color:#9B2042;">권위</span>
+          <span class="kw" style="background:#F9EEF1;color:#9B2042;">전문성</span>
+          <span class="kw" style="background:#F9EEF1;color:#9B2042;">명문 교육</span>
+          <span class="kw" style="background:#F9EEF1;color:#9B2042;">성취감</span>
+          <span class="kw" style="background:#F9EEF1;color:#9B2042;">최고 신뢰도</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="mock-nav">
+    <div class="mock-logo">키즈루트</div>
+    <div class="mock-nav-links">
+      <span class="mock-nav-link">기능</span>
+      <span class="mock-nav-link">이용방법</span>
+      <span class="mock-nav-link">요금제</span>
+      <button class="mock-cta">사전예약</button>
+    </div>
+  </nav>
+
+  <div class="mock-hero">
+    <div class="mock-hero-left">
+      <div class="mock-badge">🗺️ MVP v1.0 · 서울 강남구 출시 예정</div>
+      <h1><em>3초면 완성되는</em><br>우리 아이<br>학원 스케줄</h1>
+      <p>GPS 반경 내 학원을 자동으로 찾아주고,<br>시간 충돌 없는 최적 조합을 추천해요.</p>
+      <div class="mock-btns">
+        <button class="mock-btn-primary">🍎 App Store 사전예약</button>
+        <button class="mock-btn-secondary">이용방법 보기</button>
+      </div>
+      <div class="mock-stats">
+        <div><div class="stat-num">3초</div><div class="stat-label">스케줄 완성</div></div>
+        <div><div class="stat-num">98%</div><div class="stat-label">충돌 방지율</div></div>
+        <div><div class="stat-num">500+</div><div class="stat-label">강남구 학원 DB</div></div>
+      </div>
+    </div>
+    <div class="mock-phone">
+      <div class="phone-icon">📱</div>
+      <div class="phone-label">앱 미리보기</div>
+    </div>
+  </div>
+
+  <div class="mock-features">
+    <div class="sec-title">핵심 기능</div>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">🗺️</div><h4>GPS 반경 탐색</h4><p>반경 1~5km 학원 자동 수집</p></div>
+      <div class="feat-card"><div class="feat-icon">⚡</div><h4>3초 스케줄</h4><p>충돌 없는 최적 조합 즉시 생성</p></div>
+      <div class="feat-card"><div class="feat-icon">🚗</div><h4>이동 시간 고려</h4><p>실제 이동 시간 포함 계산</p></div>
+    </div>
+  </div>
+
+  <div class="mock-reviews">
+    <div class="sec-title">학부모들이 먼저 써봤어요</div>
+    <div class="reviews-grid">
+      <div class="review-card"><div class="avatar">이</div><div class="r-name">이○○ 학부모</div><div class="r-region">강남구</div><div class="r-stars">★★★★★</div><div class="r-text">"엑셀 없이도 시간표 완성! 이동 시간까지 계산해줘요."</div></div>
+      <div class="review-card"><div class="avatar">김</div><div class="r-name">김○○ 학부모</div><div class="r-region">서초구</div><div class="r-stars">★★★★★</div><div class="r-text">"수학·영어·피아노 겹치지 않게 짜줘서 너무 편해요."</div></div>
+      <div class="review-card"><div class="avatar">박</div><div class="r-name">박○○ 학부모</div><div class="r-region">송파구</div><div class="r-stars">★★★★★</div><div class="r-text">"학원 두 개 더 넣을 여유 시간 생겼어요. 강추!"</div></div>
+    </div>
+  </div>
+
+  <div class="mock-cta-sec">
+    <div class="cta-title">지금 사전예약하고 먼저 써보세요 🎉</div>
+    <div class="cta-sub">출시 즉시 알림 · 얼리버드 3개월 프리미엄 무료</div>
+    <div class="store-btns">
+      <button class="store-btn">🍎 App Store 사전예약</button>
+      <button class="store-btn outline">▶ Play Store 사전예약</button>
+    </div>
+    <div class="cta-caption">*사전예약은 무료입니다</div>
+  </div>
+</div>
+
+</body>
+</html>
