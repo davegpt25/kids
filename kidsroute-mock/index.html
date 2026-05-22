@@ -1155,6 +1155,57 @@
   40% { transform: scale(1.04); }
   100% { transform: scale(1); }
 }
+/* 학원×방향 카드 헤더 */
+.live-stop-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.live-stop-acicon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.live-stop-acinfo { flex: 1; min-width: 0; }
+.live-stop-acname {
+  font-size: 13px; font-weight: 800; color: var(--text-main);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.live-stop-dir {
+  font-size: 12px; color: var(--text-sub); margin-top: 1px;
+}
+.live-near-pill {
+  background: #FEF3C7; color: #92400E;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 100px; white-space: nowrap; flex-shrink: 0;
+}
+.live-progress-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.live-join-hint {
+  font-size: 12px; color: var(--text-sub); margin-bottom: 8px; line-height: 1.5;
+}
+.live-complete-badge {
+  display: flex; align-items: flex-start; gap: 6px;
+  background: #ECFDF5; color: #065F46; border-radius: 10px;
+  padding: 9px 12px; font-size: 12px; line-height: 1.5;
+}
+/* 학원 운영 시각 추가 스타일 */
+.live-ac-body { padding: 12px 16px 16px; }
+.live-ac-section-label {
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  letter-spacing: .04em; text-transform: uppercase;
+  margin: 12px 0 8px; padding-top: 12px; border-top: 1px solid var(--gray-100);
+}
+.live-ac-section-label:first-child { margin-top: 0; border-top: none; }
+.live-ac-owner-note {
+  margin-top: 14px; padding: 10px 12px;
+  background: var(--primary-light); border-radius: 12px;
+  font-size: 12px; color: var(--text-sub); line-height: 1.5;
+}
+.live-ac-owner-note strong { color: var(--primary); }
+.live-kin-bar.near { background: linear-gradient(90deg,#F59E0B,#FCD34D); }
+.live-kin-bar.gathering { background: linear-gradient(90deg,var(--primary),var(--primary-dark)); }
+.live-kin-bar.complete { background: linear-gradient(90deg,#10B981,#059669); }
+.live-kin-row.near { background: #FFFBEB; border-color: #FCD34D; }
+.live-kin-hint.ok { color: #059669; font-weight: 600; }
 .live-stop-name {
   font-size: 15px; font-weight: 800; color: var(--text-main); margin-bottom: 2px;
 }
@@ -2202,12 +2253,12 @@
 <section id="live-stops" style="background:var(--bg-base);">
   <div class="live-section">
     <div class="live-badge"><span class="live-dot"></span>LIVE &middot; 실시간 현황</div>
-    <h2>5명이 모이면 정류장이 생겨요</h2>
-    <p class="live-subtitle">아직 정류장이 없어도 괜찮아요. 같은 방향 이웃 5명이 모이면 키즈루트가 자동으로 정류장을 만들고, 학원에도 알려드려요.</p>
+    <h2>같은 방향 5명이 모이면,<br>학원이 셔틀을 직접 운영해요</h2>
+    <p class="live-subtitle">키즈루트가 방향별 탑승 수요를 모아드려요.<br>5명이 채워지면 <strong>학원이 직접 정류장을 만들고 운행을 시작해요.</strong></p>
 
     <div class="live-tabs">
       <button class="live-tab active" onclick="switchLiveTab('parent')">👨‍👩‍👧 학부모 시각</button>
-      <button class="live-tab" onclick="switchLiveTab('academy')">🏫 학원 시각</button>
+      <button class="live-tab" onclick="switchLiveTab('academy')">🏫 학원 운영 시각</button>
     </div>
 
     <!-- Parent Tab -->
@@ -3101,36 +3152,48 @@ function submitLeadForm() {
 }
 
 // ─── Live Stop Creation Section ───
+// ─── 학원×방향 단위 셔틀 모집 데이터 ───
+// 오너십: 학원. 키즈루트는 수요 집계 플랫폼.
 const _LS_DATA = [
-  { id:'st0', name:'대치동', area:'강남구', count:5, max:5, x:65, y:52, complete:true,
+  { id:'rt0',
+    acName:'대치 수학의신 학원', acIcon:'📐', acColor:'#4285F4', acBg:'#EBF2FB',
+    dir:'역삼동 → 대치역 방향', count:5, max:5, x:55, y:44, complete:true,
     names:['김○○','이○○','박○○','최○○','정○○'],
     avatarColors:['#4285F4','#EA4335','#34A853','#F59E0B','#8B5CF6'] },
-  { id:'st1', name:'역삼동', area:'강남구', count:4, max:5, x:55, y:45,
-    names:['김○○','이○○','박○○','최○○'], avatarColors:['#4285F4','#EA4335','#34A853','#F59E0B'] },
-  { id:'st2', name:'방배동', area:'서초구', count:3, max:5, x:28, y:72,
-    names:['장○○','윤○○','정○○'], avatarColors:['#8B5CF6','#EC4899','#06B6D4'] },
-  { id:'st3', name:'압구정동', area:'강남구', count:2, max:5, x:40, y:22,
-    names:['한○○','오○○'], avatarColors:['#14B8A6','#F97316'] },
-  { id:'st4', name:'잠실동', area:'송파구', count:1, max:5, x:76, y:68,
-    names:['강○○'], avatarColors:['#F97316'] },
+  { id:'rt1',
+    acName:'대치 수학의신 학원', acIcon:'📐', acColor:'#4285F4', acBg:'#EBF2FB',
+    dir:'방배동 → 사당역 방향', count:4, max:5, x:28, y:70,
+    names:['장○○','윤○○','정○○','한○○'],
+    avatarColors:['#8B5CF6','#EC4899','#06B6D4','#14B8A6'] },
+  { id:'rt2',
+    acName:'YBM 어학원 대치점', acIcon:'🌐', acColor:'#EA4335', acBg:'#FEF2F2',
+    dir:'압구정동 → 학동역 방향', count:3, max:5, x:40, y:23,
+    names:['오○○','강○○','최○○'],
+    avatarColors:['#F97316','#EA4335','#4285F4'] },
+  { id:'rt3',
+    acName:'창의력 미술학원', acIcon:'🎨', acColor:'#8B5CF6', acBg:'#F5F3FF',
+    dir:'잠실동 → 삼성역 방향', count:2, max:5, x:76, y:68,
+    names:['윤○○','박○○'],
+    avatarColors:['#8B5CF6','#D946EF'] },
+  { id:'rt4',
+    acName:'YBM 어학원 대치점', acIcon:'🌐', acColor:'#EA4335', acBg:'#FEF2F2',
+    dir:'개포동 → 대치역 방향', count:1, max:5, x:62, y:80,
+    names:['이○○'],
+    avatarColors:['#34A853'] },
 ];
 
-const _LA_DATA = [
-  { id:'ac1', name:'대치 수학의신 학원', sub:'수학 전문 · 강남구 대치동', icon:'📐', color:'#4285F4', bg:'#EBF2FB',
-    kindergartens: [
-      { id:'kin1', name:'햇살유치원', area:'강남구 역삼동', count:4, max:5 },
-      { id:'kin2', name:'미래어린이집', area:'서초구 방배동', count:3, max:5 },
-    ]},
-  { id:'ac2', name:'YBM 어학원 대치점', sub:'영어 전문 · 강남구 대치동', icon:'🌐', color:'#EA4335', bg:'#FEF2F2',
-    kindergartens: [
-      { id:'kin3', name:'꿈나무유치원', area:'강남구 압구정동', count:5, max:5, complete:true },
-      { id:'kin4', name:'별빛어린이집', area:'송파구 잠실동', count:2, max:5 },
-    ]},
-  { id:'ac3', name:'창의력 미술학원', sub:'미술 · 서초구 방배동', icon:'🎨', color:'#8B5CF6', bg:'#F5F3FF',
-    kindergartens: [
-      { id:'kin5', name:'파랑새유치원', area:'서초구 방배동', count:3, max:5 },
-      { id:'kin6', name:'사랑어린이집', area:'강남구 개포동', count:1, max:5 },
-    ]},
+// ─── 유치원 픽업 데이터 (학원 단위 운영) ───
+const _LP_DATA = [
+  { id:'pk1', acName:'대치 수학의신 학원', acIcon:'📐', acColor:'#4285F4',
+    kinName:'햇살유치원', kinArea:'강남구 역삼동', count:4, max:5 },
+  { id:'pk2', acName:'대치 수학의신 학원', acIcon:'📐', acColor:'#4285F4',
+    kinName:'미래어린이집', kinArea:'서초구 방배동', count:3, max:5 },
+  { id:'pk3', acName:'YBM 어학원 대치점', acIcon:'🌐', acColor:'#EA4335',
+    kinName:'꿈나무유치원', kinArea:'강남구 압구정동', count:5, max:5, complete:true },
+  { id:'pk4', acName:'YBM 어학원 대치점', acIcon:'🌐', acColor:'#EA4335',
+    kinName:'별빛어린이집', kinArea:'송파구 잠실동', count:2, max:5 },
+  { id:'pk5', acName:'창의력 미술학원', acIcon:'🎨', acColor:'#8B5CF6',
+    kinName:'파랑새유치원', kinArea:'서초구 방배동', count:3, max:5 },
 ];
 
 let _lsSimInterval = null;
@@ -3138,44 +3201,45 @@ let _lsFeedSecs = 1;
 let _lsSimStep = 0;
 
 const _lsSimSteps = [
-  { type:'stop', id:'st1' },
-  { type:'kin', acId:'ac1', kinId:'kin1' },
-  { type:'stop', id:'st2' },
-  { type:'kin', acId:'ac2', kinId:'kin4' },
-  { type:'stop', id:'st3' },
-  { type:'kin', acId:'ac1', kinId:'kin2' },
-  { type:'stop', id:'st4' },
-  { type:'kin', acId:'ac3', kinId:'kin5' },
-  { type:'stop', id:'st1' },
-  { type:'kin', acId:'ac3', kinId:'kin6' },
+  { type:'route', id:'rt1' },
+  { type:'pickup', id:'pk1' },
+  { type:'route', id:'rt2' },
+  { type:'pickup', id:'pk4' },
+  { type:'route', id:'rt3' },
+  { type:'pickup', id:'pk2' },
+  { type:'route', id:'rt4' },
+  { type:'pickup', id:'pk5' },
+  { type:'route', id:'rt1' },
+  { type:'pickup', id:'pk3' },
 ];
 
-const _extraNames = ['권○○','신○○','류○○','안○○','황○○','임○○'];
+const _extraNames  = ['권○○','신○○','류○○','안○○','황○○','임○○'];
 const _extraColors = ['#0EA5E9','#D946EF','#84CC16','#FB7185','#38BDF8','#A3E635'];
 
-function _lsGetStop(id) { return _LS_DATA.find(s => s.id === id); }
-function _lsGetAc(id) { return _LA_DATA.find(a => a.id === id); }
-function _lsGetKin(ac, kinId) { return ac.kindergartens.find(k => k.id === kinId); }
+function _lsGetRoute(id) { return _LS_DATA.find(r => r.id === id); }
+function _lsGetPickup(id) { return _LP_DATA.find(p => p.id === id); }
 
-function _lsStopClass(stop) {
-  if (stop.complete) return 'complete';
-  if (stop.count >= stop.max - 1) return 'near';
+function _lsRouteClass(r) {
+  if (r.complete) return 'complete';
+  if (r.count >= r.max - 1) return 'near';
   return 'gathering';
 }
 
 function _lsRenderMap() {
   const area = document.getElementById('liveMapArea');
   if (!area) return;
-  const existing = area.querySelectorAll('.live-map-dot');
-  existing.forEach(d => d.remove());
-  _LS_DATA.forEach(stop => {
-    const cls = _lsStopClass(stop);
+  area.querySelectorAll('.live-map-dot').forEach(d => d.remove());
+  _LS_DATA.forEach(r => {
+    const cls = _lsRouteClass(r);
     const dot = document.createElement('div');
     dot.className = 'live-map-dot';
-    dot.id = 'lsMapDot-' + stop.id;
-    dot.style.left = stop.x + '%';
-    dot.style.top = stop.y + '%';
-    dot.innerHTML = `<div class="live-dot-ring ${cls}">${stop.count}</div><div class="live-dot-label">${stop.name}</div>`;
+    dot.id = 'lsMapDot-' + r.id;
+    dot.style.left = r.x + '%';
+    dot.style.top  = r.y + '%';
+    // Show academy icon + count on map
+    dot.innerHTML = `
+      <div class="live-dot-ring ${cls}" style="background:${r.complete?'#10B981':r.acColor}">${r.complete?'✓':r.count}</div>
+      <div class="live-dot-label">${r.acIcon} ${r.acName.split(' ')[0]}</div>`;
     area.appendChild(dot);
   });
 }
@@ -3183,65 +3247,127 @@ function _lsRenderMap() {
 function _lsRenderStopGrid() {
   const grid = document.getElementById('liveStopGrid');
   if (!grid) return;
-  grid.innerHTML = _LS_DATA.map(stop => {
-    const cls = _lsStopClass(stop);
-    const avatars = Array.from({length: stop.max}, (_, i) => {
-      if (i < stop.names.length) {
-        return `<div class="live-avatar" style="background:${stop.avatarColors[i]}">${stop.names[i][0]}</div>`;
-      }
-      return `<div class="live-avatar empty"></div>`;
-    }).join('');
-    const barW = Math.round((stop.count / stop.max) * 100);
-    const actionHtml = stop.complete
-      ? `<div class="live-complete-badge">✅ 정류장 생성 완료! 셔틀 운행 시작</div>`
-      : `<button class="live-join-btn">+ 나도 신청하기</button>`;
-    return `<div class="live-stop-card ${cls}" id="lsCard-${stop.id}">
-      <div class="live-stop-name">${stop.name}</div>
-      <div class="live-stop-area">${stop.area}</div>
-      <div class="live-avatars">${avatars}</div>
-      <div class="live-bar-wrap"><div class="live-bar" style="width:${barW}%"></div></div>
-      <div class="live-bar-label">${stop.count}/${stop.max}명 참여 중</div>
-      ${actionHtml}
-    </div>`;
+  grid.innerHTML = _LS_DATA.map(r => {
+    const cls  = _lsRouteClass(r);
+    const barW = Math.round((r.count / r.max) * 100);
+    const remain = r.max - r.count;
+    const avatars = Array.from({length: r.max}, (_, i) =>
+      i < r.names.length
+        ? `<div class="live-avatar" style="background:${r.avatarColors[i]}">${r.names[i][0]}</div>`
+        : `<div class="live-avatar empty"></div>`
+    ).join('');
+    const nearBadge = (!r.complete && r.count >= r.max - 1)
+      ? `<span class="live-near-pill">D-1명!</span>` : '';
+    const action = r.complete
+      ? `<div class="live-complete-badge">
+           ✅ <strong>${r.acName}</strong>이 정류장을 생성했어요! 셔틀 운행 시작
+         </div>`
+      : `<div class="live-join-hint">
+           ${remain}명 더 모이면 <strong>${r.acName}</strong>이 직접 정류장을 만들어요
+         </div>
+         <button class="live-join-btn">+ 탑승 신청하기</button>`;
+    return `
+      <div class="live-stop-card ${cls}" id="lsCard-${r.id}">
+        <div class="live-stop-header">
+          <span class="live-stop-acicon" style="background:${r.acBg}">${r.acIcon}</span>
+          <div class="live-stop-acinfo">
+            <div class="live-stop-acname">${r.acName}</div>
+            <div class="live-stop-dir">🚌 ${r.dir}</div>
+          </div>
+          ${nearBadge}
+        </div>
+        <div class="live-avatars">${avatars}</div>
+        <div class="live-progress-row">
+          <div class="live-bar-wrap"><div class="live-bar" style="width:${barW}%"></div></div>
+          <div class="live-bar-label">${r.count}/${r.max}명</div>
+        </div>
+        ${action}
+      </div>`;
   }).join('');
 }
 
 function _lsRenderAcademy() {
   const grid = document.getElementById('liveAcademyGrid');
   if (!grid) return;
-  grid.innerHTML = _LA_DATA.map(ac => {
-    const kinRows = ac.kindergartens.map(kin => {
-      const isDone = kin.complete;
-      const remaining = kin.max - kin.count;
-      const barW = Math.round((kin.count / kin.max) * 100);
-      const badge = isDone
-        ? `<span class="live-kin-badge done">✅ 픽업 확정!</span>`
-        : `<span class="live-kin-badge remaining">D-${remaining}명</span>`;
-      const hint = isDone
-        ? `<div class="live-kin-hint" style="color:#059669;">픽업 차량이 배정됐어요 🚐</div>`
-        : `<div class="live-kin-hint">${remaining}명 더 모이면 ${kin.name}으로 픽업을 보낼 수 있어요</div>`;
-      return `<div class="live-kin-row${isDone ? ' complete' : ''}" id="lsKin-${kin.id}">
+
+  // 학원별로 그룹핑 (셔틀 방향 + 유치원 픽업)
+  const academies = {};
+  _LS_DATA.forEach(r => {
+    if (!academies[r.acName]) academies[r.acName] = { icon:r.acIcon, color:r.acColor, bg:r.acBg, routes:[], pickups:[] };
+    academies[r.acName].routes.push(r);
+  });
+  _LP_DATA.forEach(p => {
+    if (!academies[p.acName]) academies[p.acName] = { icon:p.acIcon, color:p.acColor, bg:'#F5F5F5', routes:[], pickups:[] };
+    academies[p.acName].pickups.push(p);
+  });
+
+  grid.innerHTML = Object.entries(academies).map(([acName, ac]) => {
+    // 셔틀 방향별 행
+    const routeRows = ac.routes.map(r => {
+      const cls = _lsRouteClass(r);
+      const barW = Math.round((r.count/r.max)*100);
+      const remain = r.max - r.count;
+      const badge = r.complete
+        ? `<span class="live-kin-badge done">✅ 정류장 운영 중</span>`
+        : r.count >= r.max-1
+          ? `<span class="live-kin-badge near">D-1명!</span>`
+          : `<span class="live-kin-badge remaining">D-${remain}명</span>`;
+      const hint = r.complete
+        ? `<div class="live-kin-hint ok">학원이 정류장을 생성했어요 — 셔틀 운행 시작 🚌</div>`
+        : `<div class="live-kin-hint">${remain}명 더 모이면 학원이 이 방향 정류장을 직접 운영해요</div>`;
+      return `<div class="live-kin-row ${cls}" id="lsKin-${r.id}">
         <div class="live-kin-info">
-          <div class="live-kin-name">${kin.name}</div>
-          <div class="live-kin-area">${kin.area}</div>
+          <div class="live-kin-name">🚌 ${r.dir}</div>
           ${hint}
         </div>
         <div class="live-kin-right">
           ${badge}
-          <div class="live-kin-bar-wrap"><div class="live-kin-bar" style="width:${barW}%"></div></div>
-          <div class="live-kin-count">${kin.count}/${kin.max}명</div>
+          <div class="live-kin-bar-wrap"><div class="live-kin-bar ${cls}" style="width:${barW}%"></div></div>
+          <div class="live-kin-count">${r.count}/${r.max}명</div>
         </div>
       </div>`;
     }).join('');
+
+    // 유치원 픽업 행
+    const pickupRows = ac.pickups.map(p => {
+      const isDone = p.complete;
+      const remain = p.max - p.count;
+      const barW = Math.round((p.count/p.max)*100);
+      const badge = isDone
+        ? `<span class="live-kin-badge done">✅ 픽업 확정!</span>`
+        : `<span class="live-kin-badge remaining">D-${remain}명</span>`;
+      const hint = isDone
+        ? `<div class="live-kin-hint ok">학원 차량이 유치원으로 출발해요 🚐</div>`
+        : `<div class="live-kin-hint">${remain}명 더 모이면 ${p.kinName}으로 픽업 차량을 보낼 수 있어요</div>`;
+      return `<div class="live-kin-row ${isDone?'complete':''}" id="lsPk-${p.id}">
+        <div class="live-kin-info">
+          <div class="live-kin-name">🏠 ${p.kinName} <span class="live-kin-area">${p.kinArea}</span></div>
+          ${hint}
+        </div>
+        <div class="live-kin-right">
+          ${badge}
+          <div class="live-kin-bar-wrap"><div class="live-kin-bar ${isDone?'complete':''}" style="width:${barW}%"></div></div>
+          <div class="live-kin-count">${p.count}/${p.max}명</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const shuttleSection = ac.routes.length
+      ? `<div class="live-ac-section-label">🚌 방향별 셔틀 탑승 현황</div>${routeRows}` : '';
+    const pickupSection = ac.pickups.length
+      ? `<div class="live-ac-section-label">🏠 유치원 픽업 현황</div>${pickupRows}` : '';
+    const ownerNote = `<div class="live-ac-owner-note">💡 5명 기준 달성 시 <strong>${acName}</strong>이 직접 정류장을 만들고 운영해요</div>`;
+
     return `<div class="live-academy-card">
       <div class="live-academy-header" style="background:${ac.bg}">
-        <div class="live-academy-icon" style="background:${ac.color}22">${ac.icon}</div>
-        <div>
-          <div class="live-academy-name">${ac.name}</div>
-          <div class="live-academy-sub">${ac.sub}</div>
-        </div>
+        <div class="live-academy-icon" style="color:${ac.color}">${ac.icon}</div>
+        <div class="live-academy-name">${acName}</div>
       </div>
-      ${kinRows}
+      <div class="live-ac-body">
+        ${shuttleSection}
+        ${pickupSection}
+        ${ownerNote}
+      </div>
     </div>`;
   }).join('');
 }
@@ -3258,67 +3384,53 @@ function _lsPrependFeed(icon, text) {
   if (items.length > 8) items[items.length - 1].remove();
 }
 
-function _lsIncrementStop(stopId) {
-  const stop = _lsGetStop(stopId);
-  if (!stop || stop.complete) return;
-  stop.count = Math.min(stop.count + 1, stop.max);
-  const namePool = _extraNames;
-  const colorPool = _extraColors;
-  if (stop.names.length < stop.max) {
-    const idx = stop.names.length % namePool.length;
-    stop.names.push(namePool[idx]);
-    stop.avatarColors.push(colorPool[idx]);
+function _lsIncrementRoute(routeId) {
+  const r = _lsGetRoute(routeId);
+  if (!r || r.complete) return;
+  r.count = Math.min(r.count + 1, r.max);
+  if (r.names.length < r.max) {
+    const i = r.names.length % _extraNames.length;
+    r.names.push(_extraNames[i]); r.avatarColors.push(_extraColors[i]);
   }
-  _lsPrependFeed('🙋', `${stop.area} ${stop.name}에 새 신청이 들어왔어요 (${stop.count}/5명)`);
+  _lsPrependFeed('🙋', `${r.acName} — ${r.dir} 신청 (${r.count}/5명)`);
 
-  // Update map dot
-  const dotEl = document.getElementById('lsMapDot-' + stop.id);
+  // 지도 마커 업데이트
+  const dotEl = document.getElementById('lsMapDot-' + r.id);
   if (dotEl) {
     const ring = dotEl.querySelector('.live-dot-ring');
-    ring.textContent = stop.count;
-    const cls = _lsStopClass(stop);
-    ring.className = 'live-dot-ring ' + cls;
+    ring.textContent = r.count;
+    ring.className = 'live-dot-ring ' + _lsRouteClass(r);
+    ring.style.background = r.complete ? '#10B981' : r.acColor;
   }
+  // 카드 팝 애니메이션
+  const card = document.getElementById('lsCard-' + r.id);
+  if (card) { card.classList.add('cardPop'); setTimeout(() => card.classList.remove('cardPop'), 500); }
 
-  // Card pop
-  const card = document.getElementById('lsCard-' + stop.id);
-  if (card) {
-    card.classList.add('cardPop');
-    setTimeout(() => card.classList.remove('cardPop'), 500);
-  }
-
-  const wasComplete = stop.complete;
-  if (stop.count >= stop.max && !wasComplete) {
-    stop.complete = true;
-    _lsPrependFeed('🎉', `${stop.area} ${stop.name} 정류장이 생성됐어요!`);
-    showToast(`🎉 ${stop.area} ${stop.name} 정류장이 생성됐어요!`);
-    _lsRenderStopGrid();
-    _lsRenderMap();
+  if (r.count >= r.max && !r.complete) {
+    r.complete = true;
+    _lsPrependFeed('🎉', `${r.acName}이 ${r.dir} 정류장을 생성했어요!`);
+    showToast(`🎉 ${r.acName}이 정류장을 생성했어요!`);
+    _lsRenderStopGrid(); _lsRenderMap(); _lsRenderAcademy();
     setTimeout(() => {
-      stop.count = 0; stop.complete = false; stop.names = []; stop.avatarColors = [];
-      _lsRenderStopGrid(); _lsRenderMap();
+      r.count = 0; r.complete = false; r.names = []; r.avatarColors = [];
+      _lsRenderStopGrid(); _lsRenderMap(); _lsRenderAcademy();
     }, 8000);
   } else {
-    _lsRenderStopGrid();
+    _lsRenderStopGrid(); _lsRenderAcademy();
   }
 }
 
-function _lsIncrementKin(acId, kinId) {
-  const ac = _lsGetAc(acId);
-  if (!ac) return;
-  const kin = _lsGetKin(ac, kinId);
-  if (!kin || kin.complete) return;
-  kin.count = Math.min(kin.count + 1, kin.max);
-  _lsPrependFeed('🏠', `${kin.name} 원아가 ${ac.name} 픽업을 신청했어요 (${kin.count}/5명)`);
-  if (kin.count >= kin.max && !kin.complete) {
-    kin.complete = true;
-    _lsPrependFeed('🚐', `${ac.name} → ${kin.name} 픽업 확정!`);
-    showToast(`🚐 ${ac.name} → ${kin.name} 픽업 확정!`);
+function _lsIncrementPickup(pickupId) {
+  const p = _lsGetPickup(pickupId);
+  if (!p || p.complete) return;
+  p.count = Math.min(p.count + 1, p.max);
+  _lsPrependFeed('🏠', `${p.kinName} 원아 ${p.acName} 픽업 신청 (${p.count}/5명)`);
+  if (p.count >= p.max && !p.complete) {
+    p.complete = true;
+    _lsPrependFeed('🚐', `${p.acName} → ${p.kinName} 픽업 확정!`);
+    showToast(`🚐 ${p.acName} → ${p.kinName} 픽업 확정!`);
     _lsRenderAcademy();
-    setTimeout(() => {
-      kin.count = 1; kin.complete = false;
-      _lsRenderAcademy();
-    }, 8000);
+    setTimeout(() => { p.count = 1; p.complete = false; _lsRenderAcademy(); }, 8000);
   } else {
     _lsRenderAcademy();
   }
@@ -3327,25 +3439,21 @@ function _lsIncrementKin(acId, kinId) {
 function _lsSimTick() {
   const step = _lsSimSteps[_lsSimStep % _lsSimSteps.length];
   _lsSimStep++;
-  if (step.type === 'stop') {
-    _lsIncrementStop(step.id);
-  } else {
-    _lsIncrementKin(step.acId, step.kinId);
-  }
+  if (step.type === 'route')  _lsIncrementRoute(step.id);
+  else                        _lsIncrementPickup(step.id);
 }
 
 function _lsInit() {
   _lsRenderMap();
   _lsRenderStopGrid();
   _lsRenderAcademy();
-  // Prepopulate feed (oldest to newest, so newest ends up on top)
-  const seedItems = [
-    ['🔔', '강남구 압구정동에서 새 신청이 들어왔어요 (2/5명)'],
-    ['🔔', '서초구 방배동에서 새 신청이 들어왔어요 (3/5명)'],
-    ['🏠', '햇살유치원 원아가 대치 수학의신 학원 픽업을 신청했어요 (4/5명)'],
-    ['🎉', '강남구 대치동 정류장이 생성됐어요!'],
-  ];
-  seedItems.forEach(([icon, text]) => _lsPrependFeed(icon, text));
+  // seed feed (oldest → newest, 최신이 맨 위)
+  [
+    ['🔔', 'YBM 어학원 — 압구정동 → 학동역 방향 신청 (3/5명)'],
+    ['🔔', '대치 수학의신 학원 — 방배동 → 사당역 방향 신청 (4/5명)'],
+    ['🏠', '햇살유치원 원아 대치 수학의신 학원 픽업 신청 (4/5명)'],
+    ['🎉', '대치 수학의신 학원이 역삼동 → 대치역 정류장을 생성했어요!'],
+  ].forEach(([icon, text]) => _lsPrependFeed(icon, text));
 }
 
 function switchLiveTab(tab) {
