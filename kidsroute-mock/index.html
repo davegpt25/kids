@@ -2646,6 +2646,7 @@ const KAKAO_APP_KEY = '1550b9b3a098d276139c9f66eabb7a64';
 let _toastTimer = null;
 let _tokenClient = null;
 let _demoGoogleFillPending = false;
+let _pendingOAuthFill = null; // redirect 복귀 후 demo form 채우기용
 
 // Map step state
 let _demoRadius = 1000;
@@ -2658,8 +2659,128 @@ const _RADIUS_TO_PX = { 500: 75, 1000: 120, 2000: 158, 3000: 182, 5000: 205 };
 // 카카오맵 레벨: 숫자가 클수록 축소 (1=가장 가까움)
 const _KAKAO_LEVEL = { 500: 4, 1000: 5, 2000: 6, 3000: 7, 5000: 7 };
 
+// ─── 모바일 판별 ───
+function _isMobile() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 1 && window.innerWidth <= 1024);
+}
+
+// ─── 모바일: Google implicit token redirect ───
+function _oauthRedirectGoogle(mode) {
+  sessionStorage.setItem('_oauthMode', 'google_' + (mode || 'login'));
+  const base = location.origin + location.pathname;
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: base,
+    response_type: 'token',
+    scope: 'openid email profile',
+    prompt: 'select_account',
+    state: 'gl'
+  });
+  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+// ─── 모바일: Kakao authorization code redirect ───
+function _oauthRedirectKakao(mode) {
+  sessionStorage.setItem('_oauthMode', 'kakao_' + (mode || 'login'));
+  const base = location.origin + location.pathname;
+  const params = new URLSearchParams({
+    client_id: KAKAO_APP_KEY,
+    redirect_uri: base,
+    response_type: 'code',
+    scope: 'profile_nickname,account_email',
+    state: 'kk'
+  });
+  location.href = 'https://kauth.kakao.com/oauth/authorize?' + params.toString();
+}
+
+// ─── OAuth 리다이렉트 복귀 처리 ───
+async function _handleOAuthCallback() {
+  const hashParams   = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const searchParams = new URLSearchParams(location.search);
+  const accessToken  = hashParams.get('access_token');
+  const code         = searchParams.get('code');
+  const state        = searchParams.get('state') || hashParams.get('state');
+
+  if (!accessToken && !code) return; // 콜백 아님
+
+  const mode = sessionStorage.getItem('_oauthMode') || '';
+  sessionStorage.removeItem('_oauthMode');
+  // URL 정리 (토큰/코드가 히스토리에 남지 않도록)
+  history.replaceState(null, '', location.pathname);
+
+  const isDemo = mode.endsWith('_demo');
+
+  // ── Google token ──
+  if (accessToken && state === 'gl') {
+    try {
+      const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      const user = await r.json();
+      const name  = user.name || user.email?.split('@')[0] || 'Google사용자';
+      const email = user.email || '';
+      if (isDemo) {
+        // demo modal step4(리드폼)로 복귀
+        setTimeout(() => {
+          document.getElementById('demoOverlay').classList.add('open');
+          document.body.style.overflow = 'hidden';
+          _showDemoStep('demoStep4');
+          _fillLeadForm(name, email);
+          showToast('Google 정보를 가져왔어요');
+        }, 300);
+      } else {
+        onLoginSuccess(name, email, '#4285F4', 'google');
+      }
+    } catch(e) { console.error('Google 사용자 정보 오류:', e); }
+    return;
+  }
+
+  // ── Kakao authorization code ──
+  if (code && state === 'kk') {
+    try {
+      const base = location.origin + location.pathname;
+      const tokenResp = await fetch('https://kauth.kakao.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
+        body: new URLSearchParams({
+          grant_type:   'authorization_code',
+          client_id:    KAKAO_APP_KEY,
+          redirect_uri: base,
+          code
+        })
+      });
+      const tokenData = await tokenResp.json();
+      if (!tokenData.access_token) {
+        console.error('카카오 토큰 오류:', tokenData);
+        return;
+      }
+      const meResp = await fetch('https://kapi.kakao.com/v2/user/me', {
+        headers: { Authorization: 'Bearer ' + tokenData.access_token }
+      });
+      const me    = await meResp.json();
+      const name  = me.kakao_account?.profile?.nickname || '카카오사용자';
+      const email = me.kakao_account?.email || '';
+      if (isDemo) {
+        setTimeout(() => {
+          document.getElementById('demoOverlay').classList.add('open');
+          document.body.style.overflow = 'hidden';
+          _showDemoStep('demoStep4');
+          _fillLeadForm(name, email);
+          showToast('카카오 정보를 가져왔어요');
+        }, 300);
+      } else {
+        onLoginSuccess(name, email || name + '@kakao.com', '#FEE500', 'kakao');
+      }
+    } catch(e) { console.error('카카오 사용자 정보 오류:', e); }
+    return;
+  }
+}
+
 // ─── 초기화 ───
 window.addEventListener('load', () => {
+  // OAuth 리다이렉트 복귀 처리 (모바일용)
+  _handleOAuthCallback();
   // Google SDK 초기화
   const pollGoogle = setInterval(() => {
     if (typeof google !== 'undefined' && google.accounts) {
@@ -2725,32 +2846,56 @@ function showView(viewId) {
 function selectProvider(provider) {
   if (provider === 'google') {
     const hasClientId = GOOGLE_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
-    if (_tokenClient && hasClientId) {
-      closeGoogleModal(); // 모달 닫고 Google 팝업 띄우기
-      _tokenClient.requestAccessToken({ prompt: 'select_account' });
+    if (hasClientId) {
+      if (_isMobile()) {
+        // 모바일: 팝업 차단 우회 → redirect 방식
+        closeGoogleModal();
+        _oauthRedirectGoogle('login');
+      } else if (_tokenClient) {
+        // 데스크톱: gesture chain 유지를 위해 OAuth 먼저 호출 후 모달 닫기
+        _tokenClient.requestAccessToken({ prompt: 'select_account' });
+        closeGoogleModal();
+      } else {
+        showView('gViewPicker'); // SDK 로드 전 fallback
+      }
     } else {
-      showView('gViewPicker'); // fallback 목업 모달
+      showView('gViewPicker'); // 앱키 미설정 → 목업 모달
     }
   } else if (provider === 'kakao') {
     const hasKakaoKey = KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE';
-    if (typeof Kakao !== 'undefined' && Kakao.isInitialized() && hasKakaoKey) {
-      closeGoogleModal();
-      Kakao.Auth.login({
-        success: () => {
-          Kakao.API.request({
-            url: '/v2/user/me',
-            success: (res) => {
-              const name = res.kakao_account?.profile?.nickname || '카카오사용자';
-              const email = res.kakao_account?.email || name + '@kakao.com';
-              onLoginSuccess(name, email, '#FEE500', 'kakao');
-            },
-            fail: (err) => console.error('카카오 사용자 정보 오류:', err)
-          });
-        },
-        fail: (err) => console.error('카카오 로그인 실패:', err)
-      });
+    if (hasKakaoKey) {
+      if (_isMobile()) {
+        // 모바일: redirect 방식
+        closeGoogleModal();
+        _oauthRedirectKakao('login');
+      } else if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
+        // 데스크톱: popup 방식
+        Kakao.Auth.login({
+          success: () => {
+            Kakao.API.request({
+              url: '/v2/user/me',
+              success: (res) => {
+                const name  = res.kakao_account?.profile?.nickname || '카카오사용자';
+                const email = res.kakao_account?.email || name + '@kakao.com';
+                closeGoogleModal();
+                onLoginSuccess(name, email, '#FEE500', 'kakao');
+              },
+              fail: (err) => console.error('카카오 사용자 정보 오류:', err)
+            });
+          },
+          fail: (err) => console.error('카카오 로그인 실패:', err)
+        });
+      } else {
+        // Kakao SDK 로드 전 fallback
+        showView('gViewLoading');
+        document.getElementById('gLoadingText').textContent = '카카오 로그인 중...';
+        setTimeout(() => {
+          closeGoogleModal();
+          onLoginSuccess('카카오사용자', 'kakao_user@kakao.com', '#FEE500', 'kakao');
+        }, 1400);
+      }
     } else {
-      // Kakao 앱키 미설정 → 목업 fallback
+      // 앱키 미설정 → 목업 fallback
       showView('gViewLoading');
       document.getElementById('gLoadingText').textContent = '카카오 로그인 중...';
       setTimeout(() => {
@@ -3093,9 +3238,17 @@ function _fillLeadForm(name, email) {
 
 function demoFillFromGoogle() {
   const hasClientId = GOOGLE_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
-  if (_tokenClient && hasClientId) {
-    _demoGoogleFillPending = true;
-    _tokenClient.requestAccessToken({ prompt: 'select_account' });
+  if (hasClientId) {
+    if (_isMobile()) {
+      // 모바일: demo step4로 복귀하도록 mode=google_demo
+      _oauthRedirectGoogle('demo');
+    } else if (_tokenClient) {
+      _demoGoogleFillPending = true;
+      _tokenClient.requestAccessToken({ prompt: 'select_account' });
+    } else {
+      _fillLeadForm('김지수', 'jisu.kim@gmail.com');
+      showToast('Google 정보를 가져왔어요');
+    }
   } else {
     _fillLeadForm('김지수', 'jisu.kim@gmail.com');
     showToast('Google 정보를 가져왔어요');
@@ -3104,22 +3257,30 @@ function demoFillFromGoogle() {
 
 function demoFillFromKakao() {
   const hasKakaoKey = KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE';
-  if (typeof Kakao !== 'undefined' && Kakao.isInitialized() && hasKakaoKey) {
-    Kakao.Auth.login({
-      success: () => {
-        Kakao.API.request({
-          url: '/v2/user/me',
-          success: (res) => {
-            const name  = res.kakao_account?.profile?.nickname || '카카오사용자';
-            const email = res.kakao_account?.email || '';
-            _fillLeadForm(name, email);
-            showToast('카카오 정보를 가져왔어요');
-          },
-          fail: () => showToast('카카오 정보를 불러올 수 없어요')
-        });
-      },
-      fail: () => showToast('카카오 로그인에 실패했어요')
-    });
+  if (hasKakaoKey) {
+    if (_isMobile()) {
+      // 모바일: demo step4로 복귀하도록 mode=kakao_demo
+      _oauthRedirectKakao('demo');
+    } else if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
+      Kakao.Auth.login({
+        success: () => {
+          Kakao.API.request({
+            url: '/v2/user/me',
+            success: (res) => {
+              const name  = res.kakao_account?.profile?.nickname || '카카오사용자';
+              const email = res.kakao_account?.email || '';
+              _fillLeadForm(name, email);
+              showToast('카카오 정보를 가져왔어요');
+            },
+            fail: () => showToast('카카오 정보를 불러올 수 없어요')
+          });
+        },
+        fail: () => showToast('카카오 로그인에 실패했어요')
+      });
+    } else {
+      _fillLeadForm('카카오사용자', '');
+      showToast('카카오 정보를 가져왔어요');
+    }
   } else {
     _fillLeadForm('카카오사용자', '');
     showToast('카카오 정보를 가져왔어요');
