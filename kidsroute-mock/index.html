@@ -690,6 +690,177 @@
   transform: translateY(0);
 }
 
+/* ─── DEMO MODAL ─── */
+.demo-overlay {
+  display: none; position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; padding: 20px;
+  animation: gOverlayIn .2s ease;
+}
+.demo-overlay.open { display: flex; }
+
+.demo-modal {
+  background: #fff; border-radius: 28px; width: 100%; max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  overflow: hidden; animation: gModalIn .3s cubic-bezier(0.34,1.56,0.64,1);
+  max-height: 90vh; overflow-y: auto;
+}
+
+/* Step 1: 타이핑 데모 */
+.demo-step { display: none; padding: 36px 32px 28px; }
+.demo-step.active { display: block; }
+
+.demo-title {
+  font-size: 22px; font-weight: 800; color: var(--gray-900);
+  letter-spacing: -0.5px; margin-bottom: 6px; line-height: 1.3;
+}
+.demo-sub {
+  font-size: 14px; color: var(--text-sub); margin-bottom: 24px; line-height: 1.6;
+}
+
+.demo-input-wrap {
+  position: relative;
+  background: var(--primary-light); border: 2px solid #FED7AA;
+  border-radius: 16px; padding: 20px; min-height: 120px;
+  margin-bottom: 16px;
+}
+.demo-input-wrap.active-query { border-color: var(--primary); }
+.demo-typewriter {
+  font-size: 17px; font-weight: 500; color: var(--gray-900);
+  line-height: 1.6; min-height: 80px;
+  word-break: keep-all;
+}
+.demo-cursor {
+  display: inline-block; width: 2px; height: 1.1em;
+  background: var(--primary); margin-left: 2px;
+  vertical-align: text-bottom; animation: blink .7s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.demo-hint { font-size: 12px; color: var(--text-muted); text-align: right; margin-top: 8px; }
+
+.demo-query-pills {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+}
+.demo-pill {
+  background: #fff; border: 1.5px solid var(--gray-300);
+  border-radius: 100px; padding: 7px 14px; font-size: 13px;
+  color: var(--text-sub); cursor: pointer; transition: all .15s;
+  white-space: nowrap;
+}
+.demo-pill:hover, .demo-pill.selected {
+  background: var(--primary-light); border-color: var(--primary);
+  color: var(--primary); font-weight: 600;
+}
+
+.demo-start-btn {
+  width: 100%; padding: 16px; background: var(--primary); color: #fff;
+  border: none; border-radius: 14px; font-size: 16px; font-weight: 700;
+  cursor: pointer; transition: all .2s; box-shadow: 0 4px 16px rgba(249,115,22,0.3);
+}
+.demo-start-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.demo-start-btn:disabled { background: var(--gray-300); box-shadow: none; transform: none; cursor: default; }
+
+/* Step 2: 분석 중 */
+.demo-analyzing {
+  text-align: center; padding: 48px 32px;
+}
+.demo-analyzing-icon { font-size: 48px; margin-bottom: 16px; animation: pulse 1.5s ease infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+.demo-analyzing-title { font-size: 20px; font-weight: 800; color: var(--gray-900); margin-bottom: 8px; }
+.demo-analyzing-sub { font-size: 14px; color: var(--text-sub); }
+.demo-progress {
+  width: 100%; height: 4px; background: var(--gray-100);
+  border-radius: 2px; margin: 20px 0; overflow: hidden;
+}
+.demo-progress-bar {
+  height: 100%; background: linear-gradient(90deg, var(--primary), #FB923C);
+  border-radius: 2px; width: 0%; transition: width .3s ease;
+  animation: progress 2.5s ease forwards;
+}
+@keyframes progress { to { width: 100%; } }
+
+/* Step 3: 리드 폼 */
+.demo-form-header { margin-bottom: 24px; }
+.demo-form-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #DCFCE7; color: #16A34A;
+  border-radius: 100px; padding: 5px 12px; font-size: 12px; font-weight: 700;
+  margin-bottom: 12px;
+}
+.demo-form-group { margin-bottom: 16px; }
+.demo-form-group label {
+  display: block; font-size: 13px; font-weight: 600; color: var(--gray-700);
+  margin-bottom: 6px;
+}
+.demo-form-group label span { color: var(--primary); margin-left: 2px; font-size: 11px; }
+.demo-form-group input, .demo-form-group select {
+  width: 100%; padding: 13px 16px; border: 1.5px solid var(--gray-300);
+  border-radius: 12px; font-size: 15px; font-family: inherit;
+  transition: border-color .2s; outline: none; background: #fff;
+  color: var(--gray-900);
+}
+.demo-form-group input:focus, .demo-form-group select:focus {
+  border-color: var(--primary);
+}
+.demo-form-group input.auto-filled { background: var(--primary-light); }
+
+.demo-social-fill {
+  display: flex; gap: 8px; margin-bottom: 16px;
+}
+.demo-social-btn {
+  flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid var(--gray-300);
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: #fff;
+}
+.demo-social-btn:hover { transform: translateY(-1px); }
+.demo-social-google:hover { border-color: #4285F4; color: #4285F4; }
+.demo-social-kakao { background: #FEE500; border-color: #FEE500; color: #3C1E1E; }
+.demo-social-kakao:hover { background: #F5DC00; border-color: #F5DC00; }
+
+.demo-submit-btn {
+  width: 100%; padding: 16px; background: var(--primary); color: #fff;
+  border: none; border-radius: 14px; font-size: 16px; font-weight: 700;
+  cursor: pointer; transition: all .2s; box-shadow: 0 4px 16px rgba(249,115,22,0.3);
+  margin-top: 8px;
+}
+.demo-submit-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+.demo-privacy {
+  font-size: 11px; color: var(--text-muted); text-align: center;
+  margin-top: 12px; line-height: 1.6;
+}
+
+/* Step 4: 완료 */
+.demo-success {
+  text-align: center; padding: 48px 32px;
+}
+.demo-success-icon { font-size: 56px; margin-bottom: 16px; }
+.demo-success-title { font-size: 22px; font-weight: 800; color: var(--gray-900); margin-bottom: 8px; }
+.demo-success-sub { font-size: 15px; color: var(--text-sub); line-height: 1.7; margin-bottom: 24px; }
+.demo-close-btn {
+  padding: 13px 32px; background: var(--primary); color: #fff;
+  border: none; border-radius: 100px; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: background .2s;
+}
+.demo-close-btn:hover { background: var(--primary-dark); }
+
+.demo-modal-close {
+  position: absolute; top: 16px; right: 20px;
+  background: none; border: none; font-size: 20px; cursor: pointer;
+  color: var(--text-muted); padding: 4px; border-radius: 6px;
+  transition: background .15s; z-index: 1;
+}
+.demo-modal-close:hover { background: var(--gray-100); }
+
+@media (max-width: 480px) {
+  .demo-modal { border-radius: 20px; }
+  .demo-step { padding: 28px 20px 20px; }
+  .demo-title { font-size: 19px; }
+  .demo-typewriter { font-size: 15px; }
+}
+
 /* ─── NAV USER STATE (after login) ─── */
 .nav-user {
   display: none;
@@ -928,8 +1099,8 @@
     <h1><em>3초면 완성되는</em><br>우리 아이<br>학원 스케줄</h1>
     <p>GPS 반경 내 학원을 자동으로 찾아주고,<br>시간 충돌 없는 최적 조합을 추천해요.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="openGoogleLogin()">🍎 App Store 사전예약</button>
-      <button class="btn-secondary" onclick="document.getElementById('howto').scrollIntoView({behavior:'smooth'})">이용방법 보기</button>
+      <button class="btn-primary" onclick="openDemoModal()">✨ 무료로 체험하기</button>
+      <button class="btn-secondary" onclick="openGoogleLogin()">🍎 사전예약</button>
     </div>
     <div class="hero-stats">
       <div class="stat-item">
@@ -1680,6 +1851,95 @@
   </div>
 </section>
 
+<!-- 데모 + 리드캡처 모달 -->
+<div class="demo-overlay" id="demoOverlay" onclick="handleDemoOverlayClick(event)">
+  <div class="demo-modal" style="position:relative">
+    <button class="demo-modal-close" onclick="closeDemoModal()">✕</button>
+
+    <!-- Step 1: 타이핑 데모 -->
+    <div class="demo-step active" id="demoStep1">
+      <div class="demo-title">키즈루트에게 물어보세요 🗺️</div>
+      <div class="demo-sub">아이 학원 스케줄, 이렇게 고민하고 계신가요?<br>예시를 클릭하거나 출시 알림을 신청해보세요.</div>
+      <div class="demo-input-wrap" id="demoInputWrap">
+        <div class="demo-typewriter" id="demoTypewriter"></div>
+        <span class="demo-cursor"></span>
+        <div class="demo-hint">예시 클릭 또는 직접 입력</div>
+      </div>
+      <div class="demo-query-pills" id="demoPills">
+        <div class="demo-pill" onclick="selectPill(this, '강남 수학 학원 1km 반경 추천해줘')">📍 강남 수학 학원 추천</div>
+        <div class="demo-pill" onclick="selectPill(this, '월수금 저녁 6시 이후 영어+피아노 조합')">📅 시간대별 조합 추천</div>
+        <div class="demo-pill" onclick="selectPill(this, '초등 3학년 시간 안 겹치는 학원 3개')">🎯 충돌 없는 스케줄</div>
+        <div class="demo-pill" onclick="selectPill(this, '우리 동네 태권도 최적 시간대')">🥋 반경 내 탐색</div>
+        <div class="demo-pill" onclick="selectPill(this, '수학·영어·미술 최적 조합 만들어줘')">✨ 과목 조합 최적화</div>
+      </div>
+      <button class="demo-start-btn" id="demoStartBtn" onclick="startDemoAnalysis()">출시 알림 신청하기 →</button>
+    </div>
+
+    <!-- Step 2: 분석 중 -->
+    <div class="demo-step" id="demoStep2">
+      <div class="demo-analyzing">
+        <div class="demo-analyzing-icon">🔍</div>
+        <div class="demo-analyzing-title">키즈루트가 분석 중이에요</div>
+        <div class="demo-analyzing-sub" id="demoAnalyzingText">주변 학원 데이터를 탐색하고 있어요...</div>
+        <div class="demo-progress"><div class="demo-progress-bar" id="demoProgressBar"></div></div>
+      </div>
+    </div>
+
+    <!-- Step 3: 리드 폼 -->
+    <div class="demo-step" id="demoStep3">
+      <div class="demo-form-badge">🎉 분석 완료</div>
+      <div class="demo-title">결과를 이메일로 받아보세요</div>
+      <div class="demo-sub">출시 시 맞춤 결과와 얼리버드 혜택을<br>가장 먼저 전달드릴게요.</div>
+
+      <!-- 소셜 자동입력 버튼 -->
+      <div id="demoSocialSection">
+        <div class="demo-social-fill">
+          <button class="demo-social-btn demo-social-google" onclick="demoFillFromGoogle()">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Google 정보 가져오기
+          </button>
+          <button class="demo-social-btn demo-social-kakao" onclick="demoFillFromKakao()">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.72 2 11.3c0 2.94 1.87 5.52 4.7 7.02L5.6 22l4.56-2.98c.59.08 1.2.13 1.84.13 5.52 0 10-3.72 10-8.3C22 6.72 17.52 3 12 3z" fill="#3C1E1E"/></svg>
+            카카오 정보 가져오기
+          </button>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--text-muted);margin-bottom:16px;">또는 직접 입력</div>
+      </div>
+
+      <div class="demo-form-group">
+        <label>이메일 주소 <span>필수</span></label>
+        <input type="email" id="leadEmail" placeholder="your@email.com">
+      </div>
+      <div class="demo-form-group">
+        <label>성함 <span>선택</span></label>
+        <input type="text" id="leadName" placeholder="홍길동">
+      </div>
+      <div class="demo-form-group">
+        <label>자녀 나이 <span>선택</span></label>
+        <select id="leadAge">
+          <option value="">선택해주세요</option>
+          <option value="5-7">5~7세 (유치원)</option>
+          <option value="8-10">8~10세 (초등 1-3학년)</option>
+          <option value="11-13">11~13세 (초등 4-6학년)</option>
+          <option value="14-16">14~16세 (중학교)</option>
+        </select>
+      </div>
+      <button class="demo-submit-btn" onclick="submitLeadForm()">출시 알림 신청 완료 🎉</button>
+      <div class="demo-privacy">입력하신 정보는 출시 알림 발송 목적으로만 사용되며,<br>언제든지 수신 거부할 수 있습니다.</div>
+    </div>
+
+    <!-- Step 4: 완료 -->
+    <div class="demo-step" id="demoStep4">
+      <div class="demo-success">
+        <div class="demo-success-icon">🎊</div>
+        <div class="demo-success-title">신청이 완료됐어요!</div>
+        <div class="demo-success-sub" id="demoSuccessMsg">출시 시 가장 먼저 알려드릴게요.<br>얼리버드 3개월 무료 혜택도 함께 드립니다!</div>
+        <button class="demo-close-btn" onclick="closeDemoModal()">확인</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 로그인 모달 -->
 <div class="g-overlay" id="gOverlay" onclick="handleOverlayClick(event)">
   <div class="g-modal" id="gModal">
@@ -1790,10 +2050,11 @@
 const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com';
 // Kakao: https://developers.kakao.com/ → 내 애플리케이션 → JavaScript 키
 // ⚠️ 아래에 카카오 앱의 JavaScript 키를 입력하세요
-const KAKAO_APP_KEY = 'YOUR_KAKAO_APP_KEY_HERE';
+const KAKAO_APP_KEY = '1550b9b3a098d276139c9f66eabb7a64';
 
 let _toastTimer = null;
 let _tokenClient = null;
+let _demoGoogleFillPending = false;
 
 // ─── 초기화 ───
 window.addEventListener('load', () => {
@@ -1811,7 +2072,14 @@ window.addEventListener('load', () => {
               headers: { Authorization: 'Bearer ' + res.access_token }
             });
             const user = await r.json();
-            onLoginSuccess(user.name || user.email.split('@')[0], user.email, '#4285F4', 'google');
+            if (_demoGoogleFillPending) {
+              // Demo modal 리드 폼 자동입력 모드
+              _demoGoogleFillPending = false;
+              _fillLeadForm(user.name || user.email.split('@')[0], user.email);
+              showToast('Google 정보를 가져왔어요');
+            } else {
+              onLoginSuccess(user.name || user.email.split('@')[0], user.email, '#4285F4', 'google');
+            }
           } catch(e) { console.error('Google 사용자 정보 오류:', e); }
         }
       });
@@ -1936,6 +2204,214 @@ function showToast(msg) {
 
 function showUserMenu() {
   showToast('로그인 상태입니다. 출시 시 알림을 드릴게요!');
+}
+
+// ─── Demo Modal ───
+const _demoQueries = [
+  '강남 수학 학원 1km 반경 추천해줘',
+  '월수금 저녁 6시 이후 영어+피아노 조합',
+  '초등 3학년 시간 안 겹치는 학원 3개',
+  '우리 동네 태권도 최적 시간대',
+  '수학·영어·미술 최적 조합 만들어줘'
+];
+let _demoQueryIdx = 0;
+let _demoCharIdx = 0;
+let _demoErasing = false;
+let _demoAutoTimer = null;
+
+function openDemoModal() {
+  document.getElementById('demoOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  _showDemoStep('demoStep1');
+  document.querySelectorAll('.demo-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('demoTypewriter').textContent = '';
+  _demoQueryIdx = 0;
+  _demoCharIdx = 0;
+  _demoErasing = false;
+  _startTypewriterCycle();
+}
+
+function closeDemoModal() {
+  document.getElementById('demoOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  _stopTypewriter();
+}
+
+function handleDemoOverlayClick(e) {
+  if (e.target === document.getElementById('demoOverlay')) closeDemoModal();
+}
+
+function _showDemoStep(stepId) {
+  ['demoStep1','demoStep2','demoStep3','demoStep4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const target = document.getElementById(stepId);
+  if (target) target.classList.add('active');
+}
+
+// ─── Typewriter auto-cycle ───
+function _stopTypewriter() {
+  clearTimeout(_demoAutoTimer);
+  _demoAutoTimer = null;
+}
+
+function _startTypewriterCycle() {
+  _stopTypewriter();
+  _typewriterTick();
+}
+
+function _typewriterTick() {
+  const el = document.getElementById('demoTypewriter');
+  if (!el) return;
+  const query = _demoQueries[_demoQueryIdx];
+  if (_demoErasing) {
+    if (_demoCharIdx > 0) {
+      _demoCharIdx--;
+      el.textContent = query.slice(0, _demoCharIdx);
+      _demoAutoTimer = setTimeout(_typewriterTick, 35);
+    } else {
+      _demoQueryIdx = (_demoQueryIdx + 1) % _demoQueries.length;
+      _demoErasing = false;
+      _demoAutoTimer = setTimeout(_typewriterTick, 450);
+    }
+  } else {
+    if (_demoCharIdx < query.length) {
+      el.textContent = query.slice(0, _demoCharIdx + 1);
+      _demoCharIdx++;
+      _demoAutoTimer = setTimeout(_typewriterTick, 75);
+    } else {
+      _demoErasing = true;
+      _demoAutoTimer = setTimeout(_typewriterTick, 1800);
+    }
+  }
+}
+
+function _showQueryInTypewriter(text) {
+  _stopTypewriter();
+  const el = document.getElementById('demoTypewriter');
+  if (!el) return;
+  let i = 0;
+  el.textContent = '';
+  function tick() {
+    el.textContent = text.slice(0, i + 1);
+    i++;
+    if (i < text.length) {
+      _demoAutoTimer = setTimeout(tick, 55);
+    }
+  }
+  tick();
+}
+
+function selectPill(el, text) {
+  document.querySelectorAll('.demo-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  _showQueryInTypewriter(text);
+}
+
+// ─── Step 2: 분석 중 ───
+function startDemoAnalysis() {
+  _showDemoStep('demoStep2');
+  _stopTypewriter();
+  const bar = document.getElementById('demoProgressBar');
+  const txt = document.getElementById('demoAnalyzingText');
+  const msgs = [
+    '주변 학원 데이터를 탐색하고 있어요...',
+    '시간대 충돌을 확인하고 있어요...',
+    '최적 조합을 계산하고 있어요...',
+    '맞춤 결과를 준비하고 있어요...'
+  ];
+  let progress = 0;
+  let msgIdx = 0;
+  if (bar) bar.style.width = '0%';
+  if (txt) txt.textContent = msgs[0];
+
+  const iv = setInterval(() => {
+    progress += Math.random() * 16 + 7;
+    if (progress > 100) progress = 100;
+    if (bar) bar.style.width = progress + '%';
+    const newIdx = Math.min(Math.floor(progress / 26), msgs.length - 1);
+    if (newIdx !== msgIdx && txt) {
+      msgIdx = newIdx;
+      txt.textContent = msgs[msgIdx];
+    }
+    if (progress >= 100) {
+      clearInterval(iv);
+      // Reset lead form
+      ['leadEmail','leadName'].forEach(id => { const f = document.getElementById(id); if(f) f.value=''; });
+      const sel = document.getElementById('leadAge');
+      if (sel) sel.selectedIndex = 0;
+      setTimeout(() => _showDemoStep('demoStep3'), 400);
+    }
+  }, 220);
+}
+
+// ─── Step 3: 리드 폼 ───
+function _fillLeadForm(name, email) {
+  const emailEl = document.getElementById('leadEmail');
+  const nameEl  = document.getElementById('leadName');
+  if (email && emailEl) emailEl.value = email;
+  if (name  && nameEl)  nameEl.value  = name;
+}
+
+function demoFillFromGoogle() {
+  const hasClientId = GOOGLE_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
+  if (_tokenClient && hasClientId) {
+    _demoGoogleFillPending = true;
+    _tokenClient.requestAccessToken({ prompt: 'select_account' });
+  } else {
+    _fillLeadForm('김지수', 'jisu.kim@gmail.com');
+    showToast('Google 정보를 가져왔어요');
+  }
+}
+
+function demoFillFromKakao() {
+  const hasKakaoKey = KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE';
+  if (typeof Kakao !== 'undefined' && Kakao.isInitialized() && hasKakaoKey) {
+    Kakao.Auth.login({
+      success: () => {
+        Kakao.API.request({
+          url: '/v2/user/me',
+          success: (res) => {
+            const name  = res.kakao_account?.profile?.nickname || '카카오사용자';
+            const email = res.kakao_account?.email || '';
+            _fillLeadForm(name, email);
+            showToast('카카오 정보를 가져왔어요');
+          },
+          fail: () => showToast('카카오 정보를 불러올 수 없어요')
+        });
+      },
+      fail: () => showToast('카카오 로그인에 실패했어요')
+    });
+  } else {
+    _fillLeadForm('카카오사용자', '');
+    showToast('카카오 정보를 가져왔어요');
+  }
+}
+
+function submitLeadForm() {
+  const emailEl = document.getElementById('leadEmail');
+  const email = emailEl ? emailEl.value.trim() : '';
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    if (emailEl) {
+      emailEl.focus();
+      emailEl.style.borderColor = 'var(--red)';
+      emailEl.style.boxShadow = '0 0 0 3px rgba(239,68,68,.15)';
+      setTimeout(() => {
+        emailEl.style.borderColor = '';
+        emailEl.style.boxShadow = '';
+      }, 2200);
+    }
+    showToast('이메일 주소를 올바르게 입력해 주세요');
+    return;
+  }
+  const msg = document.getElementById('demoSuccessMsg');
+  if (msg) {
+    msg.innerHTML =
+      '<strong>' + email + '</strong>으로<br>출시 알림을 보내드릴게요! 🎉<br>' +
+      '<span style="font-size:13px;color:var(--text-sub);display:block;margin-top:6px">얼리버드 3개월 무료 혜택도 함께 드립니다.</span>';
+  }
+  _showDemoStep('demoStep4');
 }
 
 // ─── Hero phone navigation ───
