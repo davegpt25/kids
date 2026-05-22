@@ -1018,6 +1018,288 @@
   .demo-service-name { font-size: 13px; }
 }
 
+/* ─── LIVE STOP CREATION SECTION ─── */
+.live-section {
+  max-width: 960px; margin: 0 auto; padding: 80px 24px; text-align: center;
+}
+.live-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #FEF2F2; color: #DC2626;
+  border: 1.5px solid #FECACA; border-radius: 100px;
+  padding: 5px 14px; font-size: 12px; font-weight: 700;
+  margin-bottom: 20px; letter-spacing: 0.3px;
+}
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #EF4444; flex-shrink: 0;
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+.live-section h2 {
+  font-size: clamp(26px, 4vw, 40px); font-weight: 800;
+  color: var(--text-main); letter-spacing: -1px; margin-bottom: 14px;
+}
+.live-section .live-subtitle {
+  font-size: 16px; color: var(--text-sub); line-height: 1.7;
+  max-width: 600px; margin: 0 auto 36px;
+}
+.live-tabs {
+  display: inline-flex; gap: 6px; background: var(--gray-100);
+  border-radius: 100px; padding: 5px; margin-bottom: 32px;
+}
+.live-tab {
+  padding: 9px 22px; border-radius: 100px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: var(--text-sub);
+  background: transparent; transition: all .2s;
+}
+.live-tab.active {
+  background: #fff; color: var(--text-main);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+.live-tab-content { display: none; text-align: left; }
+.live-tab-content.active { display: block; }
+
+/* Map */
+.live-map-area {
+  position: relative; height: 220px; border-radius: 16px;
+  overflow: hidden; border: 1.5px solid var(--border);
+  margin-bottom: 24px;
+  background:
+    linear-gradient(rgba(200,195,185,0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,195,185,0.5) 1px, transparent 1px),
+    linear-gradient(rgba(185,178,165,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(185,178,165,0.3) 1px, transparent 1px),
+    #ede8dc;
+  background-size: 48px 48px, 48px 48px, 12px 12px, 12px 12px;
+}
+.live-map-area::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 110px 70px at 22% 28%, rgba(185,210,185,0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 90px 55px at 72% 65%, rgba(195,215,235,0.5) 0%, transparent 70%),
+    radial-gradient(ellipse 65px 40px at 48% 52%, rgba(185,210,185,0.4) 0%, transparent 70%);
+}
+.live-map-area::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(transparent 44%, #d8d0c4 44%, #d8d0c4 46%, transparent 46%),
+    linear-gradient(90deg, transparent 58%, #d8d0c4 58%, #d8d0c4 60%, transparent 60%);
+}
+.live-map-dot {
+  position: absolute; z-index: 5;
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.live-dot-ring {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff;
+  position: relative; flex-shrink: 0;
+}
+.live-dot-ring::before {
+  content: ''; position: absolute; inset: -5px; border-radius: 50%;
+  border: 2px solid currentColor; opacity: 0.4;
+}
+.live-dot-ring.gathering {
+  background: #F97316; color: #fff;
+  animation: dotPulseOrange 2s ease-in-out infinite;
+}
+@keyframes dotPulseOrange {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(249,115,22,0); }
+}
+.live-dot-ring.near {
+  background: #D97706; color: #fff;
+  animation: dotPulseAmber 1s ease-in-out infinite;
+}
+@keyframes dotPulseAmber {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.6); }
+  50% { box-shadow: 0 0 0 10px rgba(217,119,6,0); }
+}
+.live-dot-ring.complete {
+  background: #10B981; color: #fff;
+  box-shadow: 0 0 0 4px rgba(16,185,129,0.2);
+}
+.live-dot-label {
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(4px);
+  border-radius: 6px; padding: 2px 7px;
+  font-size: 10px; font-weight: 700; color: var(--text-main);
+  white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,.12);
+}
+
+/* Stop Cards */
+.live-stop-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  margin-bottom: 24px;
+}
+.live-stop-card {
+  background: #fff; border: 1.5px solid var(--gray-300);
+  border-radius: 18px; padding: 16px 18px;
+  transition: box-shadow .2s;
+}
+.live-stop-card.near {
+  border-color: #F59E0B; background: #FFFBEB;
+}
+.live-stop-card.complete {
+  border-color: #10B981;
+  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+}
+.live-stop-card.cardPop {
+  animation: cardPop 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes cardPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.live-stop-name {
+  font-size: 15px; font-weight: 800; color: var(--text-main); margin-bottom: 2px;
+}
+.live-stop-area {
+  font-size: 12px; color: var(--text-sub); margin-bottom: 12px;
+}
+.live-avatars {
+  display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap;
+}
+.live-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.live-avatar.empty {
+  background: transparent; border: 2px dashed var(--gray-300); color: var(--gray-300);
+}
+.live-bar-wrap {
+  height: 6px; background: var(--gray-100); border-radius: 100px;
+  margin-bottom: 8px; overflow: hidden;
+}
+.live-bar {
+  height: 100%; border-radius: 100px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  transition: width 0.5s ease;
+}
+.live-stop-card.near .live-bar {
+  background: linear-gradient(90deg, #F59E0B, #D97706);
+}
+.live-stop-card.complete .live-bar {
+  background: linear-gradient(90deg, #10B981, #059669);
+}
+.live-bar-label {
+  font-size: 12px; color: var(--text-sub); margin-bottom: 10px;
+}
+.live-join-btn {
+  width: 100%; padding: 8px 0; border-radius: 10px;
+  border: 1.5px solid var(--primary); background: transparent;
+  color: var(--primary); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.live-join-btn:hover { background: var(--primary); color: #fff; }
+.live-complete-badge {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: #10B981; color: #fff; border-radius: 10px;
+  padding: 8px 12px; font-size: 12px; font-weight: 700;
+}
+
+/* Feed */
+.live-feed-wrap {
+  background: #fff; border: 1.5px solid var(--gray-300);
+  border-radius: 18px; overflow: hidden;
+}
+.live-feed-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 18px; border-bottom: 1px solid var(--gray-100);
+  font-size: 13px; font-weight: 700; color: var(--text-main);
+}
+.live-feed-list {
+  max-height: 200px; overflow-y: auto;
+  padding: 8px 0;
+}
+.live-feed-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 18px; font-size: 13px; color: var(--text-sub);
+  animation: feedSlide 0.4s ease;
+}
+.live-feed-item .feed-icon { font-size: 16px; flex-shrink: 0; }
+.live-feed-item .feed-text { flex: 1; line-height: 1.4; }
+.live-feed-item .feed-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+@keyframes feedSlide {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Academy Cards */
+.live-academy-card {
+  border-radius: 18px; border: 1.5px solid var(--gray-300);
+  overflow: hidden; margin-bottom: 14px;
+}
+.live-academy-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+}
+.live-academy-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.live-academy-name {
+  font-size: 15px; font-weight: 800; color: var(--text-main);
+}
+.live-academy-sub {
+  font-size: 12px; color: var(--text-sub);
+}
+.live-kin-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px; border-top: 1px solid var(--gray-100);
+  background: #fff; flex-wrap: wrap;
+}
+.live-kin-row.complete { background: #ECFDF5; }
+.live-kin-info { flex: 1; min-width: 0; }
+.live-kin-name {
+  font-size: 13px; font-weight: 700; color: var(--text-main);
+}
+.live-kin-area {
+  font-size: 11px; color: var(--text-sub);
+}
+.live-kin-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.live-kin-badge {
+  display: inline-block; border-radius: 100px;
+  padding: 3px 10px; font-size: 11px; font-weight: 800;
+}
+.live-kin-badge.remaining {
+  background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A;
+}
+.live-kin-badge.done {
+  background: #D1FAE5; color: #059669; border: 1px solid #A7F3D0;
+}
+.live-kin-bar-wrap {
+  width: 80px; height: 5px; background: var(--gray-100);
+  border-radius: 100px; overflow: hidden; margin-top: 2px;
+}
+.live-kin-bar {
+  height: 100%; border-radius: 100px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  transition: width 0.5s ease;
+}
+.live-kin-row.complete .live-kin-bar {
+  background: linear-gradient(90deg, #10B981, #059669);
+}
+.live-kin-count {
+  font-size: 11px; color: var(--text-sub);
+}
+.live-kin-hint {
+  width: 100%; font-size: 11px; color: var(--text-sub);
+  margin-top: 2px; padding-left: 0;
+}
+
+@media (max-width: 640px) {
+  .live-stop-grid { grid-template-columns: 1fr; }
+  .live-map-area { height: 170px; }
+  .live-section { padding: 60px 16px; }
+}
+
 /* ─── NAV USER STATE (after login) ─── */
 .nav-user {
   display: none;
@@ -1916,6 +2198,37 @@
   </div>
 </section>
 
+<!-- LIVE STOP CREATION -->
+<section id="live-stops" style="background:var(--bg-base);">
+  <div class="live-section">
+    <div class="live-badge"><span class="live-dot"></span>LIVE &middot; 실시간 현황</div>
+    <h2>5명이 모이면 정류장이 생겨요</h2>
+    <p class="live-subtitle">아직 정류장이 없어도 괜찮아요. 같은 방향 이웃 5명이 모이면 키즈루트가 자동으로 정류장을 만들고, 학원에도 알려드려요.</p>
+
+    <div class="live-tabs">
+      <button class="live-tab active" onclick="switchLiveTab('parent')">👨‍👩‍👧 학부모 시각</button>
+      <button class="live-tab" onclick="switchLiveTab('academy')">🏫 학원 시각</button>
+    </div>
+
+    <!-- Parent Tab -->
+    <div class="live-tab-content active" id="liveTab-parent">
+      <div class="live-map-area" id="liveMapArea"><!-- dots injected by JS --></div>
+      <div class="live-stop-grid" id="liveStopGrid"><!-- cards injected by JS --></div>
+      <div class="live-feed-wrap">
+        <div class="live-feed-header">
+          <span class="live-dot"></span> 실시간 신청 현황
+        </div>
+        <div class="live-feed-list" id="liveFeedList"><!-- feed items injected by JS --></div>
+      </div>
+    </div>
+
+    <!-- Academy Tab -->
+    <div class="live-tab-content" id="liveTab-academy">
+      <div id="liveAcademyGrid"><!-- academy cards injected by JS --></div>
+    </div>
+  </div>
+</section>
+
 <!-- PRICING -->
 <section class="fade-up" id="pricing">
   <div class="section-badge">요금제</div>
@@ -2786,6 +3099,284 @@ function submitLeadForm() {
   }
   _showDemoStep('demoStep5');
 }
+
+// ─── Live Stop Creation Section ───
+const _LS_DATA = [
+  { id:'st0', name:'대치동', area:'강남구', count:5, max:5, x:65, y:52, complete:true,
+    names:['김○○','이○○','박○○','최○○','정○○'],
+    avatarColors:['#4285F4','#EA4335','#34A853','#F59E0B','#8B5CF6'] },
+  { id:'st1', name:'역삼동', area:'강남구', count:4, max:5, x:55, y:45,
+    names:['김○○','이○○','박○○','최○○'], avatarColors:['#4285F4','#EA4335','#34A853','#F59E0B'] },
+  { id:'st2', name:'방배동', area:'서초구', count:3, max:5, x:28, y:72,
+    names:['장○○','윤○○','정○○'], avatarColors:['#8B5CF6','#EC4899','#06B6D4'] },
+  { id:'st3', name:'압구정동', area:'강남구', count:2, max:5, x:40, y:22,
+    names:['한○○','오○○'], avatarColors:['#14B8A6','#F97316'] },
+  { id:'st4', name:'잠실동', area:'송파구', count:1, max:5, x:76, y:68,
+    names:['강○○'], avatarColors:['#F97316'] },
+];
+
+const _LA_DATA = [
+  { id:'ac1', name:'대치 수학의신 학원', sub:'수학 전문 · 강남구 대치동', icon:'📐', color:'#4285F4', bg:'#EBF2FB',
+    kindergartens: [
+      { id:'kin1', name:'햇살유치원', area:'강남구 역삼동', count:4, max:5 },
+      { id:'kin2', name:'미래어린이집', area:'서초구 방배동', count:3, max:5 },
+    ]},
+  { id:'ac2', name:'YBM 어학원 대치점', sub:'영어 전문 · 강남구 대치동', icon:'🌐', color:'#EA4335', bg:'#FEF2F2',
+    kindergartens: [
+      { id:'kin3', name:'꿈나무유치원', area:'강남구 압구정동', count:5, max:5, complete:true },
+      { id:'kin4', name:'별빛어린이집', area:'송파구 잠실동', count:2, max:5 },
+    ]},
+  { id:'ac3', name:'창의력 미술학원', sub:'미술 · 서초구 방배동', icon:'🎨', color:'#8B5CF6', bg:'#F5F3FF',
+    kindergartens: [
+      { id:'kin5', name:'파랑새유치원', area:'서초구 방배동', count:3, max:5 },
+      { id:'kin6', name:'사랑어린이집', area:'강남구 개포동', count:1, max:5 },
+    ]},
+];
+
+let _lsSimInterval = null;
+let _lsFeedSecs = 1;
+let _lsSimStep = 0;
+
+const _lsSimSteps = [
+  { type:'stop', id:'st1' },
+  { type:'kin', acId:'ac1', kinId:'kin1' },
+  { type:'stop', id:'st2' },
+  { type:'kin', acId:'ac2', kinId:'kin4' },
+  { type:'stop', id:'st3' },
+  { type:'kin', acId:'ac1', kinId:'kin2' },
+  { type:'stop', id:'st4' },
+  { type:'kin', acId:'ac3', kinId:'kin5' },
+  { type:'stop', id:'st1' },
+  { type:'kin', acId:'ac3', kinId:'kin6' },
+];
+
+const _extraNames = ['권○○','신○○','류○○','안○○','황○○','임○○'];
+const _extraColors = ['#0EA5E9','#D946EF','#84CC16','#FB7185','#38BDF8','#A3E635'];
+
+function _lsGetStop(id) { return _LS_DATA.find(s => s.id === id); }
+function _lsGetAc(id) { return _LA_DATA.find(a => a.id === id); }
+function _lsGetKin(ac, kinId) { return ac.kindergartens.find(k => k.id === kinId); }
+
+function _lsStopClass(stop) {
+  if (stop.complete) return 'complete';
+  if (stop.count >= stop.max - 1) return 'near';
+  return 'gathering';
+}
+
+function _lsRenderMap() {
+  const area = document.getElementById('liveMapArea');
+  if (!area) return;
+  const existing = area.querySelectorAll('.live-map-dot');
+  existing.forEach(d => d.remove());
+  _LS_DATA.forEach(stop => {
+    const cls = _lsStopClass(stop);
+    const dot = document.createElement('div');
+    dot.className = 'live-map-dot';
+    dot.id = 'lsMapDot-' + stop.id;
+    dot.style.left = stop.x + '%';
+    dot.style.top = stop.y + '%';
+    dot.innerHTML = `<div class="live-dot-ring ${cls}">${stop.count}</div><div class="live-dot-label">${stop.name}</div>`;
+    area.appendChild(dot);
+  });
+}
+
+function _lsRenderStopGrid() {
+  const grid = document.getElementById('liveStopGrid');
+  if (!grid) return;
+  grid.innerHTML = _LS_DATA.map(stop => {
+    const cls = _lsStopClass(stop);
+    const avatars = Array.from({length: stop.max}, (_, i) => {
+      if (i < stop.names.length) {
+        return `<div class="live-avatar" style="background:${stop.avatarColors[i]}">${stop.names[i][0]}</div>`;
+      }
+      return `<div class="live-avatar empty"></div>`;
+    }).join('');
+    const barW = Math.round((stop.count / stop.max) * 100);
+    const actionHtml = stop.complete
+      ? `<div class="live-complete-badge">✅ 정류장 생성 완료! 셔틀 운행 시작</div>`
+      : `<button class="live-join-btn">+ 나도 신청하기</button>`;
+    return `<div class="live-stop-card ${cls}" id="lsCard-${stop.id}">
+      <div class="live-stop-name">${stop.name}</div>
+      <div class="live-stop-area">${stop.area}</div>
+      <div class="live-avatars">${avatars}</div>
+      <div class="live-bar-wrap"><div class="live-bar" style="width:${barW}%"></div></div>
+      <div class="live-bar-label">${stop.count}/${stop.max}명 참여 중</div>
+      ${actionHtml}
+    </div>`;
+  }).join('');
+}
+
+function _lsRenderAcademy() {
+  const grid = document.getElementById('liveAcademyGrid');
+  if (!grid) return;
+  grid.innerHTML = _LA_DATA.map(ac => {
+    const kinRows = ac.kindergartens.map(kin => {
+      const isDone = kin.complete;
+      const remaining = kin.max - kin.count;
+      const barW = Math.round((kin.count / kin.max) * 100);
+      const badge = isDone
+        ? `<span class="live-kin-badge done">✅ 픽업 확정!</span>`
+        : `<span class="live-kin-badge remaining">D-${remaining}명</span>`;
+      const hint = isDone
+        ? `<div class="live-kin-hint" style="color:#059669;">픽업 차량이 배정됐어요 🚐</div>`
+        : `<div class="live-kin-hint">${remaining}명 더 모이면 ${kin.name}으로 픽업을 보낼 수 있어요</div>`;
+      return `<div class="live-kin-row${isDone ? ' complete' : ''}" id="lsKin-${kin.id}">
+        <div class="live-kin-info">
+          <div class="live-kin-name">${kin.name}</div>
+          <div class="live-kin-area">${kin.area}</div>
+          ${hint}
+        </div>
+        <div class="live-kin-right">
+          ${badge}
+          <div class="live-kin-bar-wrap"><div class="live-kin-bar" style="width:${barW}%"></div></div>
+          <div class="live-kin-count">${kin.count}/${kin.max}명</div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="live-academy-card">
+      <div class="live-academy-header" style="background:${ac.bg}">
+        <div class="live-academy-icon" style="background:${ac.color}22">${ac.icon}</div>
+        <div>
+          <div class="live-academy-name">${ac.name}</div>
+          <div class="live-academy-sub">${ac.sub}</div>
+        </div>
+      </div>
+      ${kinRows}
+    </div>`;
+  }).join('');
+}
+
+function _lsPrependFeed(icon, text) {
+  const list = document.getElementById('liveFeedList');
+  if (!list) return;
+  const item = document.createElement('div');
+  item.className = 'live-feed-item';
+  item.innerHTML = `<span class="feed-icon">${icon}</span><span class="feed-text">${text}</span><span class="feed-time">${_lsFeedSecs}초 전</span>`;
+  list.insertBefore(item, list.firstChild);
+  _lsFeedSecs++;
+  const items = list.querySelectorAll('.live-feed-item');
+  if (items.length > 8) items[items.length - 1].remove();
+}
+
+function _lsIncrementStop(stopId) {
+  const stop = _lsGetStop(stopId);
+  if (!stop || stop.complete) return;
+  stop.count = Math.min(stop.count + 1, stop.max);
+  const namePool = _extraNames;
+  const colorPool = _extraColors;
+  if (stop.names.length < stop.max) {
+    const idx = stop.names.length % namePool.length;
+    stop.names.push(namePool[idx]);
+    stop.avatarColors.push(colorPool[idx]);
+  }
+  _lsPrependFeed('🙋', `${stop.area} ${stop.name}에 새 신청이 들어왔어요 (${stop.count}/5명)`);
+
+  // Update map dot
+  const dotEl = document.getElementById('lsMapDot-' + stop.id);
+  if (dotEl) {
+    const ring = dotEl.querySelector('.live-dot-ring');
+    ring.textContent = stop.count;
+    const cls = _lsStopClass(stop);
+    ring.className = 'live-dot-ring ' + cls;
+  }
+
+  // Card pop
+  const card = document.getElementById('lsCard-' + stop.id);
+  if (card) {
+    card.classList.add('cardPop');
+    setTimeout(() => card.classList.remove('cardPop'), 500);
+  }
+
+  const wasComplete = stop.complete;
+  if (stop.count >= stop.max && !wasComplete) {
+    stop.complete = true;
+    _lsPrependFeed('🎉', `${stop.area} ${stop.name} 정류장이 생성됐어요!`);
+    showToast(`🎉 ${stop.area} ${stop.name} 정류장이 생성됐어요!`);
+    _lsRenderStopGrid();
+    _lsRenderMap();
+    setTimeout(() => {
+      stop.count = 0; stop.complete = false; stop.names = []; stop.avatarColors = [];
+      _lsRenderStopGrid(); _lsRenderMap();
+    }, 8000);
+  } else {
+    _lsRenderStopGrid();
+  }
+}
+
+function _lsIncrementKin(acId, kinId) {
+  const ac = _lsGetAc(acId);
+  if (!ac) return;
+  const kin = _lsGetKin(ac, kinId);
+  if (!kin || kin.complete) return;
+  kin.count = Math.min(kin.count + 1, kin.max);
+  _lsPrependFeed('🏠', `${kin.name} 원아가 ${ac.name} 픽업을 신청했어요 (${kin.count}/5명)`);
+  if (kin.count >= kin.max && !kin.complete) {
+    kin.complete = true;
+    _lsPrependFeed('🚐', `${ac.name} → ${kin.name} 픽업 확정!`);
+    showToast(`🚐 ${ac.name} → ${kin.name} 픽업 확정!`);
+    _lsRenderAcademy();
+    setTimeout(() => {
+      kin.count = 1; kin.complete = false;
+      _lsRenderAcademy();
+    }, 8000);
+  } else {
+    _lsRenderAcademy();
+  }
+}
+
+function _lsSimTick() {
+  const step = _lsSimSteps[_lsSimStep % _lsSimSteps.length];
+  _lsSimStep++;
+  if (step.type === 'stop') {
+    _lsIncrementStop(step.id);
+  } else {
+    _lsIncrementKin(step.acId, step.kinId);
+  }
+}
+
+function _lsInit() {
+  _lsRenderMap();
+  _lsRenderStopGrid();
+  _lsRenderAcademy();
+  // Prepopulate feed (oldest to newest, so newest ends up on top)
+  const seedItems = [
+    ['🔔', '강남구 압구정동에서 새 신청이 들어왔어요 (2/5명)'],
+    ['🔔', '서초구 방배동에서 새 신청이 들어왔어요 (3/5명)'],
+    ['🏠', '햇살유치원 원아가 대치 수학의신 학원 픽업을 신청했어요 (4/5명)'],
+    ['🎉', '강남구 대치동 정류장이 생성됐어요!'],
+  ];
+  seedItems.forEach(([icon, text]) => _lsPrependFeed(icon, text));
+}
+
+function switchLiveTab(tab) {
+  document.querySelectorAll('.live-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.live-tab-content').forEach(c => c.classList.remove('active'));
+  const tabIdx = tab === 'parent' ? 0 : 1;
+  document.querySelectorAll('.live-tab')[tabIdx].classList.add('active');
+  document.getElementById('liveTab-' + tab).classList.add('active');
+}
+
+// Start/stop sim on scroll
+(function() {
+  const section = document.getElementById('live-stops');
+  if (!section) return;
+  _lsInit();
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (!_lsSimInterval) {
+          _lsSimInterval = setInterval(_lsSimTick, 3000);
+        }
+      } else {
+        if (_lsSimInterval) {
+          clearInterval(_lsSimInterval);
+          _lsSimInterval = null;
+        }
+      }
+    });
+  }, { threshold: 0.1 });
+  obs.observe(section);
+})();
 
 // ─── Hero phone navigation ───
 function heroNav(screen) {
