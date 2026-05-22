@@ -246,23 +246,30 @@
 
 **배포 URL**: `https://davegpt25.github.io/kids/`
 
-#### Google OAuth (Token Client)
+#### Google OAuth
 - **Client ID**: `1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com`
 - **SDK**: Google Identity Services (`https://accounts.google.com/gsi/client`)
-- **Flow**: `google.accounts.oauth2.initTokenClient` + `requestAccessToken({ prompt: 'select_account' })`
+- **데스크톱 Flow**: `google.accounts.oauth2.initTokenClient` + `requestAccessToken({ prompt: 'select_account' })`
+- **모바일 Flow**: Implicit Token Redirect (`response_type=token` → URL hash 파싱)
 - **Scope**: `openid email profile`
 - **UserInfo**: `https://www.googleapis.com/oauth2/v3/userinfo`
+- **필수 GCP 설정**: Authorized redirect URIs에 `https://davegpt25.github.io/kids/` 추가
 
 #### Kakao OAuth
 - **JS Key**: `1550b9b3a098d276139c9f66eabb7a64`
 - **SDK**: Kakao JS SDK v2.7.2
-- **Flow**: `Kakao.Auth.login()` → `Kakao.API.request({ url: '/v2/user/me' })`
+- **데스크톱 Flow**: `Kakao.Auth.login()` → `Kakao.API.request({ url: '/v2/user/me' })`
+- **모바일 Flow**: Authorization Code Redirect (`response_type=code`) → client-side token exchange
 - **앱 대표 도메인**: `https://davegpt25.github.io/kids/`
+- **필수 Kakao 설정**: 카카오 로그인 → Redirect URI에 `https://davegpt25.github.io/kids/` 추가
 
 #### 로그인 UI 흐름
 1. 네비게이션 "사전예약" 또는 히어로 "🍎 사전예약" 버튼 클릭
 2. 로그인 방법 선택 모달 (Google / Kakao)
-3. 선택 시 각 SDK 팝업 → 실제 계정 선택
+3. 플랫폼별 분기:
+   - **인앱 브라우저(카카오톡 등)**: 안내 시트 표시 → Chrome으로 열기 유도
+   - **모바일 브라우저**: redirect flow
+   - **데스크톱**: popup flow
 4. 성공 시 `onLoginSuccess(name, email, color, provider)` 호출
    - 네비 사전예약 버튼 → 아바타로 교체
    - CTA 섹션 → 예약완료 상태로 전환
@@ -270,30 +277,39 @@
 
 ---
 
-### 무료 체험 데모 모달
+### 무료 체험 데모 모달 (5-Step)
 
 히어로 "✨ 무료로 체험하기" 버튼 클릭 시 오버레이 모달 표시.
 
 #### Step 1 — 타이프라이터 애니메이션
 - 5가지 예시 쿼리가 글자 단위로 자동 순환 (75ms/글자, 1800ms 대기, 35ms/글자 지우기)
 - 예시 쿼리 Pill 클릭 시 해당 텍스트로 즉시 타이핑 시작 + pill 활성화 표시
-- "출시 알림 신청하기 →" 버튼으로 Step 2 진행
+- "지도로 설정하기 →" 버튼으로 Step 2 진행
 
-#### Step 2 — 분석 애니메이션
+#### Step 2 — GPS 지도 & 서비스 설정
+- **카카오맵** 또는 CSS 목업 지도 표시 (API 키 없을 시 목업으로 fallback)
+- **GPS 위치 가져오기**: `navigator.geolocation.getCurrentPosition()` → 지도 중심 이동
+- **반경 선택**: 500m / 1km / 2km / 3km / 5km 버튼 → `kakao.maps.Circle` 반경 업데이트
+- **셔틀 서비스 토글**: 카드 클릭으로 on/off (`_demoShuttle`)
+- **하원 서비스 토글**: 카드 클릭으로 on/off (`_demoPickup`) — 3명 이상 동시 하원 시 무료 배너 표시
+- "분석 시작하기 →" 버튼으로 Step 3 진행
+
+#### Step 3 — 분석 애니메이션
 - 프로그레스 바 0 → 100% (랜덤 증가, ~2.5초 소요)
-- 진행률에 따라 4단계 안내 메시지 순환
-- 완료 후 400ms 딜레이 뒤 Step 3 전환
+- 반경·셔틀·하원 선택값을 반영한 4단계 메시지 순환
+- 완료 후 400ms 딜레이 뒤 Step 4 전환
 
-#### Step 3 — 리드 캡처 폼
+#### Step 4 — 리드 캡처 폼
 - 필드: 이메일(필수), 성함(선택), 자녀나이(선택)
 - **소셜 자동입력**: Google / Kakao 버튼으로 OAuth 거쳐 이름·이메일 자동 입력
-  - Google: `_demoGoogleFillPending = true` 플래그로 기존 Token Client 재사용
-  - Kakao: `Kakao.Auth.login()` 후 `/v2/user/me` API 호출
+  - Google: 인앱 브라우저 → 안내 시트 / 모바일 → redirect demo mode / 데스크톱 → Token Client
+  - Kakao: 카카오톡 인앱 → SDK popup / 모바일 → redirect demo mode / 데스크톱 → SDK popup
 - 이메일 유효성 검사 실패 시 빨간 테두리 + 토스트 알림
-- 제출 성공 시 Step 4 전환
+- 제출 성공 시 Step 5 전환
 
-#### Step 4 — 완료 화면
+#### Step 5 — 완료 화면
 - 입력한 이메일이 포함된 개인화 메시지 표시
+- 얼리버드 3개월 프리미엄 무료 혜택 안내
 - "확인" 버튼으로 모달 닫기
 
 #### 반응형
@@ -307,8 +323,207 @@
 | `closeDemoModal()` | 오버레이 닫기, 타이프라이터 정지 |
 | `handleDemoOverlayClick(e)` | 오버레이 외부 클릭 시 닫기 |
 | `selectPill(el, text)` | Pill 선택 + 해당 쿼리 타이핑 |
-| `startDemoAnalysis()` | Step 2 프로그레스 애니메이션 → Step 3 |
+| `openMapStep()` | Step 1→2 전환, 카카오맵 초기화 시작 |
+| `_initDemoMap(lat, lng)` | 카카오맵 로드 후 지도 초기화 |
+| `_loadKakaoMapScript(cb)` | `autoload=false` 방식 카카오맵 SDK 동적 로드 |
+| `_initKakaoMap(lat, lng)` | Map/Marker/Circle 생성 또는 업데이트 |
+| `setDemoRadius(el, meters)` | 반경 버튼 선택 → 지도 Circle 업데이트 |
+| `toggleService(type)` | 셔틀/하원 서비스 카드 토글 |
+| `startDemoAnalysis()` | Step 3 프로그레스 애니메이션 → Step 4 |
 | `_fillLeadForm(name, email)` | 폼 자동입력 헬퍼 |
-| `demoFillFromGoogle()` | Google OAuth → 폼 자동입력 |
-| `demoFillFromKakao()` | Kakao OAuth → 폼 자동입력 |
-| `submitLeadForm()` | 이메일 검증 → Step 4 |
+| `demoFillFromGoogle()` | Google OAuth → 폼 자동입력 (인앱 감지 포함) |
+| `demoFillFromKakao()` | Kakao OAuth → 폼 자동입력 (인앱 감지 포함) |
+| `submitLeadForm()` | 이메일 검증 → Step 5 |
+
+---
+
+## 추가 기능 스펙 (2026-05-23 업데이트)
+
+### 용어 변경
+- **`충돌` / `시간 충돌`** → **`겹침` / `시간 겹침`** (전체 일괄 변경)
+  - 이유: "충돌"은 현재 충돌이 존재한다는 부정적 오해 소지
+- **히어로 스탯 카드**: `충돌 0 / 스케줄 보장` → **`겹침 없음 / 스케줄 완성`**
+  - 이유: "충돌 0"이 '0개의 충돌이 있음'으로 오독 가능
+
+---
+
+### 실시간 정류장 형성 섹션 (`#live-stops`)
+
+히어로 아래에 위치, IntersectionObserver로 뷰포트 진입 시 시뮬레이션 자동 시작.
+
+#### 개념 모델
+- 정류장 오너십: **학원** (KidsRoute 앱이 아님)
+- 데이터 단위: `학원 × 방향` (academy × direction)
+- 5명 모집 시 학원이 직접 셔틀 운행 개시
+- 유치원 픽업: 5명 모집 시 특정 유치원으로 픽업 출발
+
+#### 탭 구조
+| 탭 | 표시 내용 |
+|----|----------|
+| 👨‍👩‍👧 학부모 시각 | 지도 위 정류장 도트 + 학원×방향 카드 + 실시간 신청 피드 |
+| 🏫 학원 운영 시각 | 학원별 셔틀 노선 카드 + 유치원 픽업 카드 (그룹핑) |
+
+#### 데이터 구조 (`_LS_DATA`)
+```javascript
+{
+  id, acName, acIcon, acColor, acBg,  // 학원 정보
+  dir,                                // 방향 (예: '역삼동 → 대치역 방향')
+  count, max,                         // 현재 신청 수 / 최대 (5명)
+  x, y,                               // 지도 도트 위치 (%)
+  names,                              // 탑승 신청자 이니셜
+  avatarColors,                       // 아바타 색상
+  complete                            // 5명 완성 여부
+}
+```
+
+#### 유치원 픽업 데이터 (`_LP_DATA`)
+```javascript
+{
+  id, acName, acIcon, acColor,
+  kinName,   // 유치원명
+  kinArea,   // 지역
+  count, max
+}
+```
+
+---
+
+### OAuth 모바일 Redirect 플로우
+
+#### 신규 변수
+```javascript
+let _pendingOAuthFill = null;  // redirect 복귀 후 demo form 채우기용
+```
+
+#### Google Implicit Token Redirect (모바일)
+```javascript
+function _oauthRedirectGoogle(mode) {
+  sessionStorage.setItem('_oauthMode', 'google_' + mode);
+  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID, redirect_uri: base,
+    response_type: 'token', scope: 'openid email profile',
+    prompt: 'select_account', state: 'gl'
+  });
+}
+```
+
+#### Kakao Authorization Code Redirect (모바일)
+```javascript
+function _oauthRedirectKakao(mode) {
+  sessionStorage.setItem('_oauthMode', 'kakao_' + mode);
+  location.href = 'https://kauth.kakao.com/oauth/authorize?' + new URLSearchParams({
+    client_id: KAKAO_APP_KEY, redirect_uri: base,
+    response_type: 'code', scope: 'profile_nickname,account_email', state: 'kk'
+  });
+}
+```
+
+#### 콜백 처리 (`_handleOAuthCallback`)
+- `window.addEventListener('load', ...)` 에서 호출
+- URL hash에 `access_token` 존재 → Google token 처리
+- URL search에 `code` + `state=kk` 존재 → Kakao code → token exchange → userinfo
+- `sessionStorage._oauthMode` 끝이 `_demo`이면 demo modal step4(리드폼)으로 복귀
+- 처리 후 `history.replaceState`로 URL 정리
+
+#### mode 값 규칙
+| mode | 의미 |
+|------|------|
+| `google_login` | 사전예약 로그인 |
+| `google_demo` | 데모 폼 자동입력 |
+| `kakao_login` | 사전예약 로그인 |
+| `kakao_demo` | 데모 폼 자동입력 |
+
+---
+
+### 인앱 브라우저 감지 & 안내
+
+#### 감지 함수
+```javascript
+function _isInAppBrowser()
+// 반환: 'kakaotalk' | 'instagram' | 'facebook' | 'naver' | 'webview' | false
+```
+
+감지 기준:
+- UA에 `KAKAOTALK` 포함 → `'kakaotalk'`
+- UA에 `Instagram` 포함 → `'instagram'`
+- UA에 `FBAN|FBAV|FB_IAB|FBIOS` 포함 → `'facebook'`
+- Android `; wv)` 패턴 → `'webview'`
+- iOS AppleWebKit이지만 Safari 없음 → `'webview'`
+
+#### 처리 전략
+
+| 환경 | Google 로그인 | Kakao 로그인 |
+|------|-------------|-------------|
+| 카카오톡 인앱 | ❌ 안내 시트 (Google 정책 차단) | SDK popup 시도 → 실패 시 안내 시트 |
+| 기타 인앱(Instagram 등) | ❌ 안내 시트 | ❌ 안내 시트 |
+| 모바일 Chrome/Samsung | Redirect flow | Redirect flow |
+| 데스크톱 | Popup flow | Popup flow |
+
+#### 안내 시트 UI
+- 하단 슬라이드업 bottom sheet (`.inapp-overlay` / `.inapp-sheet`)
+- 내용: 아이콘 + 제목 + 설명 + 단계별 안내 + **"링크 복사하기"** + 닫기
+- `inappCopyUrl()`: `navigator.clipboard.writeText()` → fallback `execCommand('copy')`
+- 오버레이 클릭 또는 닫기 버튼으로 dismiss
+
+---
+
+### 전체 JS 함수 목록 (as-is)
+
+#### OAuth & 로그인
+| 함수 | 설명 |
+|------|------|
+| `_isMobile()` | 모바일 기기 판별 (UA + touchPoints) |
+| `_isInAppBrowser()` | 인앱 브라우저 종류 반환 |
+| `_showInAppWarning(provider)` | 인앱 안내 시트 표시 |
+| `closeInappWarning(e)` | 안내 시트 닫기 |
+| `inappCopyUrl()` | 현재 URL 클립보드 복사 |
+| `_oauthRedirectGoogle(mode)` | 모바일 Google implicit redirect |
+| `_oauthRedirectKakao(mode)` | 모바일 Kakao authorization code redirect |
+| `_handleOAuthCallback()` | 페이지 로드 시 redirect 콜백 파싱 |
+| `openGoogleLogin()` | 로그인 모달 열기 |
+| `closeGoogleModal()` | 로그인 모달 닫기 |
+| `selectProvider(provider)` | Google/Kakao 선택 → 환경별 OAuth 분기 |
+| `selectAccount(name, email, color, provider)` | 목업 계정 선택 fallback |
+| `onLoginSuccess(name, email, color, provider)` | 로그인 완료 공통 처리 |
+
+#### 데모 모달
+| 함수 | 설명 |
+|------|------|
+| `openDemoModal()` | 데모 모달 열기 + Step 1 초기화 |
+| `closeDemoModal()` | 데모 모달 닫기 |
+| `_showDemoStep(stepId)` | 특정 step 표시 (demoStep1~5) |
+| `selectPill(el, text)` | Pill 클릭 → 타이프라이터 |
+| `openMapStep()` | Step 1→2, GPS 요청 + 지도 초기화 |
+| `_initDemoMap(lat, lng)` | 카카오맵 or 목업 지도 초기화 |
+| `_loadKakaoMapScript(cb)` | 카카오맵 SDK 동적 로드 |
+| `_initKakaoMap(lat, lng)` | 카카오맵 Map/Marker/Circle 생성 |
+| `_updateMockMap()` | 목업 지도 반경 링 업데이트 |
+| `setDemoRadius(el, meters)` | 반경 버튼 선택 처리 |
+| `toggleService(type)` | 셔틀/하원 토글 |
+| `startDemoAnalysis()` | Step 3 프로그레스 → Step 4 |
+| `demoFillFromGoogle()` | Google OAuth → 리드폼 자동입력 |
+| `demoFillFromKakao()` | Kakao OAuth → 리드폼 자동입력 |
+| `_fillLeadForm(name, email)` | 리드폼 값 세팅 |
+| `submitLeadForm()` | 이메일 검증 → Step 5 |
+
+#### 실시간 정류장
+| 함수 | 설명 |
+|------|------|
+| `switchLiveTab(tab)` | 학부모/학원 탭 전환 |
+| `_lsRenderParent()` | 학부모 탭: 지도 도트 + 카드 렌더 |
+| `_lsRenderAcademy()` | 학원 탭: 학원별 그룹 카드 렌더 |
+| `_lsStartSim()` | 실시간 피드 시뮬레이션 시작 |
+| `_lsStopSim()` | 시뮬레이션 중지 |
+
+#### UI 유틸
+| 함수 | 설명 |
+|------|------|
+| `showToast(msg)` | 하단 토스트 알림 |
+| `showUserMenu()` | 로그인 후 아바타 클릭 처리 |
+| `showView(viewId)` | 로그인 모달 내 뷰 전환 |
+| `handleOverlayClick(e)` | 로그인 모달 외부 클릭 닫기 |
+| `setRadius(el, val)` | 히어로 폰 목업 반경 선택 |
+| `toggleTag(el)` | 히어로 과목 태그 토글 |
+| `demoNav(screen, stepEl)` | 히어로 폰 목업 화면 전환 |
+| `toggleDemoTag(el)` | 데모 과목 태그 토글 |
+| `saveSchedule()` | 스케줄 저장 시뮬레이션 |
