@@ -6,6 +6,10 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <title>키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄</title>
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- Kakao JavaScript SDK -->
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
 <style>
   :root {
     --primary:       #F97316;
@@ -685,6 +689,210 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ─── NAV USER STATE (after login) ─── */
+.nav-user {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 12px 4px 4px;
+  border-radius: 100px;
+  border: 1.5px solid var(--gray-300);
+  transition: border-color .2s;
+}
+.nav-user:hover { border-color: var(--primary); }
+.nav-user.visible { display: flex; }
+.nav-user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+}
+.nav-user-name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+
+/* ─── 로그인 방법 선택 뷰 ─── */
+.g-provider-list {
+  padding: 20px 24px 8px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.g-provider-btn {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 13px 20px; border-radius: 12px;
+  border: 1.5px solid #E0E0E0; background: #fff;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: all .15s; text-align: left;
+}
+.g-provider-btn:hover { background: #F8F9FA; border-color: #BDBDBD; transform: translateY(-1px); }
+.g-provider-btn img, .g-provider-btn svg { width: 22px; height: 22px; flex-shrink: 0; }
+.g-provider-google { color: #3C4043; }
+.g-provider-kakao {
+  background: #FEE500; border-color: #FEE500; color: #3C1E1E;
+}
+.g-provider-kakao:hover { background: #F5DC00; border-color: #F5DC00; }
+.g-select-title {
+  font-size: 20px; font-weight: 700; color: #202124;
+  padding: 28px 24px 4px; text-align: center;
+  font-family: 'Pretendard', sans-serif; letter-spacing: -0.3px;
+}
+.g-select-sub {
+  font-size: 13px; color: #5f6368; text-align: center;
+  padding: 0 24px 16px; line-height: 1.5;
+}
+.g-select-footer {
+  padding: 16px 24px 20px;
+  display: flex; justify-content: flex-end;
+  border-top: 1px solid #E8EAED;
+}
+
+/* ─── GOOGLE MODAL ─── */
+.g-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  animation: gOverlayIn .2s ease;
+}
+.g-overlay.open { display: flex; }
+@keyframes gOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+.g-modal {
+  background: #fff;
+  border-radius: 28px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+  animation: gModalIn .25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes gModalIn {
+  from { opacity: 0; transform: scale(0.88) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.g-modal-header {
+  padding: 32px 32px 0;
+  text-align: center;
+}
+.g-google-logo {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; margin-bottom: 16px;
+}
+.g-google-logo svg { width: 92px; height: 30px; }
+.g-modal-title {
+  font-size: 22px; font-weight: 600;
+  color: #202124; margin-bottom: 6px;
+  font-family: 'Google Sans', 'Roboto', sans-serif;
+  letter-spacing: -0.3px;
+}
+.g-modal-subtitle {
+  font-size: 14px; color: #5f6368;
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.5; margin-bottom: 24px;
+}
+
+.g-account-list {
+  padding: 0 8px 8px;
+}
+.g-account-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px; border-radius: 12px;
+  cursor: pointer; transition: background .15s;
+}
+.g-account-item:hover { background: #F1F3F4; }
+.g-account-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 600; color: #fff;
+  flex-shrink: 0;
+}
+.g-account-info { flex: 1; min-width: 0; }
+.g-account-name { font-size: 15px; font-weight: 500; color: #202124; }
+.g-account-email { font-size: 13px; color: #5f6368; margin-top: 1px; }
+.g-account-check {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  color: #1a73e8; opacity: 0; transition: opacity .15s;
+}
+.g-account-item:hover .g-account-check { opacity: 0.4; }
+
+.g-divider { height: 1px; background: #E8EAED; margin: 4px 16px; }
+
+.g-add-account {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px; border-radius: 12px;
+  cursor: pointer; transition: background .15s; margin: 0 8px 8px;
+  color: #5f6368;
+}
+.g-add-account:hover { background: #F1F3F4; }
+.g-add-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #E8EAED; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #5f6368; flex-shrink: 0;
+}
+.g-add-label { font-size: 14px; color: #1a73e8; font-weight: 500; }
+
+.g-modal-footer {
+  padding: 12px 24px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid #E8EAED;
+}
+.g-footer-link {
+  font-size: 12px; color: #5f6368; text-decoration: none;
+  transition: color .15s;
+}
+.g-footer-link:hover { color: #1a73e8; text-decoration: underline; }
+.g-close-btn {
+  background: none; border: none; padding: 4px 8px;
+  font-size: 13px; color: #5f6368; cursor: pointer; border-radius: 4px;
+  transition: background .15s;
+}
+.g-close-btn:hover { background: #F1F3F4; }
+
+/* ─── LOADING SPINNER (after account select) ─── */
+.g-loading {
+  display: none; padding: 40px; text-align: center;
+}
+.g-loading.show { display: block; }
+.g-spinner {
+  width: 36px; height: 36px; margin: 0 auto 16px;
+  border: 3px solid #E8EAED;
+  border-top-color: #4285F4;
+  border-radius: 50%;
+  animation: gSpin .7s linear infinite;
+}
+@keyframes gSpin { to { transform: rotate(360deg); } }
+.g-loading-text { font-size: 14px; color: #5f6368; }
+
+/* ─── SUCCESS TOAST ─── */
+.g-toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  z-index: 9999;
+  background: #323232; color: #fff;
+  padding: 14px 24px; border-radius: 12px;
+  font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  transition: transform .35s cubic-bezier(0.34,1.56,0.64,1), opacity .35s;
+  opacity: 0; pointer-events: none;
+  white-space: nowrap;
+}
+.g-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.g-toast-icon { font-size: 18px; }
+
+/* ─── CTA SECTION: LOGGED-IN STATE ─── */
+.app-cta-logged {
+  display: none; text-align: center;
+}
+.app-cta-logged.visible { display: block; }
+.app-cta-logged h2 { font-size: 28px; font-weight: 800; color: var(--gray-900); margin-bottom: 12px; }
+.app-cta-logged p { font-size: 15px; color: var(--text-sub); line-height: 1.7; }
+.app-cta-logged .check-badge {
+  width: 72px; height: 72px; background: #D1FAE5;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin: 0 auto 24px;
+}
 </style>
 </head>
 <body>
@@ -697,7 +905,11 @@
     <a href="#howto">이용방법</a>
     <a href="#pricing">요금제</a>
     <a href="#demo">데모 체험</a>
-    <button class="nav-cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">사전예약</button>
+    <button class="nav-cta" id="navCtaBtn" onclick="openGoogleLogin()">사전예약</button>
+    <div class="nav-user" id="navUser" onclick="showUserMenu()">
+      <div class="nav-user-avatar" id="navUserAvatar"></div>
+      <span class="nav-user-name" id="navUserName"></span>
+    </div>
   </div>
   <button class="nav-hamburger" onclick="document.querySelector('.nav-mobile-menu').classList.toggle('open')" aria-label="메뉴 열기">☰</button>
 </nav>
@@ -706,7 +918,7 @@
   <a href="#howto" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">이용방법</a>
   <a href="#pricing" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">요금제</a>
   <a href="#demo" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">데모 체험</a>
-  <button class="nav-cta" style="width:fit-content" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">사전예약</button>
+  <button class="nav-cta" style="width:fit-content" onclick="openGoogleLogin()">사전예약</button>
 </div>
 
 <!-- HERO -->
@@ -716,7 +928,7 @@
     <h1><em>3초면 완성되는</em><br>우리 아이<br>학원 스케줄</h1>
     <p>GPS 반경 내 학원을 자동으로 찾아주고,<br>시간 충돌 없는 최적 조합을 추천해요.</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">🍎 App Store 사전예약</button>
+      <button class="btn-primary" onclick="openGoogleLogin()">🍎 App Store 사전예약</button>
       <button class="btn-secondary" onclick="document.getElementById('howto').scrollIntoView({behavior:'smooth'})">이용방법 보기</button>
     </div>
     <div class="hero-stats">
@@ -1449,15 +1661,116 @@
 <!-- APP STORE CTA -->
 <section class="app-cta fade-up" id="cta">
   <div class="app-cta-inner">
-    <h2>지금 사전예약하고<br>먼저 써보세요 🎉</h2>
-    <p>출시 즉시 알림을 받고,<br>얼리버드 혜택으로 3개월 프리미엄을 무료로 이용하세요.</p>
-    <div class="app-cta-buttons">
-      <a href="#" class="store-btn">🍎 App Store 사전예약</a>
-      <a href="#" class="store-btn outline">▶ Play Store 사전예약</a>
+    <!-- 미로그인 상태 -->
+    <div id="ctaDefault">
+      <h2>지금 사전예약하고<br>먼저 써보세요 🎉</h2>
+      <p>출시 즉시 알림을 받고,<br>얼리버드 혜택으로 3개월 프리미엄을 무료로 이용하세요.</p>
+      <div class="app-cta-buttons">
+        <a href="#" class="store-btn" onclick="openGoogleLogin(); return false;">🍎 App Store 사전예약</a>
+        <a href="#" class="store-btn outline" onclick="openGoogleLogin(); return false;">▶ Play Store 사전예약</a>
+      </div>
+      <p class="app-cta-caption">*사전예약은 무료입니다. 출시 전 언제든 취소 가능합니다.</p>
     </div>
-    <p class="app-cta-caption">*사전예약은 무료입니다. 출시 전 언제든 취소 가능합니다.</p>
+    <!-- 로그인 완료 상태 -->
+    <div class="app-cta-logged" id="ctaLogged">
+      <div class="check-badge">✅</div>
+      <h2>사전예약이 완료됐어요!</h2>
+      <p id="ctaLoggedDesc">출시 시 이메일로 가장 먼저 알려드릴게요.<br>얼리버드 혜택도 자동 적용됩니다.</p>
+    </div>
   </div>
 </section>
+
+<!-- 로그인 모달 -->
+<div class="g-overlay" id="gOverlay" onclick="handleOverlayClick(event)">
+  <div class="g-modal" id="gModal">
+
+    <!-- ① 로그인 방법 선택 뷰 (기본) -->
+    <div id="gViewSelect">
+      <div class="g-select-title">사전예약 로그인</div>
+      <div class="g-select-sub">키즈루트 출시 알림을 받을<br>계정으로 로그인해 주세요</div>
+      <div class="g-provider-list">
+        <!-- Google -->
+        <button class="g-provider-btn g-provider-google" onclick="selectProvider('google')">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Google로 계속하기
+        </button>
+        <!-- 카카오 -->
+        <button class="g-provider-btn g-provider-kakao" onclick="selectProvider('kakao')">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3C6.48 3 2 6.72 2 11.3c0 2.94 1.87 5.52 4.7 7.02L5.6 22l4.56-2.98c.59.08 1.2.13 1.84.13 5.52 0 10-3.72 10-8.3C22 6.72 17.52 3 12 3z" fill="#3C1E1E"/>
+          </svg>
+          카카오로 계속하기
+        </button>
+      </div>
+      <div class="g-select-footer">
+        <button class="g-close-btn" onclick="closeGoogleModal()">닫기</button>
+      </div>
+    </div>
+
+    <!-- ② Google 계정 선택 fallback (Client ID 미설정 시) -->
+    <div id="gViewPicker" style="display:none">
+      <div class="g-modal-header">
+        <div class="g-google-logo">
+          <svg viewBox="0 0 92 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="24" font-family="'Product Sans',Arial,sans-serif" font-size="22" font-weight="400" fill="#4285F4">G</text>
+            <text x="16" y="24" font-family="'Product Sans',Arial,sans-serif" font-size="22" font-weight="400" fill="#EA4335">o</text>
+            <text x="30" y="24" font-family="'Product Sans',Arial,sans-serif" font-size="22" font-weight="400" fill="#FBBC05">o</text>
+            <text x="44" y="24" font-family="'Product Sans',Arial,sans-serif" font-size="22" font-weight="400" fill="#4285F4">g</text>
+            <text x="57" y="24" font-family="'Product Sans',Arial,sans-serif" font-size="22" font-weight="400" fill="#34A853">l</text>
+            <text x="65" y="24" font-family="'Product Sans',Arial,sans-serif" font-size="22" font-weight="400" fill="#EA4335">e</text>
+          </svg>
+        </div>
+        <div class="g-modal-title">계속하려면 로그인하세요</div>
+        <div class="g-modal-subtitle">키즈루트 사전예약을 위해<br>Google 계정으로 로그인해 주세요</div>
+      </div>
+      <div class="g-account-list">
+        <div class="g-account-item" onclick="selectAccount('김지수', 'jisu.kim@gmail.com', '#4285F4', 'google')">
+          <div class="g-account-avatar" style="background:#4285F4">김</div>
+          <div class="g-account-info">
+            <div class="g-account-name">김지수</div>
+            <div class="g-account-email">jisu.kim@gmail.com</div>
+          </div>
+          <div class="g-account-check"><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M7 14L2 9l1.4-1.4L7 11.2l7.6-7.6L16 5z"/></svg></div>
+        </div>
+        <div class="g-account-item" onclick="selectAccount('박민준', 'minjun.park@gmail.com', '#34A853', 'google')">
+          <div class="g-account-avatar" style="background:#34A853">박</div>
+          <div class="g-account-info">
+            <div class="g-account-name">박민준</div>
+            <div class="g-account-email">minjun.park@gmail.com</div>
+          </div>
+          <div class="g-account-check"><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M7 14L2 9l1.4-1.4L7 11.2l7.6-7.6L16 5z"/></svg></div>
+        </div>
+      </div>
+      <div class="g-divider"></div>
+      <div class="g-add-account" onclick="selectAccount('다른 계정', 'other@gmail.com', '#EA4335', 'google')">
+        <div class="g-add-icon">+</div>
+        <span class="g-add-label">다른 계정 사용</span>
+      </div>
+      <div class="g-modal-footer">
+        <button class="g-close-btn" style="margin-right:auto" onclick="showView('gViewSelect')">← 뒤로</button>
+        <button class="g-close-btn" onclick="closeGoogleModal()">닫기</button>
+      </div>
+    </div>
+
+    <!-- ③ 로딩 뷰 -->
+    <div class="g-loading" id="gViewLoading">
+      <div class="g-spinner"></div>
+      <div class="g-loading-text" id="gLoadingText">로그인 중...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUCCESS TOAST -->
+<div class="g-toast" id="gToast">
+  <span class="g-toast-icon">🎉</span>
+  <span id="gToastMsg">사전예약이 완료됐어요!</span>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -1472,6 +1785,159 @@
 </footer>
 
 <script>
+// ─── 소셜 로그인 설정 ───
+// Google: https://console.cloud.google.com/ → 클라이언트 ID
+const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com';
+// Kakao: https://developers.kakao.com/ → 내 애플리케이션 → JavaScript 키
+// ⚠️ 아래에 카카오 앱의 JavaScript 키를 입력하세요
+const KAKAO_APP_KEY = 'YOUR_KAKAO_APP_KEY_HERE';
+
+let _toastTimer = null;
+let _tokenClient = null;
+
+// ─── 초기화 ───
+window.addEventListener('load', () => {
+  // Google SDK 초기화
+  const pollGoogle = setInterval(() => {
+    if (typeof google !== 'undefined' && google.accounts) {
+      clearInterval(pollGoogle);
+      _tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'openid email profile',
+        callback: async (res) => {
+          if (res.error) { console.error('Google 오류:', res.error); return; }
+          try {
+            const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+              headers: { Authorization: 'Bearer ' + res.access_token }
+            });
+            const user = await r.json();
+            onLoginSuccess(user.name || user.email.split('@')[0], user.email, '#4285F4', 'google');
+          } catch(e) { console.error('Google 사용자 정보 오류:', e); }
+        }
+      });
+    }
+  }, 100);
+  setTimeout(() => clearInterval(pollGoogle), 6000);
+
+  // Kakao SDK 초기화
+  if (typeof Kakao !== 'undefined' && KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE') {
+    Kakao.init(KAKAO_APP_KEY);
+  }
+});
+
+// ─── 모달 열기/닫기 ───
+function openGoogleLogin() {
+  showView('gViewSelect');
+  document.getElementById('gOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeGoogleModal() {
+  document.getElementById('gOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('gOverlay')) closeGoogleModal();
+}
+
+function showView(viewId) {
+  ['gViewSelect','gViewPicker','gViewLoading'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = (id === viewId) ? 'block' : 'none';
+  });
+  if (viewId === 'gViewLoading') {
+    document.getElementById('gViewLoading').classList.add('show');
+  }
+}
+
+// ─── 로그인 방법 선택 ───
+function selectProvider(provider) {
+  if (provider === 'google') {
+    const hasClientId = GOOGLE_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
+    if (_tokenClient && hasClientId) {
+      closeGoogleModal(); // 모달 닫고 Google 팝업 띄우기
+      _tokenClient.requestAccessToken({ prompt: 'select_account' });
+    } else {
+      showView('gViewPicker'); // fallback 목업 모달
+    }
+  } else if (provider === 'kakao') {
+    const hasKakaoKey = KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE';
+    if (typeof Kakao !== 'undefined' && Kakao.isInitialized() && hasKakaoKey) {
+      closeGoogleModal();
+      Kakao.Auth.login({
+        success: () => {
+          Kakao.API.request({
+            url: '/v2/user/me',
+            success: (res) => {
+              const name = res.kakao_account?.profile?.nickname || '카카오사용자';
+              const email = res.kakao_account?.email || name + '@kakao.com';
+              onLoginSuccess(name, email, '#FEE500', 'kakao');
+            },
+            fail: (err) => console.error('카카오 사용자 정보 오류:', err)
+          });
+        },
+        fail: (err) => console.error('카카오 로그인 실패:', err)
+      });
+    } else {
+      // Kakao 앱키 미설정 → 목업 fallback
+      showView('gViewLoading');
+      document.getElementById('gLoadingText').textContent = '카카오 로그인 중...';
+      setTimeout(() => {
+        closeGoogleModal();
+        onLoginSuccess('카카오사용자', 'kakao_user@kakao.com', '#FEE500', 'kakao');
+      }, 1400);
+    }
+  }
+}
+
+// ─── Google 목업 fallback 계정 선택 ───
+function selectAccount(name, email, color, provider) {
+  showView('gViewLoading');
+  document.getElementById('gLoadingText').textContent = '로그인 중...';
+  setTimeout(() => {
+    closeGoogleModal();
+    onLoginSuccess(name === '다른 계정' ? email.split('@')[0] : name, email, color, provider || 'google');
+  }, 1400);
+}
+
+// ─── 로그인 완료 공통 처리 ───
+function onLoginSuccess(name, email, color, provider) {
+  // 카카오는 아바타 텍스트색 어둡게
+  const isKakao = provider === 'kakao';
+
+  // 네비게이션: 사전예약 버튼 → 사용자 아바타
+  document.getElementById('navCtaBtn').style.display = 'none';
+  const navUser = document.getElementById('navUser');
+  navUser.classList.add('visible');
+  const avatar = document.getElementById('navUserAvatar');
+  avatar.textContent = name.charAt(0);
+  avatar.style.background = color;
+  avatar.style.color = isKakao ? '#3C1E1E' : '#fff';
+  document.getElementById('navUserName').textContent = name;
+
+  // CTA 섹션 → 예약완료 상태
+  document.getElementById('ctaDefault').style.display = 'none';
+  const ctaLogged = document.getElementById('ctaLogged');
+  ctaLogged.classList.add('visible');
+  document.getElementById('ctaLoggedDesc').innerHTML =
+    '<strong>' + email + '</strong>으로 출시 알림을 보내드릴게요.<br>얼리버드 혜택도 자동 적용됩니다.';
+
+  showToast(name + '님, 사전예약 완료! 🎉');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('gToast');
+  document.getElementById('gToastMsg').textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+function showUserMenu() {
+  showToast('로그인 상태입니다. 출시 시 알림을 드릴게요!');
+}
+
 // ─── Hero phone navigation ───
 function heroNav(screen) {
   document.querySelectorAll('#heroPhone .app-screen').forEach(s => s.classList.remove('active'));
