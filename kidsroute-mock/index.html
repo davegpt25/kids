@@ -861,6 +861,163 @@
   .demo-typewriter { font-size: 15px; }
 }
 
+/* ─── Step 2: 지도 탐색 ─── */
+.demo-location-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--primary-light); border: 1.5px solid #FED7AA;
+  border-radius: 12px; padding: 10px 14px; margin-bottom: 14px;
+}
+.demo-location-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: 8px; padding: 7px 12px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  white-space: nowrap; transition: background .15s; flex-shrink: 0;
+}
+.demo-location-btn:hover { background: var(--primary-dark); }
+.demo-location-text {
+  font-size: 12px; color: var(--text-sub); flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.demo-map-wrap {
+  position: relative; border-radius: 16px; overflow: hidden;
+  border: 1.5px solid var(--border); margin-bottom: 16px;
+  height: 200px; background: #f0ebe0;
+}
+/* CSS 모의 지도 (Naver API 키 미설정 시) */
+.demo-map-mock {
+  width: 100%; height: 100%; position: relative; overflow: hidden;
+  background:
+    linear-gradient(rgba(200,195,185,0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,195,185,0.5) 1px, transparent 1px),
+    linear-gradient(rgba(185,178,165,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(185,178,165,0.3) 1px, transparent 1px),
+    #ede8dc;
+  background-size: 48px 48px, 48px 48px, 12px 12px, 12px 12px;
+}
+.demo-map-mock::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 110px 70px at 22% 28%, rgba(185,210,185,0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 90px 55px at 72% 65%, rgba(195,215,235,0.5) 0%, transparent 70%),
+    radial-gradient(ellipse 65px 40px at 48% 52%, rgba(185,210,185,0.4) 0%, transparent 70%);
+}
+/* 도로 */
+.demo-map-mock::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(transparent 44%, #d8d0c4 44%, #d8d0c4 46%, transparent 46%),
+    linear-gradient(90deg, transparent 58%, #d8d0c4 58%, #d8d0c4 60%, transparent 60%);
+}
+.demo-map-ring {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2.5px solid rgba(249,115,22,0.7);
+  background: rgba(249,115,22,0.07);
+  pointer-events: none; z-index: 3;
+  transition: width .4s cubic-bezier(.34,1.56,.64,1),
+              height .4s cubic-bezier(.34,1.56,.64,1);
+}
+.demo-map-pin {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -100%) translateY(6px);
+  font-size: 26px; z-index: 4;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,.3));
+}
+.demo-map-gps-dot {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #4285F4; border: 2.5px solid #fff;
+  box-shadow: 0 0 0 5px rgba(66,133,244,.2); z-index: 5;
+}
+.demo-map-radius-chip {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(4px);
+  border-radius: 8px; padding: 3px 10px;
+  font-size: 11px; font-weight: 700; color: var(--primary); z-index: 5;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+}
+#demoNaverMap { width: 100%; height: 100%; display: none; }
+
+/* 반경 선택 */
+.demo-radius-section { margin-bottom: 16px; }
+.demo-radius-label {
+  font-size: 12px; font-weight: 700; color: var(--text-sub);
+  margin-bottom: 8px;
+}
+.demo-radius-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.demo-radius-btn {
+  padding: 7px 14px; border-radius: 100px;
+  border: 1.5px solid var(--gray-300); background: #fff;
+  font-size: 13px; font-weight: 600; color: var(--text-sub);
+  cursor: pointer; transition: all .15s;
+}
+.demo-radius-btn:hover { border-color: var(--primary); color: var(--primary); }
+.demo-radius-btn.active {
+  background: var(--primary); border-color: var(--primary);
+  color: #fff; box-shadow: 0 2px 8px rgba(249,115,22,.3);
+}
+
+/* 추가 서비스 */
+.demo-service-section {
+  border-top: 1px solid var(--border); padding-top: 14px;
+}
+.demo-service-title {
+  font-size: 12px; font-weight: 700; color: var(--gray-700);
+  margin-bottom: 10px;
+}
+.demo-service-cards {
+  display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;
+}
+.demo-service-card {
+  display: flex; align-items: center; gap: 12px;
+  border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 12px 14px; cursor: pointer; transition: all .2s; background: #fff;
+}
+.demo-service-card:hover { border-color: #FED7AA; }
+.demo-service-card.active { border-color: var(--primary); background: var(--primary-light); }
+.demo-service-icon { font-size: 20px; flex-shrink: 0; }
+.demo-service-info { flex: 1; min-width: 0; }
+.demo-service-name { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+.demo-service-desc { font-size: 11px; color: var(--text-sub); margin-top: 1px; }
+.demo-service-toggle {
+  width: 38px; height: 21px; border-radius: 11px;
+  background: var(--gray-300); position: relative;
+  transition: background .2s; flex-shrink: 0;
+}
+.demo-service-toggle::after {
+  content: ''; position: absolute;
+  width: 17px; height: 17px; border-radius: 50%; background: #fff;
+  top: 2px; left: 2px; transition: transform .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.demo-service-card.active .demo-service-toggle { background: var(--primary); }
+.demo-service-card.active .demo-service-toggle::after { transform: translateX(17px); }
+
+.demo-merit-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+  border: 1.5px solid #FED7AA; border-radius: 14px;
+  padding: 12px 14px; font-size: 13px; line-height: 1.5;
+  opacity: 0; max-height: 0; overflow: hidden;
+  transition: opacity .3s ease, max-height .35s ease, padding .3s ease, margin .3s ease;
+  margin-bottom: 0;
+}
+.demo-merit-banner.show {
+  opacity: 1; max-height: 120px; padding: 12px 14px; margin-bottom: 2px;
+}
+.demo-merit-banner strong { color: var(--primary); font-weight: 700; }
+.demo-merit-banner small { font-size: 11px; color: var(--text-sub); display: block; margin-top: 2px; }
+.demo-merit-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+
+@media (max-width: 480px) {
+  .demo-map-wrap { height: 170px; }
+  .demo-radius-btn { padding: 6px 11px; font-size: 12px; }
+  .demo-service-name { font-size: 13px; }
+}
+
 /* ─── NAV USER STATE (after login) ─── */
 .nav-user {
   display: none;
@@ -1872,11 +2029,79 @@
         <div class="demo-pill" onclick="selectPill(this, '우리 동네 태권도 최적 시간대')">🥋 반경 내 탐색</div>
         <div class="demo-pill" onclick="selectPill(this, '수학·영어·미술 최적 조합 만들어줘')">✨ 과목 조합 최적화</div>
       </div>
-      <button class="demo-start-btn" id="demoStartBtn" onclick="startDemoAnalysis()">출시 알림 신청하기 →</button>
+      <button class="demo-start-btn" id="demoStartBtn" onclick="openMapStep()">지도로 위치 설정하기 🗺️</button>
     </div>
 
-    <!-- Step 2: 분석 중 -->
+    <!-- Step 2 (NEW): 지도 탐색 + 서비스 설정 -->
     <div class="demo-step" id="demoStep2">
+      <div class="demo-title">어디서 찾아드릴까요? 📍</div>
+      <div class="demo-sub">현재 위치를 확인하고 탐색 반경과<br>원하는 서비스를 선택해주세요.</div>
+
+      <!-- 위치 표시 바 -->
+      <div class="demo-location-bar">
+        <button class="demo-location-btn" onclick="getDemoGPS()">📍 현재 위치</button>
+        <span class="demo-location-text" id="demoLocationText">클릭해서 위치를 불러오세요</span>
+      </div>
+
+      <!-- 지도 컨테이너 -->
+      <div class="demo-map-wrap" id="demoMapWrap">
+        <div id="demoNaverMap"></div>
+        <div class="demo-map-mock" id="demoMapMock">
+          <div class="demo-map-ring" id="demoMapRing" style="width:120px;height:120px"></div>
+          <div class="demo-map-pin" id="demoMapPin">📍</div>
+          <div class="demo-map-gps-dot" id="demoGpsDot" style="display:none"></div>
+          <div class="demo-map-radius-chip" id="demoRadiusChip">반경 1km</div>
+        </div>
+      </div>
+
+      <!-- 반경 선택 -->
+      <div class="demo-radius-section">
+        <div class="demo-radius-label">🔍 탐색 반경 설정</div>
+        <div class="demo-radius-btns">
+          <button class="demo-radius-btn" onclick="setDemoRadius(this,500)">500m</button>
+          <button class="demo-radius-btn active" onclick="setDemoRadius(this,1000)">1km</button>
+          <button class="demo-radius-btn" onclick="setDemoRadius(this,2000)">2km</button>
+          <button class="demo-radius-btn" onclick="setDemoRadius(this,3000)">3km</button>
+          <button class="demo-radius-btn" onclick="setDemoRadius(this,5000)">5km</button>
+        </div>
+      </div>
+
+      <!-- 추가 서비스 선택 -->
+      <div class="demo-service-section">
+        <div class="demo-service-title">🚌 추가 서비스 선택 (선택사항)</div>
+        <div class="demo-service-cards">
+          <div class="demo-service-card" id="demoShuttleCard" onclick="toggleService('shuttle')">
+            <div class="demo-service-icon">🚌</div>
+            <div class="demo-service-info">
+              <div class="demo-service-name">셔틀 서비스</div>
+              <div class="demo-service-desc">등하원 셔틀 운행 학원을 우선 추천</div>
+            </div>
+            <div class="demo-service-toggle"></div>
+          </div>
+          <div class="demo-service-card" id="demoPickupCard" onclick="toggleService('pickup')">
+            <div class="demo-service-icon">🏠</div>
+            <div class="demo-service-info">
+              <div class="demo-service-name">하원 서비스</div>
+              <div class="demo-service-desc">수업 후 집까지 안전 귀가 도우미 연결</div>
+            </div>
+            <div class="demo-service-toggle"></div>
+          </div>
+        </div>
+        <!-- 그룹 혜택 배너: 하원 서비스 선택 시 표시 -->
+        <div class="demo-merit-banner" id="demoMeritBanner">
+          <div class="demo-merit-icon">💡</div>
+          <div>
+            <strong>3명 이상 동시 하원</strong> 시 하원 서비스 무료!<br>
+            <small>같은 방향 이웃 아이들과 함께하면 비용 없이 이용 가능해요. 키즈루트가 자동으로 매칭해드려요.</small>
+          </div>
+        </div>
+      </div>
+
+      <button class="demo-start-btn" onclick="startDemoAnalysis()" style="margin-top:14px">학원 탐색 시작하기 →</button>
+    </div>
+
+    <!-- Step 3: 분석 중 -->
+    <div class="demo-step" id="demoStep3">
       <div class="demo-analyzing">
         <div class="demo-analyzing-icon">🔍</div>
         <div class="demo-analyzing-title">키즈루트가 분석 중이에요</div>
@@ -1885,8 +2110,8 @@
       </div>
     </div>
 
-    <!-- Step 3: 리드 폼 -->
-    <div class="demo-step" id="demoStep3">
+    <!-- Step 4: 리드 폼 -->
+    <div class="demo-step" id="demoStep4">
       <div class="demo-form-badge">🎉 분석 완료</div>
       <div class="demo-title">결과를 이메일로 받아보세요</div>
       <div class="demo-sub">출시 시 맞춤 결과와 얼리버드 혜택을<br>가장 먼저 전달드릴게요.</div>
@@ -1928,8 +2153,8 @@
       <div class="demo-privacy">입력하신 정보는 출시 알림 발송 목적으로만 사용되며,<br>언제든지 수신 거부할 수 있습니다.</div>
     </div>
 
-    <!-- Step 4: 완료 -->
-    <div class="demo-step" id="demoStep4">
+    <!-- Step 5: 완료 -->
+    <div class="demo-step" id="demoStep5">
       <div class="demo-success">
         <div class="demo-success-icon">🎊</div>
         <div class="demo-success-title">신청이 완료됐어요!</div>
@@ -2052,9 +2277,23 @@ const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.go
 // ⚠️ 아래에 카카오 앱의 JavaScript 키를 입력하세요
 const KAKAO_APP_KEY = '1550b9b3a098d276139c9f66eabb7a64';
 
+// Naver Maps: https://console.ncloud.com/ → Application → Web Dynamic Map
+// ncpClientId 입력 시 실제 GPS 지도로 전환됩니다
+const NAVER_MAP_CLIENT_ID = 'YOUR_NAVER_MAP_CLIENT_ID';
+
 let _toastTimer = null;
 let _tokenClient = null;
 let _demoGoogleFillPending = false;
+
+// Map step state
+let _demoRadius = 1000;
+let _demoShuttle = false;
+let _demoPickup  = false;
+let _demoMap = null, _demoMarker = null, _demoCircle = null;
+let _demoGPSLat = 37.5665, _demoGPSLng = 126.9780; // default: Seoul
+
+const _RADIUS_TO_PX = { 500: 75, 1000: 120, 2000: 158, 3000: 182, 5000: 205 };
+const _RADIUS_TO_ZOOM = { 500: 16, 1000: 15, 2000: 14, 3000: 13, 5000: 12 };
 
 // ─── 초기화 ───
 window.addEventListener('load', () => {
@@ -2225,9 +2464,17 @@ function openDemoModal() {
   _showDemoStep('demoStep1');
   document.querySelectorAll('.demo-pill').forEach(p => p.classList.remove('active'));
   document.getElementById('demoTypewriter').textContent = '';
-  _demoQueryIdx = 0;
-  _demoCharIdx = 0;
-  _demoErasing = false;
+  _demoQueryIdx = 0; _demoCharIdx = 0; _demoErasing = false;
+  // Reset service toggles
+  _demoShuttle = false; _demoPickup = false;
+  ['demoShuttleCard','demoPickupCard'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.classList.remove('active');
+  });
+  const merit = document.getElementById('demoMeritBanner');
+  if (merit) merit.classList.remove('show');
+  // Reset radius to 1km default
+  _demoRadius = 1000;
+  document.querySelectorAll('.demo-radius-btn').forEach((b,i) => b.classList.toggle('active', i===1));
   _startTypewriterCycle();
 }
 
@@ -2242,7 +2489,7 @@ function handleDemoOverlayClick(e) {
 }
 
 function _showDemoStep(stepId) {
-  ['demoStep1','demoStep2','demoStep3','demoStep4'].forEach(id => {
+  ['demoStep1','demoStep2','demoStep3','demoStep4','demoStep5'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -2309,16 +2556,131 @@ function selectPill(el, text) {
   _showQueryInTypewriter(text);
 }
 
-// ─── Step 2: 분석 중 ───
-function startDemoAnalysis() {
+// ─── Map Step ───
+function openMapStep() {
   _showDemoStep('demoStep2');
+  _stopTypewriter();
+  // Slight delay so CSS transition lands before GPS dialog
+  setTimeout(getDemoGPS, 200);
+}
+
+function getDemoGPS() {
+  const txt = document.getElementById('demoLocationText');
+  if (txt) txt.textContent = '위치 정보를 가져오는 중...';
+  if (!navigator.geolocation) {
+    if (txt) txt.textContent = '위치 서비스 미지원 — 서울 기본 위치 사용';
+    _initDemoMap(_demoGPSLat, _demoGPSLng);
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      _demoGPSLat = pos.coords.latitude;
+      _demoGPSLng = pos.coords.longitude;
+      if (txt) {
+        txt.textContent = `현재 위치 확인 완료 (${_demoGPSLat.toFixed(4)}, ${_demoGPSLng.toFixed(4)})`;
+      }
+      // Show GPS dot on mock map
+      const dot = document.getElementById('demoGpsDot');
+      if (dot) dot.style.display = 'block';
+      _initDemoMap(_demoGPSLat, _demoGPSLng);
+    },
+    () => {
+      if (txt) txt.textContent = '위치 권한 거부됨 — 서울 기본 위치로 탐색합니다';
+      _initDemoMap(_demoGPSLat, _demoGPSLng);
+    },
+    { timeout: 6000, enableHighAccuracy: true }
+  );
+}
+
+function _initDemoMap(lat, lng) {
+  const hasKey = NAVER_MAP_CLIENT_ID !== 'YOUR_NAVER_MAP_CLIENT_ID';
+  if (hasKey) {
+    _loadNaverMapScript(() => _initNaverMap(lat, lng));
+  } else {
+    _updateMockMap();
+  }
+}
+
+function _loadNaverMapScript(cb) {
+  if (typeof naver !== 'undefined' && naver.maps) { cb(); return; }
+  let s = document.getElementById('_naverMapScript');
+  if (s) { s.addEventListener('load', cb); return; }
+  s = document.createElement('script');
+  s.id = '_naverMapScript';
+  s.src = 'https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_MAP_CLIENT_ID;
+  s.onload = cb;
+  document.head.appendChild(s);
+}
+
+function _initNaverMap(lat, lng) {
+  document.getElementById('demoNaverMap').style.display = 'block';
+  document.getElementById('demoMapMock').style.display = 'none';
+  const center = new naver.maps.LatLng(lat, lng);
+  if (!_demoMap) {
+    _demoMap = new naver.maps.Map('demoNaverMap', {
+      center, zoom: _RADIUS_TO_ZOOM[_demoRadius] || 15,
+      scaleControl: false, mapDataControl: false,
+    });
+    _demoMarker = new naver.maps.Marker({ position: center, map: _demoMap });
+    _demoCircle = new naver.maps.Circle({
+      map: _demoMap, center, radius: _demoRadius,
+      strokeColor: '#F97316', strokeOpacity: 0.85, strokeWeight: 2,
+      fillColor: '#F97316', fillOpacity: 0.07,
+    });
+  } else {
+    _demoMap.setCenter(center);
+    _demoMarker.setPosition(center);
+    _demoCircle.setCenter(center);
+    _demoCircle.setRadius(_demoRadius);
+    _demoMap.setZoom(_RADIUS_TO_ZOOM[_demoRadius] || 15);
+  }
+}
+
+function _updateMockMap() {
+  const px = _RADIUS_TO_PX[_demoRadius] || 120;
+  const ring = document.getElementById('demoMapRing');
+  if (ring) { ring.style.width = px + 'px'; ring.style.height = px + 'px'; }
+  const chip = document.getElementById('demoRadiusChip');
+  const label = _demoRadius >= 1000 ? (_demoRadius/1000)+'km' : _demoRadius+'m';
+  if (chip) chip.textContent = '반경 ' + label;
+}
+
+function setDemoRadius(el, meters) {
+  _demoRadius = meters;
+  document.querySelectorAll('.demo-radius-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (_demoMap && _demoCircle && typeof naver !== 'undefined') {
+    _demoCircle.setRadius(meters);
+    _demoMap.setZoom(_RADIUS_TO_ZOOM[meters] || 14);
+  } else {
+    _updateMockMap();
+  }
+}
+
+function toggleService(type) {
+  if (type === 'shuttle') {
+    _demoShuttle = !_demoShuttle;
+    document.getElementById('demoShuttleCard').classList.toggle('active', _demoShuttle);
+  } else if (type === 'pickup') {
+    _demoPickup = !_demoPickup;
+    document.getElementById('demoPickupCard').classList.toggle('active', _demoPickup);
+    document.getElementById('demoMeritBanner').classList.toggle('show', _demoPickup);
+  }
+}
+
+// ─── Step 3: 분석 중 ───
+function startDemoAnalysis() {
+  _showDemoStep('demoStep3');
   _stopTypewriter();
   const bar = document.getElementById('demoProgressBar');
   const txt = document.getElementById('demoAnalyzingText');
+  const radiusLabel = _demoRadius >= 1000 ? (_demoRadius/1000)+'km' : _demoRadius+'m';
+  const shuttleMsg = _demoShuttle ? ' (셔틀 우선)' : '';
+  const pickupMsg  = _demoPickup  ? ' + 하원 매칭' : '';
   const msgs = [
-    '주변 학원 데이터를 탐색하고 있어요...',
+    `반경 ${radiusLabel} 내 학원 데이터 탐색 중${shuttleMsg}...`,
     '시간대 충돌을 확인하고 있어요...',
-    '최적 조합을 계산하고 있어요...',
+    `최적 조합을 계산하고 있어요${pickupMsg}...`,
     '맞춤 결과를 준비하고 있어요...'
   ];
   let progress = 0;
@@ -2341,7 +2703,7 @@ function startDemoAnalysis() {
       ['leadEmail','leadName'].forEach(id => { const f = document.getElementById(id); if(f) f.value=''; });
       const sel = document.getElementById('leadAge');
       if (sel) sel.selectedIndex = 0;
-      setTimeout(() => _showDemoStep('demoStep3'), 400);
+      setTimeout(() => _showDemoStep('demoStep4'), 400);
     }
   }, 220);
 }
@@ -2411,7 +2773,7 @@ function submitLeadForm() {
       '<strong>' + email + '</strong>으로<br>출시 알림을 보내드릴게요! 🎉<br>' +
       '<span style="font-size:13px;color:var(--text-sub);display:block;margin-top:6px">얼리버드 3개월 무료 혜택도 함께 드립니다.</span>';
   }
-  _showDemoStep('demoStep4');
+  _showDemoStep('demoStep5');
 }
 
 // ─── Hero phone navigation ───
