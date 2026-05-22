@@ -2682,14 +2682,42 @@
 </footer>
 
 <script>
-// ─── 소셜 로그인 설정 ───
-// Google: https://console.cloud.google.com/ → 클라이언트 ID
-const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com';
-// Kakao: https://developers.kakao.com/ → 내 애플리케이션 → JavaScript 키
-// ⚠️ 아래에 카카오 앱의 JavaScript 키를 입력하세요
-const KAKAO_APP_KEY = '1550b9b3a098d276139c9f66eabb7a64';
+/**
+ * KidsRoute 랜딩페이지 — 메인 스크립트
+ * 배포: https://davegpt25.github.io/kids/
+ * 최종 업데이트: 2026-05-23
+ *
+ * ── OAuth 설정 ──────────────────────────────────────────────────────
+ *  Google (GIS Token Client + Implicit Redirect)
+ *    - GCP Console → OAuth 2.0 Client ID
+ *    - Authorized JavaScript origins: https://davegpt25.github.io
+ *    - Authorized redirect URIs:      https://davegpt25.github.io/kids/
+ *
+ *  Kakao (JS SDK v2.7.2 + Authorization Code Redirect)
+ *    - Kakao Developers → 앱 → 카카오 로그인
+ *    - Redirect URI:     https://davegpt25.github.io/kids/
+ *    - 동의항목:         닉네임(필수), 이메일(선택)
+ *    - 플랫폼 도메인:    https://davegpt25.github.io
+ *
+ * ── OAuth 플로우 분기 ─────────────────────────────────────────────
+ *  인앱 브라우저 (카카오톡 등):
+ *    Google → 안내 시트 (Google 정책상 WebView 완전 차단)
+ *    Kakao  → SDK popup 시도 (카카오톡 네이티브) → 실패 시 안내 시트
+ *  모바일 Chrome/Samsung:
+ *    Google → implicit token redirect (response_type=token)
+ *    Kakao  → authorization code redirect → client-side token exchange
+ *  데스크톱:
+ *    Google → GIS Token Client popup
+ *    Kakao  → Kakao.Auth.login() popup
+ *
+ * ── 카카오맵 ────────────────────────────────────────────────────────
+ *  KAKAO_APP_KEY 재사용 (별도 Maps 결제 불필요)
+ *  autoload=false + kakao.maps.load(cb) 방식으로 초기화
+ * ─────────────────────────────────────────────────────────────────── */
 
-// 카카오맵: KAKAO_APP_KEY를 그대로 사용합니다 (별도 결제 불필요)
+// ─── 소셜 로그인 설정 ───
+const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com';
+const KAKAO_APP_KEY    = '1550b9b3a098d276139c9f66eabb7a64';
 
 let _toastTimer = null;
 let _tokenClient = null;
