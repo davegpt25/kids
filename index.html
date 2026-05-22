@@ -939,7 +939,7 @@
   font-size: 11px; font-weight: 700; color: var(--primary); z-index: 5;
   box-shadow: 0 1px 4px rgba(0,0,0,.12);
 }
-#demoNaverMap { width: 100%; height: 100%; display: none; }
+#demoMapCanvas { width: 100%; height: 100%; display: none; }
 
 /* 반경 선택 */
 .demo-radius-section { margin-bottom: 16px; }
@@ -2045,7 +2045,7 @@
 
       <!-- 지도 컨테이너 -->
       <div class="demo-map-wrap" id="demoMapWrap">
-        <div id="demoNaverMap"></div>
+        <div id="demoMapCanvas"></div>
         <div class="demo-map-mock" id="demoMapMock">
           <div class="demo-map-ring" id="demoMapRing" style="width:120px;height:120px"></div>
           <div class="demo-map-pin" id="demoMapPin">📍</div>
@@ -2277,9 +2277,7 @@ const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.go
 // ⚠️ 아래에 카카오 앱의 JavaScript 키를 입력하세요
 const KAKAO_APP_KEY = '1550b9b3a098d276139c9f66eabb7a64';
 
-// Naver Maps: https://console.ncloud.com/ → Application → Web Dynamic Map
-// ncpClientId 입력 시 실제 GPS 지도로 전환됩니다
-const NAVER_MAP_CLIENT_ID = 'YOUR_NAVER_MAP_CLIENT_ID';
+// 카카오맵: KAKAO_APP_KEY를 그대로 사용합니다 (별도 결제 불필요)
 
 let _toastTimer = null;
 let _tokenClient = null;
@@ -2293,7 +2291,8 @@ let _demoMap = null, _demoMarker = null, _demoCircle = null;
 let _demoGPSLat = 37.5665, _demoGPSLng = 126.9780; // default: Seoul
 
 const _RADIUS_TO_PX = { 500: 75, 1000: 120, 2000: 158, 3000: 182, 5000: 205 };
-const _RADIUS_TO_ZOOM = { 500: 16, 1000: 15, 2000: 14, 3000: 13, 5000: 12 };
+// 카카오맵 레벨: 숫자가 클수록 축소 (1=가장 가까움)
+const _KAKAO_LEVEL = { 500: 4, 1000: 5, 2000: 6, 3000: 7, 5000: 7 };
 
 // ─── 초기화 ───
 window.addEventListener('load', () => {
@@ -2593,46 +2592,58 @@ function getDemoGPS() {
 }
 
 function _initDemoMap(lat, lng) {
-  const hasKey = NAVER_MAP_CLIENT_ID !== 'YOUR_NAVER_MAP_CLIENT_ID';
-  if (hasKey) {
-    _loadNaverMapScript(() => _initNaverMap(lat, lng));
+  const hasKakaoKey = KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE';
+  if (hasKakaoKey) {
+    _loadKakaoMapScript(() => _initKakaoMap(lat, lng));
   } else {
     _updateMockMap();
   }
 }
 
-function _loadNaverMapScript(cb) {
-  if (typeof naver !== 'undefined' && naver.maps) { cb(); return; }
-  let s = document.getElementById('_naverMapScript');
-  if (s) { s.addEventListener('load', cb); return; }
+function _loadKakaoMapScript(cb) {
+  // 이미 로드됨
+  if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.Map) { cb(); return; }
+  // 로딩 중인 경우 (script 태그는 있지만 아직 실행 전)
+  let s = document.getElementById('_kakaoMapScript');
+  if (s) {
+    const orig = s.onload;
+    s.onload = () => { if (orig) orig(); cb(); };
+    return;
+  }
   s = document.createElement('script');
-  s.id = '_naverMapScript';
-  s.src = 'https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_MAP_CLIENT_ID;
-  s.onload = cb;
+  s.id = '_kakaoMapScript';
+  // autoload=false → kakao.maps.load() 로 명시적 초기화
+  s.src = '//dapi.kakao.com/v2/maps/sdk.js?appkey=' + KAKAO_APP_KEY + '&autoload=false';
+  s.onload = () => kakao.maps.load(cb);
   document.head.appendChild(s);
 }
 
-function _initNaverMap(lat, lng) {
-  document.getElementById('demoNaverMap').style.display = 'block';
-  document.getElementById('demoMapMock').style.display = 'none';
-  const center = new naver.maps.LatLng(lat, lng);
+function _initKakaoMap(lat, lng) {
+  const canvas = document.getElementById('demoMapCanvas');
+  const mock   = document.getElementById('demoMapMock');
+  canvas.style.display = 'block';
+  mock.style.display   = 'none';
+
+  const center = new kakao.maps.LatLng(lat, lng);
   if (!_demoMap) {
-    _demoMap = new naver.maps.Map('demoNaverMap', {
-      center, zoom: _RADIUS_TO_ZOOM[_demoRadius] || 15,
-      scaleControl: false, mapDataControl: false,
+    _demoMap = new kakao.maps.Map(canvas, {
+      center,
+      level: _KAKAO_LEVEL[_demoRadius] || 5
     });
-    _demoMarker = new naver.maps.Marker({ position: center, map: _demoMap });
-    _demoCircle = new naver.maps.Circle({
-      map: _demoMap, center, radius: _demoRadius,
-      strokeColor: '#F97316', strokeOpacity: 0.85, strokeWeight: 2,
+    _demoMarker = new kakao.maps.Marker({ position: center, map: _demoMap });
+    _demoCircle = new kakao.maps.Circle({
+      center, radius: _demoRadius,
+      strokeWeight: 2,
+      strokeColor: '#F97316', strokeOpacity: 0.85, strokeStyle: 'solid',
       fillColor: '#F97316', fillOpacity: 0.07,
+      map: _demoMap
     });
   } else {
     _demoMap.setCenter(center);
+    _demoMap.setLevel(_KAKAO_LEVEL[_demoRadius] || 5);
     _demoMarker.setPosition(center);
-    _demoCircle.setCenter(center);
+    _demoCircle.setPosition(center);
     _demoCircle.setRadius(_demoRadius);
-    _demoMap.setZoom(_RADIUS_TO_ZOOM[_demoRadius] || 15);
   }
 }
 
@@ -2649,9 +2660,9 @@ function setDemoRadius(el, meters) {
   _demoRadius = meters;
   document.querySelectorAll('.demo-radius-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  if (_demoMap && _demoCircle && typeof naver !== 'undefined') {
+  if (_demoMap && _demoCircle && typeof kakao !== 'undefined' && kakao.maps) {
     _demoCircle.setRadius(meters);
-    _demoMap.setZoom(_RADIUS_TO_ZOOM[meters] || 14);
+    _demoMap.setLevel(_KAKAO_LEVEL[meters] || 5);
   } else {
     _updateMockMap();
   }
