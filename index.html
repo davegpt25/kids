@@ -456,6 +456,41 @@
   .step h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
   .step p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
 
+  /* ─── INAPP BROWSER WARNING SHEET ─── */
+  .inapp-overlay {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.55); align-items: flex-end;
+    backdrop-filter: blur(4px);
+  }
+  .inapp-overlay.open { display: flex; }
+  .inapp-sheet {
+    background: #fff; border-radius: 24px 24px 0 0;
+    padding: 28px 24px 44px; width: 100%;
+    animation: _inappSlideUp 0.28s cubic-bezier(.22,.68,0,1.2);
+  }
+  @keyframes _inappSlideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .inapp-handle { width: 40px; height: 4px; background: #E7E5E4; border-radius: 99px; margin: 0 auto 20px; }
+  .inapp-icon   { font-size: 40px; text-align: center; margin-bottom: 10px; }
+  .inapp-title  { font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 8px; color: var(--text-main); }
+  .inapp-desc   { font-size: 13.5px; color: var(--text-sub); text-align: center; line-height: 1.65; margin-bottom: 18px; white-space: pre-line; }
+  .inapp-steps  { background: var(--primary-light); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; }
+  .inapp-steps p { font-size: 12.5px; color: var(--text-main); line-height: 2; margin: 0; white-space: pre-line; }
+  .inapp-copy-btn {
+    width: 100%; padding: 15px; border-radius: 14px;
+    background: var(--primary); color: #fff; border: none;
+    font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px;
+    transition: background .2s;
+  }
+  .inapp-copy-btn:active { background: var(--primary-dark); }
+  .inapp-close-btn {
+    width: 100%; padding: 13px; border-radius: 14px;
+    background: none; color: var(--text-sub); border: 1.5px solid var(--border);
+    font-size: 14px; cursor: pointer;
+  }
+
   /* ─── PRICING ─── */
   .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 720px; }
   .pricing-card {
@@ -2529,6 +2564,19 @@
   </div>
 </div>
 
+<!-- 인앱 브라우저 안내 시트 -->
+<div class="inapp-overlay" id="inappOverlay" onclick="closeInappWarning(event)">
+  <div class="inapp-sheet">
+    <div class="inapp-handle"></div>
+    <div class="inapp-icon" id="inappIcon">🌐</div>
+    <div class="inapp-title" id="inappTitle">외부 브라우저에서 열어주세요</div>
+    <div class="inapp-desc"  id="inappDesc"></div>
+    <div class="inapp-steps"><p id="inappSteps"></p></div>
+    <button class="inapp-copy-btn" onclick="inappCopyUrl()">🔗 링크 복사하기</button>
+    <button class="inapp-close-btn" onclick="closeInappWarning()">닫기</button>
+  </div>
+</div>
+
 <!-- 로그인 모달 -->
 <div class="g-overlay" id="gOverlay" onclick="handleOverlayClick(event)">
   <div class="g-modal" id="gModal">
@@ -2663,6 +2711,73 @@ const _KAKAO_LEVEL = { 500: 4, 1000: 5, 2000: 6, 3000: 7, 5000: 7 };
 function _isMobile() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     || (navigator.maxTouchPoints > 1 && window.innerWidth <= 1024);
+}
+
+// ─── 인앱 브라우저 감지 ───
+// 반환값: 'kakaotalk' | 'instagram' | 'facebook' | 'naver' | 'webview' | false
+function _isInAppBrowser() {
+  const ua = navigator.userAgent || '';
+  if (/KAKAOTALK/i.test(ua))                          return 'kakaotalk';
+  if (/Instagram/i.test(ua))                          return 'instagram';
+  if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua))             return 'facebook';
+  if (/NAVER.*inapp|naver.*inapp/i.test(ua))          return 'naver';
+  if (/Android/i.test(ua) && /; wv\)/i.test(ua))      return 'webview';
+  if (/iPhone|iPad|iPod/i.test(ua) && !/Safari/i.test(ua) && /AppleWebKit/i.test(ua)) return 'webview';
+  return false;
+}
+
+// ─── 인앱 브라우저 안내 시트 ───
+function _showInAppWarning(provider) {
+  const inApp = _isInAppBrowser();
+  const isKakao = (provider === 'kakao');
+  let icon, title, desc, steps;
+
+  if (inApp === 'kakaotalk' && !isKakao) {
+    // 카카오톡에서 구글 로그인 시도
+    icon  = '🔵';
+    title = '구글 로그인은 Chrome에서 해주세요';
+    desc  = '카카오톡 내 브라우저에서는\nGoogle 정책상 로그인이 차단돼요.';
+    steps = '① 우측 상단 ⋮ 메뉴 탭\n② "다른 앱으로 열기" 또는\n   "Chrome으로 열기" 선택\n③ Chrome에서 다시 로그인 시도';
+  } else if (inApp === 'kakaotalk' && isKakao) {
+    icon  = '💛';
+    title = '카카오 로그인 오류';
+    desc  = '설정 문제로 로그인이 일시적으로\n불가능해요. Chrome에서 시도해주세요.';
+    steps = '① 우측 상단 ⋮ 메뉴 탭\n② "Chrome으로 열기" 선택\n③ Chrome에서 다시 로그인 시도';
+  } else {
+    icon  = isKakao ? '💛' : '🔵';
+    title = '외부 브라우저에서 열어주세요';
+    desc  = '현재 브라우저에서는 로그인이\n지원되지 않아요.';
+    steps = '① 아래 "링크 복사하기" 탭\n② Chrome 또는 Safari 열기\n③ 복사한 링크 주소창에 붙여넣기';
+  }
+
+  document.getElementById('inappIcon').textContent  = icon;
+  document.getElementById('inappTitle').textContent = title;
+  document.getElementById('inappDesc').textContent  = desc;
+  document.getElementById('inappSteps').textContent = steps;
+  document.getElementById('inappOverlay').classList.add('open');
+}
+
+function closeInappWarning(e) {
+  if (!e || e.target === document.getElementById('inappOverlay')) {
+    document.getElementById('inappOverlay').classList.remove('open');
+  }
+}
+
+async function inappCopyUrl() {
+  const url = location.href;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('링크를 복사했어요! Chrome에서 열어주세요 🔗');
+  } catch(e) {
+    // clipboard API 차단 시 fallback
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('링크를 복사했어요! Chrome에서 열어주세요 🔗');
+  }
+  document.getElementById('inappOverlay').classList.remove('open');
 }
 
 // ─── 모바일: Google implicit token redirect ───
@@ -2844,32 +2959,65 @@ function showView(viewId) {
 
 // ─── 로그인 방법 선택 ───
 function selectProvider(provider) {
+  const inApp = _isInAppBrowser();
+
   if (provider === 'google') {
+    // 인앱 브라우저: Google 정책상 OAuth 완전 차단 → 안내 시트
+    if (inApp) {
+      closeGoogleModal();
+      _showInAppWarning('google');
+      return;
+    }
     const hasClientId = GOOGLE_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
     if (hasClientId) {
       if (_isMobile()) {
-        // 모바일: 팝업 차단 우회 → redirect 방식
         closeGoogleModal();
         _oauthRedirectGoogle('login');
       } else if (_tokenClient) {
-        // 데스크톱: gesture chain 유지를 위해 OAuth 먼저 호출 후 모달 닫기
         _tokenClient.requestAccessToken({ prompt: 'select_account' });
         closeGoogleModal();
       } else {
-        showView('gViewPicker'); // SDK 로드 전 fallback
+        showView('gViewPicker');
       }
     } else {
-      showView('gViewPicker'); // 앱키 미설정 → 목업 모달
+      showView('gViewPicker');
     }
+
   } else if (provider === 'kakao') {
     const hasKakaoKey = KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE';
+
+    // 카카오톡 인앱 브라우저: SDK popup 시도 (KakaoTalk 네이티브 처리)
+    if (inApp === 'kakaotalk' && hasKakaoKey && typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
+      Kakao.Auth.login({
+        success: () => {
+          Kakao.API.request({
+            url: '/v2/user/me',
+            success: (res) => {
+              const name  = res.kakao_account?.profile?.nickname || '카카오사용자';
+              const email = res.kakao_account?.email || name + '@kakao.com';
+              closeGoogleModal();
+              onLoginSuccess(name, email, '#FEE500', 'kakao');
+            },
+            fail: () => { closeGoogleModal(); _showInAppWarning('kakao'); }
+          });
+        },
+        fail: () => { closeGoogleModal(); _showInAppWarning('kakao'); }
+      });
+      return;
+    }
+
+    // 기타 인앱 브라우저: 안내 시트
+    if (inApp) {
+      closeGoogleModal();
+      _showInAppWarning('kakao');
+      return;
+    }
+
     if (hasKakaoKey) {
       if (_isMobile()) {
-        // 모바일: redirect 방식
         closeGoogleModal();
         _oauthRedirectKakao('login');
       } else if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
-        // 데스크톱: popup 방식
         Kakao.Auth.login({
           success: () => {
             Kakao.API.request({
@@ -2886,22 +3034,14 @@ function selectProvider(provider) {
           fail: (err) => console.error('카카오 로그인 실패:', err)
         });
       } else {
-        // Kakao SDK 로드 전 fallback
         showView('gViewLoading');
         document.getElementById('gLoadingText').textContent = '카카오 로그인 중...';
-        setTimeout(() => {
-          closeGoogleModal();
-          onLoginSuccess('카카오사용자', 'kakao_user@kakao.com', '#FEE500', 'kakao');
-        }, 1400);
+        setTimeout(() => { closeGoogleModal(); onLoginSuccess('카카오사용자', 'kakao_user@kakao.com', '#FEE500', 'kakao'); }, 1400);
       }
     } else {
-      // 앱키 미설정 → 목업 fallback
       showView('gViewLoading');
       document.getElementById('gLoadingText').textContent = '카카오 로그인 중...';
-      setTimeout(() => {
-        closeGoogleModal();
-        onLoginSuccess('카카오사용자', 'kakao_user@kakao.com', '#FEE500', 'kakao');
-      }, 1400);
+      setTimeout(() => { closeGoogleModal(); onLoginSuccess('카카오사용자', 'kakao_user@kakao.com', '#FEE500', 'kakao'); }, 1400);
     }
   }
 }
@@ -3237,10 +3377,12 @@ function _fillLeadForm(name, email) {
 }
 
 function demoFillFromGoogle() {
+  const inApp = _isInAppBrowser();
+  if (inApp) { _showInAppWarning('google'); return; }
+
   const hasClientId = GOOGLE_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
   if (hasClientId) {
     if (_isMobile()) {
-      // 모바일: demo step4로 복귀하도록 mode=google_demo
       _oauthRedirectGoogle('demo');
     } else if (_tokenClient) {
       _demoGoogleFillPending = true;
@@ -3256,10 +3398,32 @@ function demoFillFromGoogle() {
 }
 
 function demoFillFromKakao() {
+  const inApp = _isInAppBrowser();
   const hasKakaoKey = KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE';
+
+  // 카카오톡 인앱: SDK popup 시도
+  if (inApp === 'kakaotalk' && hasKakaoKey && typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
+    Kakao.Auth.login({
+      success: () => {
+        Kakao.API.request({
+          url: '/v2/user/me',
+          success: (res) => {
+            _fillLeadForm(res.kakao_account?.profile?.nickname || '카카오사용자', res.kakao_account?.email || '');
+            showToast('카카오 정보를 가져왔어요');
+          },
+          fail: () => _showInAppWarning('kakao')
+        });
+      },
+      fail: () => _showInAppWarning('kakao')
+    });
+    return;
+  }
+
+  // 기타 인앱 브라우저
+  if (inApp) { _showInAppWarning('kakao'); return; }
+
   if (hasKakaoKey) {
     if (_isMobile()) {
-      // 모바일: demo step4로 복귀하도록 mode=kakao_demo
       _oauthRedirectKakao('demo');
     } else if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
       Kakao.Auth.login({
@@ -3267,9 +3431,7 @@ function demoFillFromKakao() {
           Kakao.API.request({
             url: '/v2/user/me',
             success: (res) => {
-              const name  = res.kakao_account?.profile?.nickname || '카카오사용자';
-              const email = res.kakao_account?.email || '';
-              _fillLeadForm(name, email);
+              _fillLeadForm(res.kakao_account?.profile?.nickname || '카카오사용자', res.kakao_account?.email || '');
               showToast('카카오 정보를 가져왔어요');
             },
             fail: () => showToast('카카오 정보를 불러올 수 없어요')
@@ -3278,12 +3440,10 @@ function demoFillFromKakao() {
         fail: () => showToast('카카오 로그인에 실패했어요')
       });
     } else {
-      _fillLeadForm('카카오사용자', '');
-      showToast('카카오 정보를 가져왔어요');
+      _fillLeadForm('카카오사용자', ''); showToast('카카오 정보를 가져왔어요');
     }
   } else {
-    _fillLeadForm('카카오사용자', '');
-    showToast('카카오 정보를 가져왔어요');
+    _fillLeadForm('카카오사용자', ''); showToast('카카오 정보를 가져왔어요');
   }
 }
 
