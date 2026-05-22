@@ -237,3 +237,78 @@
   - `<body>`: ③⑤⑧ 섹션 추가, 기존 섹션 스타일 클래스 교체
   - `<script>`: 기존 JS 유지 + Intersection Observer 추가, 햄버거 메뉴 토글
 - **삭제**: `kidsroute-mock/style-compare.html` (임시 비교 파일)
+
+---
+
+## 추가 기능 스펙 (2026-05-22 업데이트)
+
+### OAuth 사전예약 로그인
+
+**배포 URL**: `https://davegpt25.github.io/kids/`
+
+#### Google OAuth (Token Client)
+- **Client ID**: `1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com`
+- **SDK**: Google Identity Services (`https://accounts.google.com/gsi/client`)
+- **Flow**: `google.accounts.oauth2.initTokenClient` + `requestAccessToken({ prompt: 'select_account' })`
+- **Scope**: `openid email profile`
+- **UserInfo**: `https://www.googleapis.com/oauth2/v3/userinfo`
+
+#### Kakao OAuth
+- **JS Key**: `1550b9b3a098d276139c9f66eabb7a64`
+- **SDK**: Kakao JS SDK v2.7.2
+- **Flow**: `Kakao.Auth.login()` → `Kakao.API.request({ url: '/v2/user/me' })`
+- **앱 대표 도메인**: `https://davegpt25.github.io/kids/`
+
+#### 로그인 UI 흐름
+1. 네비게이션 "사전예약" 또는 히어로 "🍎 사전예약" 버튼 클릭
+2. 로그인 방법 선택 모달 (Google / Kakao)
+3. 선택 시 각 SDK 팝업 → 실제 계정 선택
+4. 성공 시 `onLoginSuccess(name, email, color, provider)` 호출
+   - 네비 사전예약 버튼 → 아바타로 교체
+   - CTA 섹션 → 예약완료 상태로 전환
+   - 하단 토스트 알림
+
+---
+
+### 무료 체험 데모 모달
+
+히어로 "✨ 무료로 체험하기" 버튼 클릭 시 오버레이 모달 표시.
+
+#### Step 1 — 타이프라이터 애니메이션
+- 5가지 예시 쿼리가 글자 단위로 자동 순환 (75ms/글자, 1800ms 대기, 35ms/글자 지우기)
+- 예시 쿼리 Pill 클릭 시 해당 텍스트로 즉시 타이핑 시작 + pill 활성화 표시
+- "출시 알림 신청하기 →" 버튼으로 Step 2 진행
+
+#### Step 2 — 분석 애니메이션
+- 프로그레스 바 0 → 100% (랜덤 증가, ~2.5초 소요)
+- 진행률에 따라 4단계 안내 메시지 순환
+- 완료 후 400ms 딜레이 뒤 Step 3 전환
+
+#### Step 3 — 리드 캡처 폼
+- 필드: 이메일(필수), 성함(선택), 자녀나이(선택)
+- **소셜 자동입력**: Google / Kakao 버튼으로 OAuth 거쳐 이름·이메일 자동 입력
+  - Google: `_demoGoogleFillPending = true` 플래그로 기존 Token Client 재사용
+  - Kakao: `Kakao.Auth.login()` 후 `/v2/user/me` API 호출
+- 이메일 유효성 검사 실패 시 빨간 테두리 + 토스트 알림
+- 제출 성공 시 Step 4 전환
+
+#### Step 4 — 완료 화면
+- 입력한 이메일이 포함된 개인화 메시지 표시
+- "확인" 버튼으로 모달 닫기
+
+#### 반응형
+- 최대 너비 520px, 패딩 모바일 조정 (28px 20px)
+- Pill 버튼 wrap, 소셜 버튼 세로 스택 (모바일 480px 이하)
+
+#### 주요 JS 함수
+| 함수 | 설명 |
+|------|------|
+| `openDemoModal()` | 오버레이 열기, Step 1 초기화, 타이프라이터 시작 |
+| `closeDemoModal()` | 오버레이 닫기, 타이프라이터 정지 |
+| `handleDemoOverlayClick(e)` | 오버레이 외부 클릭 시 닫기 |
+| `selectPill(el, text)` | Pill 선택 + 해당 쿼리 타이핑 |
+| `startDemoAnalysis()` | Step 2 프로그레스 애니메이션 → Step 3 |
+| `_fillLeadForm(name, email)` | 폼 자동입력 헬퍼 |
+| `demoFillFromGoogle()` | Google OAuth → 폼 자동입력 |
+| `demoFillFromKakao()` | Kakao OAuth → 폼 자동입력 |
+| `submitLeadForm()` | 이메일 검증 → Step 4 |
