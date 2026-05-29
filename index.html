@@ -54,7 +54,7 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--gray-100);
   }
-  .nav-logo { font-size: 20px; font-weight: 800; color: var(--blue); letter-spacing: -0.5px; }
+  .nav-logo { font-size: 20px; font-weight: 800; color: var(--blue); letter-spacing: -0.5px; text-decoration: none; cursor: pointer; }
   .nav-logo span { color: var(--primary); }
   .nav-links { display: flex; gap: 28px; align-items: center; }
   .nav-links a { text-decoration: none; color: var(--gray-700); font-size: 14px; font-weight: 500; transition: color .2s; }
@@ -1595,7 +1595,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">키즈루<span>트</span></div>
+  <a class="nav-logo" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'}); return false;">키즈루<span>트</span></a>
   <div class="nav-links">
     <a href="#features">기능</a>
     <a href="#howto">이용방법</a>
