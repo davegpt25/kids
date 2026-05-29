@@ -6,6 +6,16 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <title>키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄">
+<meta property="og:description" content="GPS 반경 내 학원을 자동으로 찾아주고, 시간 겹침 없는 최적 조합을 3초 만에 추천해요.">
+<meta property="og:url" content="https://davegpt25.github.io/kids/">
+<meta property="og:image" content="https://davegpt25.github.io/kids/og-image.png">
+<meta property="og:site_name" content="키즈루트">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄">
+<meta name="twitter:description" content="GPS 반경 내 학원을 자동으로 찾아주고, 시간 겹침 없는 최적 조합을 3초 만에 추천해요.">
+<meta name="description" content="GPS 반경 내 학원을 자동으로 찾아주고, 시간 겹침 없는 최적 조합을 3초 만에 추천해요.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF9A3C'/%3E%3Cstop offset='100%25' stop-color='%23F97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='96' height='96' rx='24' fill='url(%23g)'/%3E%3Ccircle cx='48' cy='22' r='11' fill='white'/%3E%3Cline x1='48' y1='33' x2='48' y2='50' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3Cline x1='33' y1='41' x2='63' y2='41' stroke='white' stroke-width='4.5' stroke-linecap='round'/%3E%3Cline x1='48' y1='50' x2='38' y2='63' stroke='white' stroke-width='4.5' stroke-linecap='round'/%3E%3Cline x1='48' y1='50' x2='58' y2='63' stroke='white' stroke-width='4.5' stroke-linecap='round'/%3E%3Cpath d='M14 79 Q32 71 48 73 Q64 75 82 67' fill='none' stroke='white' stroke-width='2.8' stroke-dasharray='5%2C3.5' stroke-linecap='round' opacity='0.9'/%3E%3Ccircle cx='14' cy='79' r='4' fill='white'/%3E%3Cpath d='M78 64 L83 67 L78 71' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -36,6 +46,27 @@
     --red:           #EF4444;
     --yellow:        #F59E0B;
   }
+
+  /* ─── SCROLL PROGRESS BAR ─── */
+  #scrollProgressBar {
+    position: fixed; top: 0; left: 0; z-index: 9999;
+    height: 3px; width: 0%; background: var(--primary);
+    transition: width 0.1s linear;
+    pointer-events: none;
+  }
+
+  /* ─── BACK TO TOP ─── */
+  #backToTop {
+    position: fixed; bottom: 28px; right: 24px; z-index: 500;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--primary); color: #fff; border: none;
+    font-size: 18px; cursor: pointer; display: none;
+    box-shadow: 0 4px 16px rgba(249,115,22,0.35);
+    transition: opacity .25s, transform .25s;
+    align-items: center; justify-content: center;
+  }
+  #backToTop:hover { background: var(--primary-dark); transform: translateY(-2px); }
+  #backToTop.visible { display: flex; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -583,6 +614,53 @@
   .footer-copy { font-size: 12px; }
 
   /* ─── RESPONSIVE ─── */
+  /* ─── PRESS BAR ─── */
+  .press-bar {
+    background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 14px 40px; display: flex; align-items: center; gap: 20px; overflow: hidden;
+  }
+  .press-bar-label {
+    font-size: 10px; font-weight: 800; color: var(--text-muted); letter-spacing: .1em;
+    text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
+  }
+  .press-bar-items {
+    display: flex; align-items: center; gap: 16px; overflow-x: auto; scrollbar-width: none;
+  }
+  .press-bar-items::-webkit-scrollbar { display: none; }
+  .press-item { font-size: 13px; font-weight: 600; color: var(--text-sub); white-space: nowrap; }
+  .press-divider { color: var(--border); font-size: 16px; flex-shrink: 0; }
+  @media (max-width: 768px) {
+    .press-bar { padding: 12px 20px; gap: 12px; }
+    .press-bar-label { display: none; }
+  }
+
+  /* ─── COMPARISON ─── */
+  .comparison-section { padding: 80px 40px; text-align: center; background: var(--bg-base); }
+  .comparison-wrap { overflow-x: auto; margin-top: 36px; }
+  .comparison-table {
+    width: 100%; max-width: 720px; margin: 0 auto; border-collapse: collapse;
+    font-size: 14px; text-align: center;
+  }
+  .comparison-table thead tr { background: var(--primary-light); }
+  .comparison-table th {
+    padding: 14px 16px; font-weight: 800; font-size: 13px; border-bottom: 2px solid var(--border);
+  }
+  .comp-feature { text-align: left; color: var(--text-sub); }
+  .comp-us { color: var(--primary); }
+  .comp-other { color: var(--text-muted); }
+  .comparison-table tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+  .comparison-table tbody tr:hover { background: var(--primary-light); }
+  .comparison-table td { padding: 13px 16px; }
+  .comparison-table tbody td:first-child { text-align: left; font-weight: 600; color: var(--text-main); }
+  .comp-yes { color: #10B981; font-weight: 800; }
+  .comp-no  { color: #EF4444; font-weight: 700; }
+  .comp-half { color: #F59E0B; font-weight: 700; }
+  @media (max-width: 768px) {
+    .comparison-section { padding: 60px 20px; }
+    .comparison-table { font-size: 12px; }
+    .comparison-table th, .comparison-table td { padding: 10px 10px; }
+  }
+
   /* ─── HOW-TO ─── */
   .howto { padding: 100px 40px; background: #fff; }
   .howto-inner { max-width: 1100px; margin: 0 auto; }
@@ -627,32 +705,81 @@
   }
 
   /* ─── REVIEWS ─── */
-  .reviews { padding: 100px 40px; background: #fff; }
-  .reviews-inner { max-width: 1100px; margin: 0 auto; }
-  .reviews-label {
-    display: inline-block; background: var(--primary-light); color: var(--primary);
-    border-radius: 100px; padding: 5px 14px; font-size: 12px; font-weight: 700; margin-bottom: 16px;
+  .reviews { padding: 80px 0; background: var(--primary-light); text-align: center; overflow: hidden; }
+  .reviews-inner { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+  .reviews-label { font-size: 12px; font-weight: 700; color: var(--primary); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+  .reviews h2 { font-size: 36px; font-weight: 800; color: var(--text-main); margin-bottom: 10px; letter-spacing: -0.5px; }
+  .reviews-sub { font-size: 16px; color: var(--text-sub); margin-bottom: 36px; }
+
+  .reviews-slider-wrap { overflow: hidden; margin: 0 -40px; padding: 0 40px; }
+  .reviews-slider {
+    display: flex; gap: 20px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
   }
-  .reviews h2 { font-size: 36px; font-weight: 800; color: var(--text-main); letter-spacing: -1px; margin-bottom: 8px; }
-  .reviews-sub { font-size: 16px; color: var(--text-sub); margin-bottom: 56px; }
-  .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .review-card { background: var(--bg-base); border: 1.5px solid var(--border); border-radius: 16px; padding: 28px; }
-  .review-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-  .review-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--primary); color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 800; flex-shrink: 0;
+  .reviews-slider::-webkit-scrollbar { display: none; }
+
+  .review-card {
+    background: var(--bg-card); border-radius: 16px; padding: 24px;
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    min-width: 300px; max-width: 320px;
+    scroll-snap-align: start; flex-shrink: 0;
+    text-align: left;
   }
-  .review-info { display: flex; flex-direction: column; gap: 2px; }
-  .review-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
-  .review-region { font-size: 12px; color: var(--text-muted); }
-  .review-stars { color: #F59E0B; font-size: 14px; margin-bottom: 12px; }
-  .review-text { font-size: 14px; color: var(--text-sub); line-height: 1.7; }
   @media (max-width: 768px) {
-    .reviews { padding: 72px 20px; }
-    .reviews-grid { grid-template-columns: 1fr; gap: 14px; }
+    .review-card { min-width: 260px; }
   }
+
+  .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .review-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    font-weight: 800; font-size: 17px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .review-info { display: flex; flex-direction: column; }
+  .review-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
+  .review-region { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .review-stars { color: #F59E0B; font-size: 14px; margin-bottom: 10px; letter-spacing: 1px; }
+  .review-text { font-size: 14px; color: var(--text-sub); line-height: 1.7; }
+
+  /* Dot navigation */
+  .reviews-dots { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+  .reviews-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); border: none; cursor: pointer; padding: 0;
+    transition: background .2s, transform .2s;
+  }
+  .reviews-dot.active { background: var(--primary); transform: scale(1.3); }
+  @media (max-width: 768px) {
+    .reviews { padding: 60px 0; }
+    .reviews-inner { padding: 0 20px; }
+    .reviews-slider-wrap { margin: 0 -20px; padding: 0 20px; }
+  }
+
+  /* ─── HERO COUNTER ─── */
+  .hero-counter {
+    margin-top: 18px;
+    font-size: 14px; font-weight: 700; color: var(--primary);
+    background: rgba(249,115,22,0.08); border-radius: 100px;
+    display: inline-block; padding: 7px 18px;
+    animation: counterPulse 2.5s ease infinite;
+  }
+  @keyframes counterPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* ─── COUNTDOWN TIMER ─── */
+  .cta-countdown { margin-bottom: 24px; }
+  .countdown-label { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .countdown-timer { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .countdown-unit { display: flex; flex-direction: column; align-items: center; background: #fff; border-radius: 10px; padding: 10px 14px; min-width: 58px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  .countdown-unit span { font-size: 28px; font-weight: 900; color: var(--primary); line-height: 1; }
+  .countdown-unit small { font-size: 10px; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
+  .countdown-sep { font-size: 24px; font-weight: 900; color: var(--primary); margin-bottom: 14px; }
 
   /* ─── APP STORE CTA ─── */
   .app-cta { padding: 100px 40px; background: var(--primary-light); text-align: center; }
@@ -1591,9 +1718,99 @@
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-size: 36px; margin: 0 auto 24px;
 }
+
+/* ─── FAQ ─── */
+.faq-list { max-width: 720px; display: flex; flex-direction: column; gap: 0; margin-top: 32px; }
+.faq-item { border-bottom: 1px solid var(--gray-200); }
+.faq-item:first-child { border-top: 1px solid var(--gray-200); }
+.faq-q {
+  width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 4px; font-size: 15px; font-weight: 600; color: var(--gray-900);
+  gap: 16px;
+}
+.faq-q:hover { color: var(--blue); }
+.faq-icon {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--gray-100); display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.3s;
+  font-size: 14px; color: var(--gray-500);
+}
+.faq-item.open .faq-icon { background: var(--blue); color: #fff; transform: rotate(45deg); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  font-size: 14px; line-height: 1.7; color: var(--gray-700);
+  padding: 0 4px;
+}
+.faq-item.open .faq-a { max-height: 300px; padding-bottom: 20px; }
+
+/* ─── SHARE ─── */
+.share-row { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+.share-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.2s, transform 0.15s; border: 1.5px solid transparent;
+}
+.share-btn:hover { opacity: 0.8; transform: translateY(-1px); }
+.share-btn.kakao { background: #FEE500; color: #3A1D1D; border-color: #FEE500; }
+.share-btn.copy { background: transparent; color: var(--gray-700); border-color: var(--gray-300); }
+.copy-toast {
+  margin-top: 10px; font-size: 13px; color: var(--blue);
+  font-weight: 600; opacity: 0; transition: opacity 0.3s;
+  height: 20px;
+}
+.copy-toast.show { opacity: 1; }
+/* ─── CALCULATOR ─── */
+.calc-section { padding: 80px 40px; }
+.calc-card {
+  max-width: 720px; margin: 32px auto 0;
+  background: var(--gray-50); border-radius: 24px; padding: 40px;
+  border: 1px solid var(--gray-200);
+}
+.calc-slider-wrap { margin-bottom: 32px; }
+.calc-label { font-size: 15px; font-weight: 700; color: var(--gray-900); display: block; margin-bottom: 12px; }
+.calc-slider-row { display: flex; align-items: center; gap: 12px; }
+.calc-slider-min, .calc-slider-max { font-size: 13px; color: var(--gray-500); white-space: nowrap; }
+.calc-range {
+  -webkit-appearance: none; appearance: none; flex: 1; height: 6px;
+  border-radius: 3px; background: var(--gray-200); outline: none; cursor: pointer;
+}
+.calc-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--orange); cursor: pointer; box-shadow: 0 2px 6px rgba(249,115,22,0.4);
+}
+.calc-value-display {
+  text-align: center; margin-top: 10px;
+  font-size: 28px; font-weight: 900; color: var(--orange);
+}
+.calc-results {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center;
+  margin-bottom: 28px;
+}
+.calc-result-item {
+  flex: 1; min-width: 150px; text-align: center;
+  background: #fff; border-radius: 16px; padding: 20px 16px;
+  border: 1px solid var(--gray-200);
+}
+.calc-result-item.save { border-color: var(--orange); background: #FFF7ED; }
+.calc-result-label { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 8px; }
+.calc-result-value { font-size: 22px; font-weight: 900; color: var(--gray-900); margin-bottom: 4px; }
+.calc-result-value.highlight { color: var(--orange); font-size: 26px; }
+.calc-result-sub { font-size: 11px; color: var(--gray-500); }
+.calc-arrow { font-size: 24px; color: var(--gray-300); flex-shrink: 0; }
+.calc-cta-text { text-align: center; font-size: 14px; color: var(--gray-700); }
+.calc-cta-text a { color: var(--orange); font-weight: 700; text-decoration: none; }
+.calc-cta-text a:hover { text-decoration: underline; }
+@media (max-width: 600px) {
+  .calc-card { padding: 24px 20px; }
+  .calc-results { flex-direction: column; }
+  .calc-arrow { transform: rotate(90deg); }
+}
 </style>
 </head>
 <body>
+<div id="scrollProgressBar"></div>
 
 <!-- NAV -->
 <nav>
@@ -1659,6 +1876,9 @@
         <span class="stat-num">맞춤</span>
         <span class="stat-label">스케줄 완성</span>
       </div>
+    </div>
+    <div class="hero-counter">
+      🔥 이미 <span id="reservationCount">1,247</span>명이 사전예약했어요
     </div>
   </div>
   <div class="hero-phone">
@@ -1910,6 +2130,22 @@
   </div>
 </section>
 
+<!-- PRESS BAR -->
+<div class="press-bar">
+  <span class="press-bar-label">베타 검증</span>
+  <div class="press-bar-items">
+    <span class="press-item">🏫 파트너 학원 50개+</span>
+    <span class="press-divider">·</span>
+    <span class="press-item">👨‍👩‍👧 강남구 학부모 검증</span>
+    <span class="press-divider">·</span>
+    <span class="press-item">📍 서초·송파·강동 확장 예정</span>
+    <span class="press-divider">·</span>
+    <span class="press-item">⭐ 베타 만족도 4.8/5.0</span>
+    <span class="press-divider">·</span>
+    <span class="press-item">🎓 에듀테크 스타트업 선정</span>
+  </div>
+</div>
+
 <!-- HOW-TO -->
 <section class="howto fade-up" id="howto">
   <div class="howto-inner">
@@ -1961,6 +2197,68 @@
   </div>
 </section>
 
+<!-- COMPARISON -->
+<section class="comparison-section fade-up">
+  <div class="section-badge">왜 키즈루트인가요?</div>
+  <h2>다른 방법과<br>무엇이 다른가요?</h2>
+  <div class="comparison-wrap">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th class="comp-feature">기능</th>
+          <th class="comp-us">🟧 키즈루트</th>
+          <th class="comp-other">직접 발품</th>
+          <th class="comp-other">기존 앱</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>스케줄 자동 최적화</td>
+          <td class="comp-yes">✓</td>
+          <td class="comp-no">✗</td>
+          <td class="comp-no">✗</td>
+        </tr>
+        <tr>
+          <td>시간 겹침 방지</td>
+          <td class="comp-yes">✓</td>
+          <td class="comp-no">✗</td>
+          <td class="comp-no">✗</td>
+        </tr>
+        <tr>
+          <td>GPS 반경 탐색</td>
+          <td class="comp-yes">✓</td>
+          <td class="comp-half">△ 수동</td>
+          <td class="comp-half">△ 일부</td>
+        </tr>
+        <tr>
+          <td>이동 시간 고려</td>
+          <td class="comp-yes">✓</td>
+          <td class="comp-no">✗</td>
+          <td class="comp-no">✗</td>
+        </tr>
+        <tr>
+          <td>과목 우선순위 설정</td>
+          <td class="comp-yes">✓</td>
+          <td class="comp-half">△ 수동</td>
+          <td class="comp-no">✗</td>
+        </tr>
+        <tr>
+          <td>소요 시간</td>
+          <td class="comp-yes">3초</td>
+          <td class="comp-no">수 시간</td>
+          <td class="comp-half">수십 분</td>
+        </tr>
+        <tr>
+          <td>무료 이용</td>
+          <td class="comp-yes">✓ 핵심 무료</td>
+          <td class="comp-yes">✓</td>
+          <td class="comp-half">△ 유료 중심</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <!-- FEATURES -->
 <section class="features fade-up" id="features">
   <div class="features-inner">
@@ -2007,42 +2305,98 @@
   <div class="reviews-inner">
     <div class="reviews-label">베타 후기</div>
     <h2>학부모들이 먼저 써봤어요</h2>
-    <p class="reviews-sub">강남구 베타 테스트에 참여한 학부모 100명의 실제 후기입니다</p>
-    <div class="reviews-grid">
-      <div class="review-card fade-up">
-        <div class="review-header">
-          <div class="review-avatar">이</div>
-          <div class="review-info">
-            <span class="review-name">이○○ 학부모</span>
-            <span class="review-region">강남구</span>
+    <p class="reviews-sub">강남·서초·송파 베타 테스트에 참여한 학부모들의 실제 후기입니다</p>
+    <div class="reviews-slider-wrap">
+      <div class="reviews-slider" id="reviewsSlider">
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">이</div>
+            <div class="review-info">
+              <span class="review-name">이○○ 학부모</span>
+              <span class="review-region">강남구</span>
+            </div>
           </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"학원 시간표 맞추느라 매번 엑셀 쓰다가 이 앱 쓰고 해방됐어요. 이동 시간까지 계산해주는 게 진짜 신기했어요."</p>
         </div>
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">"학원 시간표 맞추느라 매번 엑셀 쓰다가 이 앱 쓰고 해방됐어요. 이동 시간까지 계산해주는 게 진짜 신기했어요."</p>
-      </div>
-      <div class="review-card fade-up" style="transition-delay:0.1s">
-        <div class="review-header">
-          <div class="review-avatar">김</div>
-          <div class="review-info">
-            <span class="review-name">김○○ 학부모</span>
-            <span class="review-region">서초구</span>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">김</div>
+            <div class="review-info">
+              <span class="review-name">김○○ 학부모</span>
+              <span class="review-region">서초구</span>
+            </div>
           </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"수학 영어 피아노 세 개 겹치지 않게 짜주는 게 진짜 편해요. 아이도 덜 피곤해하는 것 같고요."</p>
         </div>
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">"수학 영어 피아노 세 개 겹치지 않게 짜주는 게 진짜 편해요. 아이도 덜 피곤해하는 것 같고요."</p>
-      </div>
-      <div class="review-card fade-up" style="transition-delay:0.2s">
-        <div class="review-header">
-          <div class="review-avatar">박</div>
-          <div class="review-info">
-            <span class="review-name">박○○ 학부모</span>
-            <span class="review-region">송파구</span>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">박</div>
+            <div class="review-info">
+              <span class="review-name">박○○ 학부모</span>
+              <span class="review-region">송파구</span>
+            </div>
           </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"베타 쓰면서 학원을 두 개 더 넣을 수 있는 여유 시간이 생겼어요. 강력 추천합니다!"</p>
         </div>
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">"베타 쓰면서 학원을 두 개 더 넣을 수 있는 여유 시간이 생겼어요. 강력 추천합니다!"</p>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">최</div>
+            <div class="review-info">
+              <span class="review-name">최○○ 학부모</span>
+              <span class="review-region">마포구</span>
+            </div>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"앱 하나로 세 아이 스케줄을 한눈에 볼 수 있어서 너무 좋아요. 예전엔 수첩에 일일이 적었거든요."</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">정</div>
+            <div class="review-info">
+              <span class="review-name">정○○ 학부모</span>
+              <span class="review-region">용산구</span>
+            </div>
+          </div>
+          <div class="review-stars">★★★★☆</div>
+          <p class="review-text">"GPS로 집 근처 학원만 딱 보여줘서 선택이 훨씬 쉬워졌어요. 정식 출시하면 주변에도 다 알릴 것 같아요."</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">윤</div>
+            <div class="review-info">
+              <span class="review-name">윤○○ 학부모</span>
+              <span class="review-region">성동구</span>
+            </div>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"학원 등하원 동선 최적화가 진짜 신기해요. 이동 시간을 줄이니까 아이 피로도가 확실히 줄었어요."</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-avatar">장</div>
+            <div class="review-info">
+              <span class="review-name">장○○ 학부모</span>
+              <span class="review-region">노원구</span>
+            </div>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"처음엔 반신반의했는데 직접 써보니 진짜 3초 만에 최적 조합이 나오더라고요. 정말 편합니다."</p>
+        </div>
+
       </div>
     </div>
+    <!-- Dot navigation -->
+    <div class="reviews-dots" id="reviewsDots"></div>
   </div>
 </section>
 
@@ -2375,6 +2729,80 @@
   </div>
 </section>
 
+<!-- CALCULATOR -->
+<section class="fade-up calc-section" id="calculator">
+  <div class="section-badge">시간 절약 계산기</div>
+  <h2>지금 몇 시간을<br>낭비하고 계신가요?</h2>
+  <p>학원 수를 입력하면 키즈루트로 절약되는 시간을 계산해 드립니다.</p>
+  <div class="calc-card">
+    <div class="calc-slider-wrap">
+      <label class="calc-label">우리 아이 학원 수</label>
+      <div class="calc-slider-row">
+        <span class="calc-slider-min">1개</span>
+        <input type="range" id="calcSlider" min="1" max="6" value="3" step="1" class="calc-range">
+        <span class="calc-slider-max">6개</span>
+      </div>
+      <div class="calc-value-display"><span id="calcN">3</span>개 학원</div>
+    </div>
+    <div class="calc-results">
+      <div class="calc-result-item waste">
+        <div class="calc-result-label">현재 주간 이동 시간</div>
+        <div class="calc-result-value" id="calcWaste">—</div>
+        <div class="calc-result-sub">최적화 없이 낭비되는 시간</div>
+      </div>
+      <div class="calc-arrow">→</div>
+      <div class="calc-result-item save">
+        <div class="calc-result-label">키즈루트 절약 시간/주</div>
+        <div class="calc-result-value highlight" id="calcSave">—</div>
+        <div class="calc-result-sub">40% 경로 최적화 적용</div>
+      </div>
+      <div class="calc-result-item year">
+        <div class="calc-result-label">연간 절약 시간</div>
+        <div class="calc-result-value" id="calcYear">—</div>
+        <div class="calc-result-sub">52주 기준 환산</div>
+      </div>
+    </div>
+    <p class="calc-cta-text">👉 <a href="#cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'}); return false;">지금 사전예약하고 시간을 되찾으세요</a></p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="fade-up" id="faq">
+  <div class="section-badge">자주 묻는 질문</div>
+  <h2>궁금한 점이<br>있으신가요?</h2>
+  <p>가장 많이 물어보시는 질문들을 모았습니다.</p>
+  <div class="faq-list" id="faqList">
+    <div class="faq-item">
+      <button class="faq-q"><span>무료 플랜은 정말 무료인가요?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">네, 핵심 기능은 영원히 무료입니다. GPS 반경 학원 탐색, 과목 우선순위 설정, 스케줄 조합 추천 1개, 주간 캘린더 뷰를 무료로 이용하실 수 있습니다. 추가 기능이 필요하시면 프리미엄 플랜을 이용해 주세요.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>어떤 학원 데이터를 사용하나요?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">공공데이터포털의 학원 등록 정보를 기반으로 하며, 자체 크롤링 및 사용자 제보를 통해 수시로 업데이트합니다. 등록 학원 수는 현재 강남구 2,400개+이며, 지속적으로 확대 중입니다.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>개인정보는 어떻게 처리되나요?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">아이의 이름, 나이, 관심 과목 등 최소한의 정보만 수집합니다. 수집된 정보는 스케줄 추천 목적으로만 사용되며, 제3자에게 제공되지 않습니다. 개인정보 보호법을 준수하며 언제든지 삭제 요청이 가능합니다.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>강남구 외 지역도 사용 가능한가요?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">현재 강남구를 중심으로 서비스 중이며, Phase 2에서 서울 전역으로, Phase 3에서 전국으로 확대할 계획입니다. 다른 지역 부모님들께서 '출시 알림 받기'를 신청해 주시면 해당 지역 출시 시 우선 안내해 드립니다.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>앱 출시는 언제 예정인가요?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">2026년 7월 정식 출시를 목표로 개발 중입니다. 현재 베타 테스트 참여자를 모집 중이며, 사전예약 신청 시 출시 즉시 알림을 받으실 수 있습니다. 베타 참여자에게는 3개월 프리미엄 무료 이용권을 제공합니다.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>아이가 여러 명이면 어떻게 관리하나요?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">무료 플랜에서는 아이 프로필 1명을 관리하실 수 있습니다. 프리미엄 플랜에서는 무제한 자녀 프로필을 생성하고 각각의 스케줄을 독립적으로 관리할 수 있습니다. 형제·자매 간 시간 충돌도 자동으로 체크해 드립니다.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>학원을 직접 추가할 수 있나요?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">네, '학원 제보' 기능을 통해 데이터에 없는 학원을 직접 제보하실 수 있습니다. 검토 후 24시간 내에 반영되며, 제보해 주신 분께는 프리미엄 1개월 무료 이용권을 드립니다.</div>
+    </div>
+  </div>
+</section>
+
 <!-- KPI -->
 <section class="kpi-section fade-up">
   <div class="section-badge">성장 목표</div>
@@ -2411,11 +2839,34 @@
     <div id="ctaDefault">
       <h2>지금 사전예약하고<br>먼저 써보세요 🎉</h2>
       <p>출시 즉시 알림을 받고,<br>얼리버드 혜택으로 3개월 프리미엄을 무료로 이용하세요.</p>
+      <div class="cta-countdown" id="ctaCountdown">
+        <div class="countdown-label">얼리버드 마감까지</div>
+        <div class="countdown-timer">
+          <div class="countdown-unit"><span id="cdDays">00</span><small>일</small></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><span id="cdHours">00</span><small>시간</small></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><span id="cdMins">00</span><small>분</small></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><span id="cdSecs">00</span><small>초</small></div>
+        </div>
+      </div>
       <div class="app-cta-buttons">
         <a href="#" class="store-btn" onclick="openGoogleLogin(); return false;">🍎 App Store 사전예약</a>
         <a href="#" class="store-btn outline" onclick="openGoogleLogin(); return false;">▶ Play Store 사전예약</a>
       </div>
       <p class="app-cta-caption">*사전예약은 무료입니다. 출시 전 언제든 취소 가능합니다.</p>
+      <div class="share-row">
+        <button class="share-btn kakao" onclick="_shareKakao()">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1.5C4.86 1.5 1.5 4.08 1.5 7.26c0 2.01 1.29 3.78 3.24 4.8l-.84 3.12c-.06.24.18.42.39.3L8.07 13.2c.3.03.6.06.93.06 4.14 0 7.5-2.58 7.5-5.76S13.14 1.5 9 1.5z" fill="#3A1D1D"/></svg>
+          카카오로 공유
+        </button>
+        <button class="share-btn copy" id="copyLinkBtn" onclick="_copyLink()">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="6" y="6" width="9" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 12V4a2 2 0 012-2h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          링크 복사
+        </button>
+      </div>
+      <div class="copy-toast" id="copyToast">링크가 복사됐어요! 🔗</div>
     </div>
     <!-- 로그인 완료 상태 -->
     <div class="app-cta-logged" id="ctaLogged">
@@ -3980,7 +4431,180 @@ setInterval(() => {
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 })();
+
+// Scroll progress bar
+function _updateScrollProgress() {
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  const bar = document.getElementById('scrollProgressBar');
+  if (bar) bar.style.width = pct + '%';
+}
+window.addEventListener('scroll', _updateScrollProgress, { passive: true });
+
+// Back to top visibility
+function _updateBackToTop() {
+  const btn = document.getElementById('backToTop');
+  if (!btn) return;
+  if (window.scrollY > 300) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+}
+window.addEventListener('scroll', _updateBackToTop, { passive: true });
+
+// Reservation counter animation
+(function() {
+  const el = document.getElementById('reservationCount');
+  if (!el) return;
+  let count = 1247;
+  function fmt(n) { return n.toLocaleString('ko-KR'); }
+  el.textContent = fmt(count);
+  // Slowly increment by 1 every 8–20 seconds
+  function tick() {
+    count += 1;
+    el.textContent = fmt(count);
+    setTimeout(tick, 8000 + Math.random() * 12000);
+  }
+  setTimeout(tick, 8000 + Math.random() * 12000);
+})();
+
+// Countdown timer — target: 2026-07-01
+(function() {
+  const TARGET = new Date('2026-07-01T00:00:00+09:00').getTime();
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function tick() {
+    const now = Date.now();
+    const diff = TARGET - now;
+    if (diff <= 0) {
+      ['cdDays','cdHours','cdMins','cdSecs'].forEach(id => { const e = document.getElementById(id); if(e) e.textContent='00'; });
+      return;
+    }
+    const days  = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins  = Math.floor((diff % 3600000)  / 60000);
+    const secs  = Math.floor((diff % 60000)    / 1000);
+    const set = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = pad(v); };
+    set('cdDays', days); set('cdHours', hours); set('cdMins', mins); set('cdSecs', secs);
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+// Reviews slider dots
+(function() {
+  const slider = document.getElementById('reviewsSlider');
+  const dotsContainer = document.getElementById('reviewsDots');
+  if (!slider || !dotsContainer) return;
+  const cards = slider.querySelectorAll('.review-card');
+  const numDots = cards.length;
+  for (let i = 0; i < numDots; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'reviews-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', `후기 ${i+1}`);
+    dot.onclick = () => {
+      cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    };
+    dotsContainer.appendChild(dot);
+  }
+  slider.addEventListener('scroll', () => {
+    const dots = dotsContainer.querySelectorAll('.reviews-dot');
+    let closest = 0, minDist = Infinity;
+    cards.forEach((card, i) => {
+      const dist = Math.abs(card.getBoundingClientRect().left - slider.getBoundingClientRect().left);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === closest));
+  }, { passive: true });
+})();
+
+// FAQ accordion
+(function() {
+  const list = document.getElementById('faqList');
+  if (!list) return;
+  list.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      list.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+})();
+
+// Kakao share + link copy
+function _shareKakao() {
+  var url = 'https://davegpt25.github.io/kidsroute';
+  if (typeof Kakao !== 'undefined' && Kakao.isInitialized && Kakao.isInitialized()) {
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄',
+        description: 'AI가 위치·시간·과목을 분석해 최적 스케줄을 추천해드립니다.',
+        imageUrl: 'https://davegpt25.github.io/kidsroute/og-image.png',
+        link: { mobileWebUrl: url, webUrl: url }
+      },
+      buttons: [{ title: '사전예약하기', link: { mobileWebUrl: url, webUrl: url } }]
+    });
+  } else {
+    // Fallback: Web Share API or copy URL
+    if (navigator.share) {
+      navigator.share({ title: '키즈루트', text: '3초면 완성되는 우리 아이 학원 스케줄', url: url });
+    } else {
+      _copyLink();
+    }
+  }
+}
+function _copyLink() {
+  var url = window.location.href;
+  var toast = document.getElementById('copyToast');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function() {
+      if (toast) { toast.classList.add('show'); setTimeout(function(){ toast.classList.remove('show'); }, 2500); }
+    });
+  } else {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    if (toast) { toast.classList.add('show'); setTimeout(function(){ toast.classList.remove('show'); }, 2500); }
+  }
+}
+// Time savings calculator
+(function() {
+  var slider = document.getElementById('calcSlider');
+  var nEl = document.getElementById('calcN');
+  var wasteEl = document.getElementById('calcWaste');
+  var saveEl = document.getElementById('calcSave');
+  var yearEl = document.getElementById('calcYear');
+
+  function fmtMin(mins) {
+    if (mins < 60) return mins + '분';
+    var h = Math.floor(mins / 60), m = mins % 60;
+    return m > 0 ? h + '시간 ' + m + '분' : h + '시간';
+  }
+
+  function calcUpdate() {
+    var n = parseInt(slider.value, 10);
+    var wasteMin = n * 15 * 2 * 5;       // N × 15min × 2way × 5days
+    var saveMin  = Math.round(wasteMin * 0.4);
+    var yearMin  = saveMin * 52;
+    var yearH    = Math.round(yearMin / 60);
+
+    nEl.textContent = n;
+    wasteEl.textContent = fmtMin(wasteMin);
+    saveEl.textContent  = fmtMin(saveMin);
+    yearEl.textContent  = yearH + '시간';
+  }
+
+  if (slider) {
+    slider.addEventListener('input', calcUpdate);
+    calcUpdate(); // init on load
+  }
+})();
 </script>
+
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">↑</button>
 
 </body>
 </html>
