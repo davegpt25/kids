@@ -1959,6 +1959,20 @@
 }
 .sim-save-btn:hover { background: var(--primary-light); }
 .sim-save-btn.saved { background: var(--primary-light); border-color: var(--primary-light); color: var(--primary); }
+
+/* ─── WTP: CONFIDENCE SCORE ─── */
+.sim-confidence {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 100px; margin-bottom: 10px;
+}
+.sim-confidence.high   { background: #ECFDF5; color: #16A34A; }
+.sim-confidence.medium { background: #FFF7ED; color: #F97316; }
+.sim-confidence.low    { background: #F3F4F6; color: #6B7280; }
+.sim-confidence.locked {
+  background: #F3F4F6; color: #9CA3AF;
+  filter: blur(4px); pointer-events: none; user-select: none;
+}
 </style>
 </head>
 <body>
@@ -3176,6 +3190,7 @@
       <div class="demo-form-badge sim-badge">✨ 분석 완료</div>
       <div class="demo-title" style="font-size:20px">이런 조합을 추천드려요!</div>
       <div class="demo-sub" id="simSubText">반경 1km · 학원 3개 조합</div>
+      <div class="sim-confidence" id="simConfidence">🧠 AI 추천 신뢰도 산출 중...</div>
 
       <!-- 추천 카드 목록 + 스케줄 (부분 공개) -->
       <div class="sim-lock-wrap">
@@ -4925,6 +4940,21 @@ function _renderSimCards() {
   var subjectTimeRow = rawSubjects.map(function(_, i) {
     return Math.min(baseRow + (i === 2 ? 1 : 0), 3);
   });
+
+  // Confidence score
+  var confScore = Math.min(95, 78 + rawSubjects.length * 3 + preferDays.length * 2);
+  var confClass = confScore >= 90 ? 'high' : confScore >= 75 ? 'medium' : 'low';
+  var confLabel = '🧠 AI 추천 신뢰도 ' + confScore + '%';
+  var isMember  = _sessionEmail && ['trial','active'].indexOf(KR.getMemberStatus(_sessionEmail).type) >= 0;
+  var confEl    = document.getElementById('simConfidence');
+  if (confEl) {
+    confEl.textContent  = isMember ? confLabel : '🔒 AI 추천 신뢰도 ??%';
+    confEl.className    = 'sim-confidence ' + (isMember ? confClass : 'locked');
+    confEl.onclick      = isMember ? null : function() {
+      checkMembership('confidenceScore');
+    };
+    confEl.style.pointerEvents = isMember ? '' : 'auto';
+  }
 
   // Sub-title: include location if GPS was used
   var subEl = document.getElementById('simSubText');
