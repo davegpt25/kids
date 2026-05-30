@@ -5187,9 +5187,12 @@ function saveCurrentSchedule() {
   var subjects = (typeof _demoSubjects !== 'undefined' && _demoSubjects.length > 0)
     ? _demoSubjects.slice(0, 3) : ['math', 'english', 'piano'];
   var label = subjects.map(function(s) {
-    var pool = _SIM_POOLS[s]; return pool ? pool.label : s;
+    var pool = (typeof _SIM_POOLS !== 'undefined') ? _SIM_POOLS[s] : null;
+    return pool ? pool.label : s;
   }).join(' + ') + ' 조합';
-  KR.saveSchedule(label, subjects, _demoPreferDays, _demoPreferTime);
+  var days = (typeof _demoPreferDays !== 'undefined') ? _demoPreferDays : [0, 2, 4];
+  var time = (typeof _demoPreferTime !== 'undefined') ? _demoPreferTime : 4;
+  KR.saveSchedule(label, subjects, days, time);
   var btn = document.getElementById('simSaveBtn');
   if (btn) {
     btn.textContent = '✅ 저장됐어요!';
