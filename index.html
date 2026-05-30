@@ -1917,6 +1917,37 @@
   font-size: 12px; color: var(--gray-400); cursor: pointer; text-decoration: underline;
 }
 .sim-skip-btn:hover { color: var(--gray-600); }
+
+/* ─── MEMBERSHIP LOCK MODAL ─── */
+.lock-overlay {
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,0.45); display: none;
+  align-items: center; justify-content: center;
+}
+.lock-overlay.open { display: flex; }
+.lock-modal {
+  background: #fff; border-radius: 20px; padding: 28px 24px;
+  max-width: 320px; width: 90%; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  animation: lockSlideUp 0.25s ease;
+}
+@keyframes lockSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.lock-icon { font-size: 36px; margin-bottom: 12px; }
+.lock-title { font-size: 17px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
+.lock-desc  { font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 20px; }
+.lock-cta {
+  width: 100%; padding: 13px; border-radius: 12px;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  color: #fff; font-size: 14px; font-weight: 700; border: none; cursor: pointer;
+  margin-bottom: 10px;
+}
+.lock-skip {
+  background: none; border: none; font-size: 12px;
+  color: var(--text-muted); cursor: pointer; text-decoration: underline;
+}
 </style>
 </head>
 <body>
@@ -5094,7 +5125,57 @@ var KR = {
     if (a) { a.status = 'sent'; a.sentAt = Date.now(); KR._set('kr_alerts', alerts); }
   }
 };
+
+// ─── Membership Gate ───
+function openLockModal(titleText, descText) {
+  var title = document.getElementById('lockTitle');
+  var desc  = document.getElementById('lockDesc');
+  if (title && titleText) title.textContent = titleText;
+  if (desc  && descText)  desc.innerHTML    = descText;
+  document.getElementById('lockOverlay').classList.add('open');
+}
+function closeLockModal(e) {
+  if (e && e.target !== document.getElementById('lockOverlay')) return;
+  document.getElementById('lockOverlay').classList.remove('open');
+}
+
+function checkMembership(featureKey) {
+  // 세션 이메일이 없으면 이메일 등록 유도
+  if (!_sessionEmail) {
+    openLockModal('이메일 등록이 필요해요',
+      '이메일을 등록하면 <strong>7일 무료 멤버십</strong>으로<br>이 기능을 바로 사용할 수 있어요!');
+    return false;
+  }
+  var feat = KR.getFeatures();
+  if (!feat[featureKey]) {
+    openLockModal('기능 준비 중이에요', '곧 사용하실 수 있도록 준비 중이에요. 😊');
+    return false;
+  }
+  var status = KR.getMemberStatus(_sessionEmail);
+  if (status.type === 'none') {
+    openLockModal('이메일 등록이 필요해요',
+      '이메일을 등록하면 <strong>7일 무료 멤버십</strong>으로<br>이 기능을 바로 사용할 수 있어요!');
+    return false;
+  }
+  if (status.type === 'expired') {
+    openLockModal('멤버십 체험이 종료됐어요',
+      '7일 무료 체험이 끝났어요.<br><strong>멤버십 구독</strong>으로 계속 사용하세요.');
+    return false;
+  }
+  return true; // trial or active
+}
 </script>
+
+<!-- 멤버십 잠금 모달 -->
+<div class="lock-overlay" id="lockOverlay" onclick="closeLockModal(event)">
+  <div class="lock-modal">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title" id="lockTitle">멤버십 전용 기능이에요</div>
+    <div class="lock-desc" id="lockDesc">7일 무료 체험이 종료됐어요.<br>멤버십 구독으로 계속 사용하세요.</div>
+    <button class="lock-cta" onclick="closeLockModal(); openDemoModal()">멤버십 구독하기</button>
+    <button class="lock-skip" onclick="closeLockModal()">나중에 →</button>
+  </div>
+</div>
 
 <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">↑</button>
 
