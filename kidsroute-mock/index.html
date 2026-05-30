@@ -5701,6 +5701,16 @@ function adminShowPage(pageId) {
   if (pageId === 'stats') adminRenderStats();
 }
 
+// ── HTML 이스케이프 헬퍼 ──
+function _escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ── 전체 렌더링 (로그인 직후 호출) ──
 function adminRenderAll() {
   adminRenderKPIs();
@@ -5824,7 +5834,7 @@ function adminRenderRecentMembers() {
       '<div class="adm-member-avatar" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">' + initial + '</div>' +
       '<div><div class="adm-member-email">' + masked + '</div><div class="adm-member-date">' + timeAgo + '</div></div>' +
       statusBadge +
-      '<button class="adm-toggle ' + (isPaid ? 'on' : '') + '" onclick="adminToggleMember(\'' + m.email + '\',this)" title="멤버십 토글"></button>' +
+      '<button class="adm-toggle ' + (isPaid ? 'on' : '') + '" data-email="' + _escHtml(m.email) + '" onclick="adminToggleMember(this.dataset.email,this)" title="멤버십 토글"></button>' +
       '</div>';
   }).join('');
 }
@@ -5899,7 +5909,7 @@ function _adminRenderAlertList(elId, limit) {
     var isPending = a.status === 'pending';
     return '<div class="adm-alert-row" style="' + (isPending ? '' : 'opacity:0.55') + '">' +
       '<div class="adm-alert-dot ' + (isPending ? 'adm-dot-pending' : 'adm-dot-sent') + '"></div>' +
-      '<div><div class="adm-alert-text">' + a.academy + ' — ' + a.slots + '자리</div>' +
+      '<div><div class="adm-alert-text">' + _escHtml(a.academy) + ' — ' + _escHtml(String(a.slots)) + '자리</div>' +
       '<div class="adm-alert-sub">' + (isPending ? '대기 중 · ' + _timeAgo(a.createdAt) : '발송 완료 · ' + _timeAgo(a.sentAt || a.createdAt)) + '</div></div>' +
       (isPending
         ? '<button class="adm-alert-send-btn" onclick="adminSendAlert(' + a.id + ',this)">알림 발송</button>'
@@ -5960,7 +5970,7 @@ function adminRenderMemberTable(filter) {
       '<td>' + regDate + '</td>' +
       '<td>' + statusBadge + '</td>' +
       '<td style="color:#64748B">' + remaining + '</td>' +
-      '<td><button class="adm-toggle ' + (m.isPaid ? 'on' : '') + '" onclick="adminToggleMember(\'' + m.email + '\',this);adminRenderMemberTable(\'' + _admMemberFilter + '\')"></button></td>' +
+      '<td><button class="adm-toggle ' + (m.isPaid ? 'on' : '') + '" data-email="' + _escHtml(m.email) + '" onclick="adminToggleMember(this.dataset.email,this);adminRenderMemberTable(_admMemberFilter)"></button></td>' +
       '</tr>';
   }).join('');
 }
