@@ -4999,6 +4999,94 @@ function openLeadFormDirect() {
   var sel = document.getElementById('leadAge');
   if (sel) sel.selectedIndex = 0;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// ─── KR DATA LAYER ───
+// All localStorage keys are prefixed kr_
+// ═══════════════════════════════════════════════════════════════
+var KR = {
+  ADMIN_EMAIL: 'davegpt25@gmail.com',
+  TRIAL_DAYS:  7,
+
+  // ── Raw getters / setters ──
+  _get: function(key) {
+    try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+  },
+  _set: function(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  },
+
+  // ── Members ──
+  getMembers: function() { return KR._get('kr_members') || []; },
+  saveMembers: function(list) { KR._set('kr_members', list); },
+  addMember: function(email, name) {
+    var members = KR.getMembers();
+    if (members.find(function(m){ return m.email === email; })) return;
+    members.push({
+      email: email,
+      name: name || '',
+      registeredAt: Date.now(),
+      trialDays: KR.TRIAL_DAYS,
+      isPaid: false
+    });
+    KR.saveMembers(members);
+  },
+  getMember: function(email) {
+    return KR.getMembers().find(function(m){ return m.email === email; }) || null;
+  },
+  getMemberStatus: function(email) {
+    var m = KR.getMember(email);
+    if (!m) return { type: 'none' };
+    if (m.isPaid) return { type: 'active' };
+    var daysLeft = Math.ceil(KR.TRIAL_DAYS - (Date.now() - m.registeredAt) / 86400000);
+    if (daysLeft > 0) return { type: 'trial', daysLeft: daysLeft };
+    return { type: 'expired' };
+  },
+  setMemberPaid: function(email, paid) {
+    var members = KR.getMembers();
+    var m = members.find(function(m){ return m.email === email; });
+    if (m) { m.isPaid = paid; KR.saveMembers(members); }
+  },
+
+  // ── Session ──
+  getSession: function() { return localStorage.getItem('kr_session') || ''; },
+  setSession: function(email) { localStorage.setItem('kr_session', email); },
+  clearSession: function() { localStorage.removeItem('kr_session'); },
+  isAdmin: function() { return KR.getSession() === KR.ADMIN_EMAIL; },
+  hasAdminSession: function() { return !!localStorage.getItem('kr_admin_session'); },
+  setAdminSession: function() { localStorage.setItem('kr_admin_session', KR.ADMIN_EMAIL); },
+  clearAdminSession: function() { localStorage.removeItem('kr_admin_session'); },
+
+  // ── Features ──
+  getFeatures: function() {
+    return KR._get('kr_features') || { scheduleHistory: true, confidenceScore: true, vacancyAlert: false };
+  },
+  setFeature: function(key, val) {
+    var f = KR.getFeatures(); f[key] = val; KR._set('kr_features', f);
+  },
+
+  // ── Saved Schedules ──
+  getSavedSchedules: function() { return KR._get('kr_schedules') || []; },
+  saveSchedule: function(label, subjects, days, time) {
+    var schedules = KR.getSavedSchedules();
+    if (schedules.length >= 5) schedules.shift();
+    schedules.push({ id: Date.now(), savedAt: Date.now(), label: label, subjects: subjects, days: days, time: time });
+    KR._set('kr_schedules', schedules);
+  },
+
+  // ── Alerts ──
+  getAlerts: function() { return KR._get('kr_alerts') || []; },
+  addAlert: function(academy, slots, waitEmail) {
+    var alerts = KR.getAlerts();
+    alerts.push({ id: Date.now(), academy: academy, slots: slots, waitEmail: waitEmail, status: 'pending', createdAt: Date.now() });
+    KR._set('kr_alerts', alerts);
+  },
+  sendAlert: function(id) {
+    var alerts = KR.getAlerts();
+    var a = alerts.find(function(a){ return a.id === id; });
+    if (a) { a.status = 'sent'; a.sentAt = Date.now(); KR._set('kr_alerts', alerts); }
+  }
+};
 </script>
 
 <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">↑</button>
