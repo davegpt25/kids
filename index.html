@@ -6016,6 +6016,33 @@ function adminRenderStats() {
     bar('멤버십 활성', active, 'linear-gradient(to right,#34D399,#10B981)') +
     bar('만료', expired, 'linear-gradient(to right,#94A3B8,#64748B)');
 }
+
+// ─── 개발 시드 데이터 (콘솔에서 adminSeed() 실행) ───
+function adminSeed() {
+  var emails = [
+    ['kim.jisoo@naver.com','김지수'], ['park.minjun@kakao.com','박민준'],
+    ['lee.sohee@gmail.com','이소희'], ['choi.hyun@naver.com','최현'],
+    ['jung.yuna@daum.net','정유나'],  ['oh.seungwoo@naver.com','오승우'],
+    ['han.mirae@kakao.com','한미래'], ['yoon.jiwon@gmail.com','윤지원']
+  ];
+  // 다양한 등록 시점 (0~14일 전)
+  emails.forEach(function(e, i) {
+    var existing = KR.getMember(e[0]);
+    if (!existing) {
+      var member = { email: e[0], name: e[1], registeredAt: Date.now() - i * 86400000 * 1.5, trialDays: 7, isPaid: false };
+      if (i < 2) member.isPaid = true; // 처음 2명은 멤버십 활성
+      var members = KR.getMembers();
+      members.push(member);
+      KR.saveMembers(members);
+    }
+  });
+  // 알림 데이터
+  ['강남 베스트 수학','YBM 영어 서초점','예원 피아노'].forEach(function(ac, i) {
+    KR.addAlert(ac, i+1, emails[i][0]);
+  });
+  if (typeof adminRenderAll === 'function') adminRenderAll();
+  console.log('Seed data added! Members:', KR.getMembers().length);
+}
 </script>
 
 <!-- 멤버십 잠금 모달 -->
