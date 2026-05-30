@@ -1973,6 +1973,49 @@
   background: #F3F4F6; color: #9CA3AF;
   filter: blur(4px); pointer-events: none; user-select: none;
 }
+
+/* ─── WTP: VACANCY ALERT ─── */
+.alert-reg-overlay {
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,0.45); display: none;
+  align-items: center; justify-content: center;
+}
+.alert-reg-overlay.open { display: flex; }
+.alert-reg-modal {
+  background: #fff; border-radius: 20px; padding: 28px 24px;
+  max-width: 320px; width: 90%; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  animation: lockSlideUp 0.25s ease;
+}
+.alert-reg-title { font-size: 17px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
+.alert-reg-desc  { font-size: 13px; color: var(--text-sub); margin-bottom: 16px; line-height: 1.6; }
+.alert-academy-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; text-align: left; }
+.alert-academy-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--bg-base); border: 1.5px solid var(--border);
+  font-size: 13px; cursor: pointer; transition: border-color 0.15s;
+}
+.alert-academy-item.selected { border-color: var(--primary); background: var(--primary-light); }
+.alert-academy-item input[type=checkbox] { accent-color: var(--primary); width: 16px; height: 16px; }
+.alert-reg-cta {
+  width: 100%; padding: 13px; border-radius: 12px;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  color: #fff; font-size: 14px; font-weight: 700; border: none; cursor: pointer;
+  margin-bottom: 10px;
+}
+.alert-reg-skip {
+  background: none; border: none; font-size: 12px;
+  color: var(--text-muted); cursor: pointer; text-decoration: underline;
+}
+.sim-alert-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 11px; border-radius: 12px; margin-top: 8px;
+  background: #fff; border: 1.5px solid #E2E8F0;
+  color: var(--text-sub); font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s;
+}
+.sim-alert-btn:hover { border-color: var(--primary); color: var(--primary); }
 </style>
 </head>
 <body>
@@ -3233,6 +3276,9 @@
 
       <button class="sim-save-btn" id="simSaveBtn" onclick="saveCurrentSchedule()">
         💾 이 조합 저장하기
+      </button>
+      <button class="sim-alert-btn" onclick="openVacancyAlertModal()">
+        🔔 공석 나면 알려줘
       </button>
       <button class="demo-start-btn" onclick="_showDemoStep('demoStep4')" style="margin-top:12px">
         📧 맞춤 결과 이메일로 받기
@@ -5236,6 +5282,47 @@ function saveCurrentSchedule() {
   }
   showToast('스케줄이 저장됐어요 💾');
 }
+
+// ─── WTP 3: Vacancy Alert ───
+function openVacancyAlertModal() {
+  if (!checkMembership('vacancyAlert')) return;
+  // 현재 시뮬레이션 카드 학원 이름 수집
+  var cards = document.querySelectorAll('#simCards .sim-card');
+  var listEl = document.getElementById('alertAcademyList');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  cards.forEach(function(card, i) {
+    var nameEl = card.querySelector('.sim-card-name');
+    if (!nameEl) return;
+    var name = nameEl.textContent;
+    var item = document.createElement('label');
+    item.className = 'alert-academy-item';
+    item.innerHTML =
+      '<input type="checkbox" name="alertAcademy" value="' + name + '" checked>' +
+      '<span>' + name + '</span>';
+    item.querySelector('input').addEventListener('change', function() {
+      item.classList.toggle('selected', this.checked);
+    });
+    item.classList.add('selected');
+    listEl.appendChild(item);
+  });
+  if (listEl.children.length === 0) {
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--text-sub);text-align:center;padding:8px">저장된 학원이 없어요</div>';
+  }
+  document.getElementById('alertRegOverlay').classList.add('open');
+}
+function closeAlertRegModal(e) {
+  if (e && e.target !== document.getElementById('alertRegOverlay')) return;
+  document.getElementById('alertRegOverlay').classList.remove('open');
+}
+function submitVacancyAlert() {
+  var checked = document.querySelectorAll('#alertAcademyList input[type=checkbox]:checked');
+  checked.forEach(function(cb) {
+    KR.addAlert(cb.value, 1, _sessionEmail);
+  });
+  closeAlertRegModal();
+  showToast('🔔 공석 알림이 등록됐어요!');
+}
 </script>
 
 <!-- 멤버십 잠금 모달 -->
@@ -5246,6 +5333,20 @@ function saveCurrentSchedule() {
     <div class="lock-desc" id="lockDesc">7일 무료 체험이 종료됐어요.<br>멤버십 구독으로 계속 사용하세요.</div>
     <button class="lock-cta" onclick="closeLockModal(); openDemoModal()">멤버십 구독하기</button>
     <button class="lock-skip" onclick="closeLockModal()">나중에 →</button>
+  </div>
+</div>
+
+<!-- 공석 알림 등록 모달 -->
+<div class="alert-reg-overlay" id="alertRegOverlay" onclick="closeAlertRegModal(event)">
+  <div class="alert-reg-modal">
+    <div style="font-size:32px;margin-bottom:10px">🔔</div>
+    <div class="alert-reg-title">공석 알림 등록</div>
+    <div class="alert-reg-desc">자리가 나면 바로 알려드릴게요.<br>알림 받을 학원을 선택해주세요.</div>
+    <div class="alert-academy-list" id="alertAcademyList">
+      <!-- JS로 렌더링 -->
+    </div>
+    <button class="alert-reg-cta" onclick="submitVacancyAlert()">알림 등록하기</button>
+    <button class="alert-reg-skip" onclick="closeAlertRegModal()">나중에 →</button>
   </div>
 </div>
 
