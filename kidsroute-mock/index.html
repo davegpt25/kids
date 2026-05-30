@@ -2127,6 +2127,14 @@
 }
 .adm-nav-badge.adm-badge-green { background: #10B981; }
 .adm-sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid #F1F5F9; }
+.adm-local-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 10px; margin-bottom: 8px;
+  background: #F0FDF4; border: 1px solid #BBF7D0;
+  font-size: 11px; font-weight: 600; color: #16A34A;
+  text-decoration: none; transition: background 0.15s;
+}
+.adm-local-link:hover { background: #DCFCE7; }
 .adm-profile {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 10px; border-radius: 10px; background: #F8FAFC;
@@ -6120,6 +6128,9 @@ function adminSeed() {
     </div>
 
     <div class="adm-sidebar-footer">
+      <a class="adm-local-link" href="http://localhost:63523/" target="_blank" rel="noopener">
+        🖥️ 로컬 컴패니언 열기
+      </a>
       <div class="adm-profile">
         <div class="adm-avatar">D</div>
         <div>
