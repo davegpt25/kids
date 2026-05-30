@@ -1920,7 +1920,7 @@
 
 /* ─── MEMBERSHIP LOCK MODAL ─── */
 .lock-overlay {
-  position: fixed; inset: 0; z-index: 8000;
+  position: fixed; inset: 0; z-index: 8500;
   background: rgba(0,0,0,0.45); display: none;
   align-items: center; justify-content: center;
 }
@@ -2068,6 +2068,253 @@
   text-decoration: none; transition: color 0.2s;
 }
 .footer-admin-link:hover { color: rgba(255,255,255,0.5); }
+
+/* ══════════════════════════════════════════════════════
+   관리자 대시보드 CSS
+══════════════════════════════════════════════════════ */
+
+/* ── 레이아웃 ── */
+#adminRoot { font-family: 'Pretendard', sans-serif; }
+#adminSidebar {
+  width: 220px; flex-shrink: 0; background: #fff;
+  border-right: 1px solid #E2E8F0;
+  display: flex; flex-direction: column;
+  padding: 20px 12px; overflow-y: auto;
+}
+#adminMain { flex: 1; overflow-y: auto; padding: 28px 32px; }
+
+/* ── 사이드바 ── */
+.adm-sidebar-logo {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 8px 20px; border-bottom: 1px solid #F1F5F9; margin-bottom: 16px;
+}
+.adm-logo-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.adm-logo-text  { font-size: 14px; font-weight: 800; color: #1E293B; }
+.adm-logo-badge {
+  font-size: 9px; font-weight: 700; background: #FFF7ED;
+  color: #F97316; padding: 1px 6px; border-radius: 100px; border: 1px solid #FED7AA;
+}
+.adm-nav-group {
+  font-size: 10px; font-weight: 700; color: #94A3B8;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0 8px; margin: 12px 0 4px;
+}
+.adm-nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 10px; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: #64748B;
+  margin-bottom: 2px; transition: all 0.15s;
+}
+.adm-nav-item:hover  { background: #F8FAFC; color: #1E293B; }
+.adm-nav-item.adm-active { background: #FFF7ED; color: #F97316; font-weight: 700; }
+.adm-nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.adm-nav-badge {
+  margin-left: auto; background: #F97316; color: #fff;
+  font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 100px;
+}
+.adm-nav-badge.adm-badge-green { background: #10B981; }
+.adm-sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid #F1F5F9; }
+.adm-profile {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 10px; background: #F8FAFC;
+}
+.adm-avatar {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: #fff; font-weight: 700;
+}
+.adm-profile-name { font-size: 11px; font-weight: 700; color: #1E293B; }
+.adm-profile-role { font-size: 10px; color: #94A3B8; }
+.adm-logout-btn {
+  margin-left: auto; background: none; border: none;
+  font-size: 16px; cursor: pointer; color: #94A3B8; padding: 4px;
+}
+.adm-logout-btn:hover { color: #F97316; }
+
+/* ── 페이지 전환 ── */
+.adm-page { display: none; }
+.adm-page.adm-page-active { display: block; }
+.adm-page-header { margin-bottom: 24px; position: relative; }
+.adm-page-title { font-size: 20px; font-weight: 800; color: #1E293B; }
+.adm-page-sub   { font-size: 13px; color: #64748B; margin-top: 3px; }
+
+/* ── KPI 카드 ── */
+.adm-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+.adm-kpi-card {
+  background: #fff; border-radius: 14px;
+  border: 1px solid #E2E8F0; padding: 16px 18px; position: relative;
+}
+.adm-kpi-icon  { position: absolute; top: 14px; right: 14px; font-size: 20px; opacity: 0.6; }
+.adm-kpi-label { font-size: 11px; font-weight: 600; color: #94A3B8; margin-bottom: 6px; }
+.adm-kpi-value { font-size: 26px; font-weight: 800; color: #1E293B; line-height: 1; }
+.adm-kpi-delta { font-size: 11px; font-weight: 600; margin-top: 6px; padding: 2px 7px; border-radius: 100px; display: inline-block; }
+.adm-delta-up   { background: #ECFDF5; color: #16A34A; }
+.adm-delta-down { background: #FEF2F2; color: #DC2626; }
+.adm-delta-warn { background: #FFF7ED; color: #F97316; }
+
+/* ── 카드 + 행 ── */
+.adm-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; margin-bottom: 16px; }
+.adm-card { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; padding: 18px 20px; }
+.adm-card-wide { }
+.adm-card-title {
+  font-size: 13px; font-weight: 700; color: #1E293B;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.adm-card-badge {
+  font-size: 10px; font-weight: 700; background: #FFF7ED; color: #F97316;
+  padding: 1px 7px; border-radius: 100px;
+}
+.adm-card-badge.adm-badge-green { background: #ECFDF5; color: #16A34A; }
+.adm-card-action { margin-left: auto; font-size: 11px; color: #F97316; font-weight: 600; cursor: pointer; }
+
+/* ── 차트 ── */
+.adm-chart-wrap { margin-bottom: 12px; }
+.adm-chart-tall .adm-chart-bars { height: 100px; }
+.adm-chart-bars {
+  display: flex; align-items: flex-end; gap: 5px; height: 60px; margin-bottom: 4px;
+}
+.adm-chart-bar {
+  flex: 1; border-radius: 4px 4px 0 0; min-height: 4px;
+  background: linear-gradient(to top, #FF9A3C, #FBBF24); opacity: 0.75; cursor: pointer;
+  transition: opacity 0.15s; position: relative;
+}
+.adm-chart-bar:hover { opacity: 1; }
+.adm-chart-bar.today { background: linear-gradient(to top, #F97316, #FF9A3C); opacity: 1; }
+.adm-chart-labels { display: flex; gap: 5px; }
+.adm-chart-label  { flex: 1; text-align: center; font-size: 9px; color: #94A3B8; }
+.adm-chart-label.today { color: #F97316; font-weight: 700; }
+.adm-stats-list { display: flex; flex-direction: column; margin-top: 8px; }
+.adm-stat-row {
+  display: flex; justify-content: space-between; padding: 7px 0;
+  border-bottom: 1px solid #F1F5F9; font-size: 12px;
+}
+.adm-stat-row:last-child { border-bottom: none; }
+.adm-stat-label { color: #64748B; }
+.adm-stat-value { font-weight: 700; color: #1E293B; }
+.adm-stat-value.orange { color: #F97316; }
+
+/* ── 멤버 리스트 ── */
+.adm-member-list { display: flex; flex-direction: column; gap: 8px; }
+.adm-member-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  background: #F8FAFC; border: 1px solid #F1F5F9;
+}
+.adm-member-avatar {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #fff; font-weight: 700;
+}
+.adm-member-email { font-size: 12px; font-weight: 600; color: #1E293B; }
+.adm-member-date  { font-size: 10px; color: #94A3B8; }
+.adm-member-status {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 100px; flex-shrink: 0;
+}
+.adm-status-active  { background: #ECFDF5; color: #16A34A; }
+.adm-status-trial   { background: #FFF7ED; color: #F97316; }
+.adm-status-expired { background: #F1F5F9; color: #94A3B8; }
+.adm-toggle {
+  width: 36px; height: 20px; border-radius: 100px; flex-shrink: 0;
+  background: #E2E8F0; cursor: pointer; position: relative; transition: background 0.2s;
+  border: none;
+}
+.adm-toggle.on { background: #F97316; }
+.adm-toggle::after {
+  content: ''; position: absolute;
+  width: 14px; height: 14px; border-radius: 50%; background: #fff;
+  top: 3px; left: 3px; transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.adm-toggle.on::after { left: 19px; }
+
+/* ── 기능 스위치 ── */
+.adm-feature-list { display: flex; flex-direction: column; gap: 10px; }
+.adm-feature-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 12px;
+  background: #F8FAFC; border: 1px solid #F1F5F9;
+}
+.adm-feature-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.adm-feature-icon.time       { background: #FFF7ED; }
+.adm-feature-icon.confidence { background: #EFF6FF; }
+.adm-feature-icon.alert      { background: #F0FDF4; }
+.adm-feature-name { font-size: 12px; font-weight: 700; color: #1E293B; }
+.adm-feature-desc { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+.adm-feature-list-large .adm-feature-row { padding: 16px 18px; }
+.adm-feature-list-large .adm-feature-icon { width: 42px; height: 42px; font-size: 20px; }
+.adm-feature-list-large .adm-feature-name { font-size: 14px; }
+.adm-feature-list-large .adm-feature-desc { font-size: 12px; }
+
+/* ── 알림 대기열 ── */
+.adm-alert-list { display: flex; flex-direction: column; gap: 8px; }
+.adm-alert-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  background: #F8FAFC; border: 1px solid #F1F5F9;
+}
+.adm-alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.adm-dot-pending { background: #F97316; box-shadow: 0 0 0 3px #FFF7ED; }
+.adm-dot-sent    { background: #10B981; }
+.adm-alert-text { font-size: 12px; font-weight: 600; color: #1E293B; }
+.adm-alert-sub  { font-size: 10px; color: #94A3B8; }
+.adm-alert-send-btn {
+  margin-left: auto; font-size: 11px; font-weight: 600; flex-shrink: 0;
+  padding: 5px 11px; border-radius: 8px; cursor: pointer;
+  border: 1.5px solid #F97316; color: #F97316; background: #FFF7ED;
+  transition: all 0.15s;
+}
+.adm-alert-send-btn:hover { background: #F97316; color: #fff; }
+.adm-alert-sent-badge { margin-left: auto; font-size: 10px; color: #10B981; font-weight: 600; flex-shrink: 0; }
+
+/* ── 멤버십 관리 테이블 ── */
+.adm-export-btn {
+  position: absolute; right: 0; top: 0;
+  padding: 8px 16px; border-radius: 10px; cursor: pointer;
+  background: #fff; border: 1.5px solid #E2E8F0;
+  font-size: 12px; font-weight: 600; color: #64748B;
+  transition: all 0.15s;
+}
+.adm-export-btn:hover { border-color: #F97316; color: #F97316; }
+.adm-filter-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.adm-filter-tab {
+  padding: 6px 16px; border-radius: 100px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid #E2E8F0; background: #fff; color: #64748B;
+  transition: all 0.15s;
+}
+.adm-filter-tab.adm-filter-active { background: #FFF7ED; border-color: #F97316; color: #F97316; }
+.adm-table-wrap { overflow-x: auto; }
+.adm-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.adm-table th {
+  text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700;
+  color: #94A3B8; border-bottom: 1px solid #E2E8F0; white-space: nowrap;
+}
+.adm-table td { padding: 10px 12px; border-bottom: 1px solid #F1F5F9; }
+.adm-table tr:last-child td { border-bottom: none; }
+.adm-table tr:hover td { background: #FAFBFC; }
+
+/* ── 전환 통계 ── */
+#admConversionStats { display: flex; flex-direction: column; gap: 12px; }
+.adm-conv-item { display: flex; flex-direction: column; gap: 4px; }
+.adm-conv-label { font-size: 12px; color: #64748B; font-weight: 600; }
+.adm-conv-bar-wrap {
+  height: 8px; background: #F1F5F9; border-radius: 100px; overflow: hidden;
+}
+.adm-conv-bar {
+  height: 100%; border-radius: 100px;
+  background: linear-gradient(to right, #FF9A3C, #F97316);
+  transition: width 0.6s ease;
+}
+.adm-conv-value { font-size: 11px; color: #94A3B8; }
 </style>
 </head>
 <body>
