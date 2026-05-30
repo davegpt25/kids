@@ -1828,6 +1828,8 @@
 }
 .demo-day-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 .demo-day-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+.demo-time-morning { display: none; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.demo-time-morning.show { display: flex; }
 .demo-time-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .demo-time-btn {
   padding: 6px 12px; border-radius: 100px; border: 1.5px solid var(--gray-200);
@@ -3075,12 +3077,18 @@
           <button class="demo-day-btn"        data-day="3" onclick="toggleDay(this)">목</button>
           <button class="demo-day-btn active" data-day="4" onclick="toggleDay(this)">금</button>
           <button class="demo-day-btn"        data-day="5" onclick="toggleDay(this)">토</button>
+          <button class="demo-day-btn"        data-day="6" onclick="toggleDay(this)">일</button>
+        </div>
+        <div class="demo-time-morning" id="demoTimeMorning">
+          <button class="demo-time-btn" data-t="0" onclick="selectTimeSlot(this)">오전 9시</button>
+          <button class="demo-time-btn" data-t="1" onclick="selectTimeSlot(this)">오전 10시</button>
+          <button class="demo-time-btn" data-t="2" onclick="selectTimeSlot(this)">오전 11시</button>
         </div>
         <div class="demo-time-row">
-          <button class="demo-time-btn"        data-t="0" onclick="selectTimeSlot(this)">오후 4시</button>
-          <button class="demo-time-btn active" data-t="1" onclick="selectTimeSlot(this)">오후 5시</button>
-          <button class="demo-time-btn"        data-t="2" onclick="selectTimeSlot(this)">오후 6시</button>
-          <button class="demo-time-btn"        data-t="3" onclick="selectTimeSlot(this)">오후 7시</button>
+          <button class="demo-time-btn"        data-t="3" onclick="selectTimeSlot(this)">오후 4시</button>
+          <button class="demo-time-btn active" data-t="4" onclick="selectTimeSlot(this)">오후 5시</button>
+          <button class="demo-time-btn"        data-t="5" onclick="selectTimeSlot(this)">오후 6시</button>
+          <button class="demo-time-btn"        data-t="6" onclick="selectTimeSlot(this)">오후 7시</button>
         </div>
       </div>
 
@@ -3377,7 +3385,7 @@ let _demoShuttle = false;
 let _demoPickup  = false;
 let _demoSubjects   = [];
 let _demoPreferDays = [0,2,4];
-let _demoPreferTime = 1;
+let _demoPreferTime = 4;
 let _demoMap = null, _demoMarker = null, _demoCircle = null;
 let _demoGPSLat = 37.5665, _demoGPSLng = 126.9780; // default: Seoul
 
@@ -3804,12 +3812,14 @@ function openDemoModal() {
   // Reset subject/day/time selections
   _demoSubjects   = [];
   _demoPreferDays = [0,2,4];
-  _demoPreferTime = 1;
+  _demoPreferTime = 4;
   document.querySelectorAll('.demo-subject-chip').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('.demo-day-btn').forEach(b => {
     b.classList.toggle('active', [0,2,4].includes(parseInt(b.dataset.day)));
   });
-  document.querySelectorAll('.demo-time-btn').forEach((b,i) => b.classList.toggle('active', i===1));
+  document.querySelectorAll('.demo-time-btn').forEach(b => b.classList.toggle('active', b.dataset.t === '4'));
+  var morningDiv = document.getElementById('demoTimeMorning');
+  if (morningDiv) morningDiv.classList.remove('show');
   _startTypewriterCycle();
 }
 
@@ -4795,15 +4805,17 @@ function _renderSimCards() {
   var shuttle     = typeof _demoShuttle    !== 'undefined' ? _demoShuttle    : false;
   var rawSubjects = (typeof _demoSubjects  !== 'undefined' && _demoSubjects.length > 0)
                     ? _demoSubjects.slice(0,3) : ['math','english','piano'];
-  var preferDays  = (typeof _demoPreferDays !== 'undefined' && _demoPreferDays.length > 0)
-                    ? _demoPreferDays.filter(function(d){ return d <= 4; }) : [0,2,4];
-  if (preferDays.length === 0) preferDays = [0,2,4];
-  var preferTime  = typeof _demoPreferTime !== 'undefined' ? _demoPreferTime : 1;
+  var preferDays = (typeof _demoPreferDays !== 'undefined' && _demoPreferDays.length > 0)
+                   ? _demoPreferDays : [0,2,4];
+  var preferTime = typeof _demoPreferTime !== 'undefined' ? _demoPreferTime : 4;
 
-  var WEEK_NAMES  = ['월','화','수','목','금'];
-  var TIME_STARTS = ['오후 4:00','오후 5:00','오후 6:00','오후 7:00'];
-  var TIME_ENDS   = ['오후 5:30','오후 6:30','오후 7:30','오후 8:30'];
+  // slot 0-2 = morning (오전 9/10/11시), slot 3-6 = afternoon (오후 4/5/6/7시)
+  var WEEK_NAMES  = ['월','화','수','목','금','토','일'];
+  var TIME_STARTS = ['오전 9:00','오전 10:00','오전 11:00','오후 4:00','오후 5:00','오후 6:00','오후 7:00'];
+  var TIME_ENDS   = ['오전 10:30','오전 11:30','오후 12:30','오후 5:30','오후 6:30','오후 7:30','오후 8:30'];
   var radiusLabel = radius >= 1000 ? (radius/1000)+'km' : radius+'m';
+  // Convert slot index to grid row 0-3
+  function slotToRow(slot) { return Math.min(slot >= 3 ? slot - 3 : slot, 3); }
 
   // Assign days per subject with minimal overlap in same row:
   // Subject 0: even-indexed slots of preferDays (e.g. Mon/Fri from Mon/Wed/Fri)
@@ -4825,8 +4837,9 @@ function _renderSimCards() {
   });
 
   // Subject 0 & 1 share same time row (different days), subject 2 goes +1 row
+  var baseRow = slotToRow(preferTime);
   var subjectTimeRow = rawSubjects.map(function(_, i) {
-    return Math.min(preferTime + (i === 2 ? 1 : 0), 3);
+    return Math.min(baseRow + (i === 2 ? 1 : 0), 3);
   });
 
   // Sub-title: include location if GPS was used
@@ -4853,8 +4866,9 @@ function _renderSimCards() {
     var walkMin = Math.round(dist / 67);
     var rating  = ratings[i] || '4.5';
     var ts      = subjectTimeRow[i];
+    var slotIdx = preferTime >= 3 ? (ts + 3) : ts;
     var daysStr = subjectDayMap[i].map(function(d){ return WEEK_NAMES[d] || ''; }).join('·');
-    var timeStr = daysStr + ' ' + TIME_STARTS[ts] + '–' + TIME_ENDS[ts];
+    var timeStr = daysStr + ' ' + TIME_STARTS[slotIdx] + '–' + TIME_ENDS[slotIdx];
     var tag1    = i === 0 ? '<span class="sim-card-tag">1위 추천</span>' : '';
     var tag2    = (shuttle && i === 0) ? '<span class="sim-card-tag orange">셔틀 있음</span>' : '';
     var noOverlap = '<span class="sim-card-tag">시간 겹침 없음</span>';
@@ -4882,6 +4896,14 @@ function _renderSimCards() {
   rows.forEach(function(row) {
     if (!row) return;
     row.querySelectorAll('div:not(.sim-time-label)').forEach(function(c){ c.innerHTML = ''; c.className = ''; });
+  });
+  // Update grid row labels based on morning/afternoon selection
+  var gridLabels = preferTime < 3
+    ? ['오전 9시','오전 10시','오전 11시','오전 12시']
+    : ['오후 4시','오후 5시','오후 6시','오후 7시'];
+  [0,1,2,3].forEach(function(r) {
+    var lEl = document.querySelector('#simRow' + r + ' .sim-time-label');
+    if (lEl) lEl.textContent = gridLabels[r];
   });
   rawSubjects.forEach(function(subj, i) {
     var pool = _SIM_POOLS[subj] || _SIM_POOLS['default'];
@@ -4919,6 +4941,17 @@ function toggleDay(el) {
     _demoPreferDays.push(day);
     _demoPreferDays.sort(function(a,b){return a-b;});
     el.classList.add('active');
+  }
+  // Show morning time slots when any weekend day (토=5, 일=6) is selected
+  var hasWeekend = _demoPreferDays.some(function(d){ return d >= 5; });
+  var morningDiv = document.getElementById('demoTimeMorning');
+  if (morningDiv) morningDiv.classList.toggle('show', hasWeekend);
+  // If morning slots just hidden but morning time is selected → reset to 오후 5시
+  if (!hasWeekend && _demoPreferTime < 3) {
+    _demoPreferTime = 4;
+    document.querySelectorAll('.demo-time-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.t === '4');
+    });
   }
 }
 function selectTimeSlot(el) {
