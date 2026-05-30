@@ -5680,6 +5680,332 @@ window.addEventListener('DOMContentLoaded', function() {
     showAdminDashboard();
   }
 });
+
+// ══════════════════════════════════════════════════════════
+// ─── ADMIN DASHBOARD JS ───
+// ══════════════════════════════════════════════════════════
+
+// ── 페이지 전환 ──
+function adminShowPage(pageId) {
+  Array.prototype.forEach.call(document.querySelectorAll('.adm-page'), function(p) { p.classList.remove('adm-page-active'); });
+  var pageEl = document.getElementById('admPage' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
+  if (pageEl) pageEl.classList.add('adm-page-active');
+  Array.prototype.forEach.call(document.querySelectorAll('.adm-nav-item'), function(item) { item.classList.remove('adm-active'); });
+  var navMap = { dashboard:'대시보드', members:'멤버십 관리', features:'기능 설정', alerts:'공석 알림', stats:'가입 통계' };
+  Array.prototype.forEach.call(document.querySelectorAll('.adm-nav-item'), function(item) {
+    if (item.textContent.trim().indexOf(navMap[pageId]) >= 0) item.classList.add('adm-active');
+  });
+  if (pageId === 'members') adminRenderMemberTable('all');
+  if (pageId === 'features') adminRenderFeaturesFull();
+  if (pageId === 'alerts') adminRenderAlertsFull();
+  if (pageId === 'stats') adminRenderStats();
+}
+
+// ── 전체 렌더링 (로그인 직후 호출) ──
+function adminRenderAll() {
+  adminRenderKPIs();
+  adminRenderChart(7, 'admChartBars', 'admChartLabels');
+  adminRenderWeekStats();
+  adminRenderRecentMembers();
+  adminRenderFeatures();
+  adminRenderAlerts();
+  adminUpdateBadges();
+}
+
+// ── KPI 카드 ──
+function adminRenderKPIs() {
+  var members = KR.getMembers();
+  var now     = Date.now();
+  var todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  var weekStart  = now - 7 * 86400000;
+
+  var total      = members.length;
+  var todayNew   = members.filter(function(m){ return m.registeredAt >= todayStart.getTime(); }).length;
+  var active     = members.filter(function(m){ return m.isPaid; }).length;
+  var weekActive = members.filter(function(m){ return m.isPaid && m.registeredAt >= weekStart; }).length;
+  var trial      = members.filter(function(m){
+    return !m.isPaid && (KR.TRIAL_DAYS - (now - m.registeredAt)/86400000) > 0;
+  }).length;
+  var expiringSoon = members.filter(function(m) {
+    var left = KR.TRIAL_DAYS - (now - m.registeredAt)/86400000;
+    return !m.isPaid && left > 0 && left <= 2;
+  }).length;
+  var conversion = total > 0 ? ((active / total) * 100).toFixed(1) : '0.0';
+
+  _setAdmEl('kpiTotal',      total);
+  _setAdmEl('kpiTodayDelta', '오늘 +' + todayNew);
+  _setAdmEl('kpiActive',     active);
+  _setAdmEl('kpiActiveDelta','이번 주 +' + weekActive);
+  _setAdmEl('kpiTrial',      trial);
+  _setAdmEl('kpiExpiringSoon','만료 임박 ' + expiringSoon + '명');
+  _setAdmEl('kpiConversion', conversion + '%');
+}
+
+function _setAdmEl(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+
+// ── 차트 ──
+function adminRenderChart(days, barsId, labelsId) {
+  var barsEl   = document.getElementById(barsId);
+  var labelsEl = document.getElementById(labelsId);
+  if (!barsEl || !labelsEl) return;
+  var members  = KR.getMembers();
+  var now      = Date.now();
+  var counts   = [];
+  var labels   = [];
+  var maxCount = 1;
+  var DAY_NAMES = ['일','월','화','수','목','금','토'];
+
+  for (var i = days - 1; i >= 0; i--) {
+    var dayStart = now - i * 86400000;
+    var dayEnd   = dayStart + 86400000;
+    var d = new Date(dayStart);
+    var count = members.filter(function(m){ return m.registeredAt >= dayStart && m.registeredAt < dayEnd; }).length;
+    counts.push(count);
+    labels.push(i === 0 ? '오늘' : DAY_NAMES[d.getDay()]);
+    if (count > maxCount) maxCount = count;
+  }
+
+  barsEl.innerHTML = '';
+  labelsEl.innerHTML = '';
+  counts.forEach(function(c, i) {
+    var pct = Math.max(4, Math.round((c / maxCount) * 100));
+    var bar = document.createElement('div');
+    bar.className = 'adm-chart-bar' + (i === counts.length - 1 ? ' today' : '');
+    bar.style.height = pct + '%';
+    bar.title = labels[i] + ': ' + c + '명';
+    barsEl.appendChild(bar);
+
+    var label = document.createElement('div');
+    label.className = 'adm-chart-label' + (i === counts.length - 1 ? ' today' : '');
+    label.textContent = labels[i];
+    labelsEl.appendChild(label);
+  });
+}
+
+// ── 주간 통계 ──
+function adminRenderWeekStats() {
+  var el = document.getElementById('admWeekStats');
+  if (!el) return;
+  var members  = KR.getMembers();
+  var now      = Date.now();
+  var weekAgo  = now - 7 * 86400000;
+  var prevWeekAgo = now - 14 * 86400000;
+  var thisWeek = members.filter(function(m){ return m.registeredAt >= weekAgo; }).length;
+  var prevWeek = members.filter(function(m){ return m.registeredAt >= prevWeekAgo && m.registeredAt < weekAgo; }).length;
+  var growth   = prevWeek > 0 ? Math.round((thisWeek - prevWeek) / prevWeek * 100) : 0;
+  var convCount= members.filter(function(m){ return m.isPaid && m.registeredAt >= weekAgo; }).length;
+  el.innerHTML =
+    '<div class="adm-stat-row"><span class="adm-stat-label">이번 주 총 가입</span><span class="adm-stat-value orange">+' + thisWeek + '명</span></div>' +
+    '<div class="adm-stat-row"><span class="adm-stat-label">전주 대비</span><span class="adm-stat-value orange">' + (growth >= 0 ? '+' : '') + growth + '%</span></div>' +
+    '<div class="adm-stat-row"><span class="adm-stat-label">체험→멤버십 전환</span><span class="adm-stat-value">' + convCount + '명 (이번 주)</span></div>';
+}
+
+// ── 최근 가입자 ──
+function adminRenderRecentMembers() {
+  var el = document.getElementById('admRecentMembers');
+  if (!el) return;
+  var members = KR.getMembers().slice().sort(function(a,b){ return b.registeredAt - a.registeredAt; }).slice(0, 4);
+  if (members.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:#94A3B8;font-size:12px;padding:16px">아직 가입자가 없어요</div>';
+    return;
+  }
+  el.innerHTML = members.map(function(m) {
+    var status = KR.getMemberStatus(m.email);
+    var masked = m.email.substring(0, 3) + '**@' + m.email.split('@')[1];
+    var initial = m.email.charAt(0).toUpperCase();
+    var statusBadge = status.type === 'active'
+      ? '<span class="adm-member-status adm-status-active">멤버십</span>'
+      : status.type === 'trial'
+      ? '<span class="adm-member-status adm-status-trial">체험 D-' + status.daysLeft + '</span>'
+      : '<span class="adm-member-status adm-status-expired">만료</span>';
+    var timeAgo = _timeAgo(m.registeredAt);
+    var isPaid  = m.isPaid;
+    return '<div class="adm-member-row">' +
+      '<div class="adm-member-avatar" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">' + initial + '</div>' +
+      '<div><div class="adm-member-email">' + masked + '</div><div class="adm-member-date">' + timeAgo + '</div></div>' +
+      statusBadge +
+      '<button class="adm-toggle ' + (isPaid ? 'on' : '') + '" onclick="adminToggleMember(\'' + m.email + '\',this)" title="멤버십 토글"></button>' +
+      '</div>';
+  }).join('');
+}
+
+function adminToggleMember(email, btn) {
+  var m = KR.getMember(email);
+  if (!m) return;
+  KR.setMemberPaid(email, !m.isPaid);
+  btn.classList.toggle('on', !m.isPaid);
+  adminRenderKPIs();
+  adminUpdateBadges();
+}
+
+function _timeAgo(ts) {
+  var diff = Date.now() - ts;
+  if (diff < 60000)      return '방금';
+  if (diff < 3600000)    return Math.floor(diff/60000) + '분 전';
+  if (diff < 86400000)   return Math.floor(diff/3600000) + '시간 전';
+  return Math.floor(diff/86400000) + '일 전';
+}
+
+// ── 기능 스위치 (대시보드 홈) ──
+function adminRenderFeatures() {
+  _adminRenderFeatureList('admFeatureList', false);
+}
+function adminRenderFeaturesFull() {
+  _adminRenderFeatureList('admFeatureListFull', true);
+}
+function _adminRenderFeatureList(elId, large) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  var feat = KR.getFeatures();
+  var defs = [
+    { key:'scheduleHistory', icon:'⏱️', cls:'time',       name:'스케줄 저장 & 히스토리', desc:'시간절약 — 최대 5개 스케줄 저장' },
+    { key:'confidenceScore', icon:'✨', cls:'confidence', name:'최적 조합 신뢰도 점수',  desc:'결정불안 해소 — AI 추천 근거 표시' },
+    { key:'vacancyAlert',    icon:'🔔', cls:'alert',      name:'학원 공석 실시간 알림',  desc:'기회손실 방지 — 카카오 알림톡 연동 (준비 중)' }
+  ];
+  el.innerHTML = defs.map(function(d) {
+    var on = feat[d.key];
+    return '<div class="adm-feature-row">' +
+      '<div class="adm-feature-icon ' + d.cls + '">' + d.icon + '</div>' +
+      '<div><div class="adm-feature-name">' + d.name + '</div><div class="adm-feature-desc">' + d.desc + '</div></div>' +
+      '<button class="adm-toggle ' + (on ? 'on' : '') + '" onclick="adminToggleFeature(\'' + d.key + '\',this)"></button>' +
+      '</div>';
+  }).join('');
+}
+function adminToggleFeature(key, btn) {
+  var feat = KR.getFeatures();
+  KR.setFeature(key, !feat[key]);
+  btn.classList.toggle('on', !feat[key]);
+}
+
+// ── 공석 알림 (대시보드 홈) ──
+function adminRenderAlerts() {
+  _adminRenderAlertList('admAlertList', 3);
+  var pending = KR.getAlerts().filter(function(a){ return a.status === 'pending'; }).length;
+  var badge = document.getElementById('admAlertCount');
+  if (badge) { badge.textContent = pending + '건'; badge.className = 'adm-card-badge' + (pending > 0 ? ' adm-badge-green' : ''); }
+}
+function adminRenderAlertsFull() {
+  _adminRenderAlertList('admAlertListFull', 999);
+}
+function _adminRenderAlertList(elId, limit) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  var alerts = KR.getAlerts().slice().sort(function(a,b){ return b.createdAt - a.createdAt; }).slice(0, limit);
+  if (alerts.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:#94A3B8;font-size:12px;padding:16px">등록된 알림이 없어요</div>';
+    return;
+  }
+  el.innerHTML = alerts.map(function(a) {
+    var isPending = a.status === 'pending';
+    return '<div class="adm-alert-row" style="' + (isPending ? '' : 'opacity:0.55') + '">' +
+      '<div class="adm-alert-dot ' + (isPending ? 'adm-dot-pending' : 'adm-dot-sent') + '"></div>' +
+      '<div><div class="adm-alert-text">' + a.academy + ' — ' + a.slots + '자리</div>' +
+      '<div class="adm-alert-sub">' + (isPending ? '대기 중 · ' + _timeAgo(a.createdAt) : '발송 완료 · ' + _timeAgo(a.sentAt || a.createdAt)) + '</div></div>' +
+      (isPending
+        ? '<button class="adm-alert-send-btn" onclick="adminSendAlert(' + a.id + ',this)">알림 발송</button>'
+        : '<span class="adm-alert-sent-badge">✅ 발송됨</span>') +
+      '</div>';
+  }).join('');
+}
+function adminSendAlert(id, btn) {
+  KR.sendAlert(id);
+  showToast('알림이 발송됐어요 ✅');
+  adminRenderAlerts();
+  adminUpdateBadges();
+}
+
+// ── 배지 업데이트 ──
+function adminUpdateBadges() {
+  var members = KR.getMembers();
+  var pending = KR.getAlerts().filter(function(a){ return a.status === 'pending'; }).length;
+  _setAdmEl('admBadgeMembers', members.length);
+  _setAdmEl('admBadgeAlerts', pending);
+}
+
+// ── 멤버십 관리 테이블 ──
+var _admMemberFilter = 'all';
+function adminFilterMembers(btn, filter) {
+  _admMemberFilter = filter;
+  Array.prototype.forEach.call(document.querySelectorAll('.adm-filter-tab'), function(t){ t.classList.remove('adm-filter-active'); });
+  btn.classList.add('adm-filter-active');
+  adminRenderMemberTable(filter);
+}
+function adminRenderMemberTable(filter) {
+  var tbody = document.getElementById('admMemberTableBody');
+  if (!tbody) return;
+  var members = KR.getMembers().slice().sort(function(a,b){ return b.registeredAt - a.registeredAt; });
+  if (filter !== 'all') {
+    members = members.filter(function(m){
+      var s = KR.getMemberStatus(m.email);
+      return s.type === filter;
+    });
+  }
+  if (members.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94A3B8;padding:20px">해당하는 회원이 없어요</td></tr>';
+    return;
+  }
+  tbody.innerHTML = members.map(function(m) {
+    var status   = KR.getMemberStatus(m.email);
+    var masked   = m.email.substring(0, 3) + '**@' + m.email.split('@')[1];
+    var regDate  = new Date(m.registeredAt).toLocaleDateString('ko-KR');
+    var statusBadge = status.type === 'active'
+      ? '<span class="adm-member-status adm-status-active">멤버십</span>'
+      : status.type === 'trial'
+      ? '<span class="adm-member-status adm-status-trial">체험 중</span>'
+      : '<span class="adm-member-status adm-status-expired">만료</span>';
+    var remaining = status.type === 'trial' ? 'D-' + status.daysLeft : status.type === 'active' ? '∞' : '-';
+    return '<tr>' +
+      '<td>' + masked + '</td>' +
+      '<td>' + (m.name || '-') + '</td>' +
+      '<td>' + regDate + '</td>' +
+      '<td>' + statusBadge + '</td>' +
+      '<td style="color:#64748B">' + remaining + '</td>' +
+      '<td><button class="adm-toggle ' + (m.isPaid ? 'on' : '') + '" onclick="adminToggleMember(\'' + m.email + '\',this);adminRenderMemberTable(\'' + _admMemberFilter + '\')"></button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ── CSV 내보내기 ──
+function adminExportCSV() {
+  var members = KR.getMembers();
+  var header  = ['이메일', '이름', '가입일', '상태', '남은기간', '멤버십'];
+  var rows    = members.map(function(m) {
+    var status  = KR.getMemberStatus(m.email);
+    var regDate = new Date(m.registeredAt).toLocaleDateString('ko-KR');
+    var remaining = status.type === 'trial' ? 'D-' + status.daysLeft : status.type === 'active' ? '유지' : '만료';
+    return [m.email, m.name || '', regDate, status.type, remaining, m.isPaid ? 'O' : 'X'].join(',');
+  });
+  var csv  = [header.join(',')].concat(rows).join('\n');
+  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url; a.download = 'kidsroute_members_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── 전환 통계 ──
+function adminRenderStats() {
+  adminRenderChart(14, 'admChartBars14', 'admChartLabels14');
+  var el = document.getElementById('admConversionStats');
+  if (!el) return;
+  var members = KR.getMembers();
+  var total   = members.length || 1;
+  var trial   = members.filter(function(m){ var s = KR.getMemberStatus(m.email); return s.type==='trial'; }).length;
+  var active  = members.filter(function(m){ return m.isPaid; }).length;
+  var expired = members.filter(function(m){ var s = KR.getMemberStatus(m.email); return s.type==='expired'; }).length;
+  function bar(label, count, color) {
+    var pct = Math.round(count / total * 100);
+    return '<div class="adm-conv-item">' +
+      '<div class="adm-conv-label">' + label + ' <strong style="color:#1E293B">' + count + '명</strong></div>' +
+      '<div class="adm-conv-bar-wrap"><div class="adm-conv-bar" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+      '<div class="adm-conv-value">' + pct + '%</div></div>';
+  }
+  el.innerHTML =
+    bar('체험 중', trial,  'linear-gradient(to right,#FF9A3C,#F97316)') +
+    bar('멤버십 활성', active, 'linear-gradient(to right,#34D399,#10B981)') +
+    bar('만료', expired, 'linear-gradient(to right,#94A3B8,#64748B)');
+}
 </script>
 
 <!-- 멤버십 잠금 모달 -->
