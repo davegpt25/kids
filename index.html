@@ -2016,6 +2016,58 @@
   transition: all 0.15s;
 }
 .sim-alert-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ─── ADMIN LOGIN MODAL ─── */
+.admin-login-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.5); display: none;
+  align-items: center; justify-content: center;
+}
+.admin-login-overlay.open { display: flex; }
+.admin-login-modal {
+  background: #fff; border-radius: 20px; padding: 32px 28px;
+  width: 320px; box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+  animation: lockSlideUp 0.25s ease;
+}
+.admin-login-logo {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 20px;
+}
+.admin-login-logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.admin-login-title { font-size: 17px; font-weight: 800; color: #1E293B; }
+.admin-login-sub   { font-size: 12px; color: #94A3B8; margin-top: 1px; }
+.admin-login-label { font-size: 12px; font-weight: 600; color: #64748B; margin-bottom: 6px; display: block; }
+.admin-login-input {
+  width: 100%; padding: 11px 14px; border-radius: 10px;
+  border: 1.5px solid #E2E8F0; font-size: 14px; outline: none;
+  margin-bottom: 8px; transition: border-color 0.15s;
+}
+.admin-login-input:focus { border-color: #F97316; }
+.admin-login-error {
+  font-size: 12px; color: #DC2626; margin-bottom: 10px; display: none;
+}
+.admin-login-btn {
+  width: 100%; padding: 13px; border-radius: 12px;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  color: #fff; font-size: 14px; font-weight: 700;
+  border: none; cursor: pointer; margin-bottom: 10px;
+}
+.admin-login-cancel {
+  width: 100%; padding: 10px; border-radius: 12px;
+  background: none; border: 1.5px solid #E2E8F0;
+  color: #64748B; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.footer-admin-link {
+  display: block; margin-top: 16px; font-size: 11px;
+  color: rgba(255,255,255,0.2); text-align: center; cursor: pointer;
+  text-decoration: none; transition: color 0.2s;
+}
+.footer-admin-link:hover { color: rgba(255,255,255,0.5); }
 </style>
 </head>
 <body>
@@ -3468,6 +3520,7 @@
     <a href="#">문의하기</a>
   </div>
   <div class="footer-copy">© 2026 KidsRoute. MVP v1.0</div>
+  <a class="footer-admin-link" onclick="openAdminLogin()">관리자</a>
 </footer>
 
 <script>
@@ -5330,6 +5383,56 @@ function submitVacancyAlert() {
   closeAlertRegModal();
   showToast('🔔 공석 알림이 등록됐어요!');
 }
+
+// ─── Admin Login / Logout ───
+function openAdminLogin() {
+  if (localStorage.getItem('kr_admin_session')) { showAdminDashboard(); return; }
+  var input = document.getElementById('adminEmailInput');
+  if (input) input.value = '';
+  var err = document.getElementById('adminLoginError');
+  if (err) err.style.display = 'none';
+  document.getElementById('adminLoginOverlay').classList.add('open');
+  setTimeout(function(){ if (input) input.focus(); }, 100);
+}
+function closeAdminLogin() {
+  document.getElementById('adminLoginOverlay').classList.remove('open');
+}
+function handleAdminLoginOverlay(e) {
+  if (e.target === document.getElementById('adminLoginOverlay')) closeAdminLogin();
+}
+function doAdminLogin() {
+  var input = document.getElementById('adminEmailInput');
+  var email = input ? input.value.trim() : '';
+  var err   = document.getElementById('adminLoginError');
+  if (email === KR.ADMIN_EMAIL) {
+    localStorage.setItem('kr_admin_session', email);
+    closeAdminLogin();
+    showAdminDashboard();
+  } else {
+    if (err) { err.style.display = 'block'; }
+    if (input) { input.style.borderColor = '#EF4444'; setTimeout(function(){ input.style.borderColor = ''; }, 2000); }
+  }
+}
+function showAdminDashboard() {
+  var adminRoot = document.getElementById('adminRoot');
+  if (adminRoot) {
+    adminRoot.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    if (typeof adminRenderAll === 'function') adminRenderAll();
+  }
+}
+function hideAdminDashboard() {
+  var adminRoot = document.getElementById('adminRoot');
+  if (adminRoot) adminRoot.style.display = 'none';
+  document.body.style.overflow = '';
+  localStorage.removeItem('kr_admin_session');
+}
+// 페이지 로드 시 어드민 세션 복원
+window.addEventListener('DOMContentLoaded', function() {
+  if (localStorage.getItem('kr_admin_session') === KR.ADMIN_EMAIL) {
+    showAdminDashboard();
+  }
+});
 </script>
 
 <!-- 멤버십 잠금 모달 -->
@@ -5358,6 +5461,26 @@ function submitVacancyAlert() {
 </div>
 
 <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">↑</button>
+
+<!-- 관리자 로그인 모달 -->
+<div class="admin-login-overlay" id="adminLoginOverlay" onclick="handleAdminLoginOverlay(event)">
+  <div class="admin-login-modal">
+    <div class="admin-login-logo">
+      <div class="admin-login-logo-icon">🗺️</div>
+      <div>
+        <div class="admin-login-title">관리자 로그인</div>
+        <div class="admin-login-sub">키즈루트 어드민</div>
+      </div>
+    </div>
+    <label class="admin-login-label">이메일</label>
+    <input class="admin-login-input" id="adminEmailInput" type="email"
+           placeholder="관리자 이메일 입력"
+           onkeydown="if(event.key==='Enter') doAdminLogin()">
+    <div class="admin-login-error" id="adminLoginError">관리자 계정이 아닙니다</div>
+    <button class="admin-login-btn" onclick="doAdminLogin()">로그인</button>
+    <button class="admin-login-cancel" onclick="closeAdminLogin()">닫기</button>
+  </div>
+</div>
 
 </body>
 </html>
