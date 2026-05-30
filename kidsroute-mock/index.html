@@ -5286,24 +5286,31 @@ function saveCurrentSchedule() {
 // ─── WTP 3: Vacancy Alert ───
 function openVacancyAlertModal() {
   if (!checkMembership('vacancyAlert')) return;
-  // 현재 시뮬레이션 카드 학원 이름 수집
   var cards = document.querySelectorAll('#simCards .sim-card');
   var listEl = document.getElementById('alertAcademyList');
   if (!listEl) return;
   listEl.innerHTML = '';
-  cards.forEach(function(card, i) {
+  Array.prototype.forEach.call(cards, function(card) {
     var nameEl = card.querySelector('.sim-card-name');
     if (!nameEl) return;
     var name = nameEl.textContent;
-    var item = document.createElement('label');
-    item.className = 'alert-academy-item';
-    item.innerHTML =
-      '<input type="checkbox" name="alertAcademy" value="' + name + '" checked>' +
-      '<span>' + name + '</span>';
-    item.querySelector('input').addEventListener('change', function() {
-      item.classList.toggle('selected', this.checked);
+    var item  = document.createElement('label');
+    item.className = 'alert-academy-item selected';
+
+    var cb = document.createElement('input');
+    cb.type    = 'checkbox';
+    cb.name    = 'alertAcademy';
+    cb.checked = true;
+    cb.setAttribute('value', name);
+    cb.addEventListener('change', function() {
+      item.classList.toggle('selected', cb.checked);
     });
-    item.classList.add('selected');
+
+    var span = document.createElement('span');
+    span.textContent = name;
+
+    item.appendChild(cb);
+    item.appendChild(span);
     listEl.appendChild(item);
   });
   if (listEl.children.length === 0) {
@@ -5317,7 +5324,7 @@ function closeAlertRegModal(e) {
 }
 function submitVacancyAlert() {
   var checked = document.querySelectorAll('#alertAcademyList input[type=checkbox]:checked');
-  checked.forEach(function(cb) {
+  Array.prototype.forEach.call(checked, function(cb) {
     KR.addAlert(cb.value, 1, _sessionEmail);
   });
   closeAlertRegModal();
