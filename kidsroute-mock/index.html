@@ -5038,7 +5038,7 @@ var KR = {
     var m = KR.getMember(email);
     if (!m) return { type: 'none' };
     if (m.isPaid) return { type: 'active' };
-    var daysLeft = Math.ceil(KR.TRIAL_DAYS - (Date.now() - m.registeredAt) / 86400000);
+    var daysLeft = Math.ceil(m.trialDays - (Date.now() - m.registeredAt) / 86400000);
     if (daysLeft > 0) return { type: 'trial', daysLeft: daysLeft };
     return { type: 'expired' };
   },
@@ -5049,13 +5049,13 @@ var KR = {
   },
 
   // ── Session ──
-  getSession: function() { return localStorage.getItem('kr_session') || ''; },
-  setSession: function(email) { localStorage.setItem('kr_session', email); },
-  clearSession: function() { localStorage.removeItem('kr_session'); },
+  getSession: function() { try { return localStorage.getItem('kr_session') || ''; } catch(e) { return ''; } },
+  setSession: function(email) { try { localStorage.setItem('kr_session', email); } catch(e) {} },
+  clearSession: function() { try { localStorage.removeItem('kr_session'); } catch(e) {} },
   isAdmin: function() { return KR.getSession() === KR.ADMIN_EMAIL; },
-  hasAdminSession: function() { return !!localStorage.getItem('kr_admin_session'); },
-  setAdminSession: function() { localStorage.setItem('kr_admin_session', KR.ADMIN_EMAIL); },
-  clearAdminSession: function() { localStorage.removeItem('kr_admin_session'); },
+  hasAdminSession: function() { try { return !!localStorage.getItem('kr_admin_session'); } catch(e) { return false; } },
+  setAdminSession: function() { try { localStorage.setItem('kr_admin_session', KR.ADMIN_EMAIL); } catch(e) {} },
+  clearAdminSession: function() { try { localStorage.removeItem('kr_admin_session'); } catch(e) {} },
 
   // ── Features ──
   getFeatures: function() {
