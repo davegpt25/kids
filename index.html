@@ -5482,5 +5482,193 @@ window.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════
+     관리자 대시보드 루트 (로그인 후 표시)
+════════════════════════════════════════════ -->
+<div id="adminRoot" style="display:none;position:fixed;inset:0;z-index:9500;background:#F8FAFC;flex-direction:row;overflow:hidden;">
+
+  <!-- 사이드바 -->
+  <aside id="adminSidebar">
+    <div class="adm-sidebar-logo">
+      <div class="adm-logo-icon">🗺️</div>
+      <div>
+        <div class="adm-logo-text">키즈루트</div>
+        <div class="adm-logo-badge">ADMIN</div>
+      </div>
+    </div>
+
+    <div class="adm-nav-group">Overview</div>
+    <div class="adm-nav-item adm-active" onclick="adminShowPage('dashboard')">
+      <span class="adm-nav-icon">📊</span> 대시보드
+    </div>
+
+    <div class="adm-nav-group">Management</div>
+    <div class="adm-nav-item" onclick="adminShowPage('members')">
+      <span class="adm-nav-icon">👥</span> 멤버십 관리
+      <span class="adm-nav-badge" id="admBadgeMembers">0</span>
+    </div>
+    <div class="adm-nav-item" onclick="adminShowPage('features')">
+      <span class="adm-nav-icon">⚙️</span> 기능 설정
+    </div>
+    <div class="adm-nav-item" onclick="adminShowPage('alerts')">
+      <span class="adm-nav-icon">🔔</span> 공석 알림
+      <span class="adm-nav-badge adm-badge-green" id="admBadgeAlerts">0</span>
+    </div>
+
+    <div class="adm-nav-group">Analytics</div>
+    <div class="adm-nav-item" onclick="adminShowPage('stats')">
+      <span class="adm-nav-icon">📈</span> 가입 통계
+    </div>
+
+    <div class="adm-sidebar-footer">
+      <div class="adm-profile">
+        <div class="adm-avatar">D</div>
+        <div>
+          <div class="adm-profile-name">davegpt25</div>
+          <div class="adm-profile-role">관리자</div>
+        </div>
+        <button class="adm-logout-btn" onclick="hideAdminDashboard()" title="로그아웃">↩</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 메인 콘텐츠 -->
+  <main id="adminMain">
+
+    <!-- ── 대시보드 홈 ── -->
+    <div id="admPageDashboard" class="adm-page adm-page-active">
+      <div class="adm-page-header">
+        <div class="adm-page-title">대시보드 👋</div>
+        <div class="adm-page-sub">오늘도 학부모들이 최적 스케줄을 찾고 있어요.</div>
+      </div>
+      <!-- KPI 카드 -->
+      <div class="adm-kpi-grid">
+        <div class="adm-kpi-card">
+          <div class="adm-kpi-icon">📋</div>
+          <div class="adm-kpi-label">총 사전예약</div>
+          <div class="adm-kpi-value" id="kpiTotal">0</div>
+          <div class="adm-kpi-delta adm-delta-up" id="kpiTodayDelta">오늘 +0</div>
+        </div>
+        <div class="adm-kpi-card">
+          <div class="adm-kpi-icon">💳</div>
+          <div class="adm-kpi-label">멤버십 활성</div>
+          <div class="adm-kpi-value" id="kpiActive">0</div>
+          <div class="adm-kpi-delta adm-delta-up" id="kpiActiveDelta">이번 주 +0</div>
+        </div>
+        <div class="adm-kpi-card">
+          <div class="adm-kpi-icon">⏳</div>
+          <div class="adm-kpi-label">체험 중</div>
+          <div class="adm-kpi-value" id="kpiTrial">0</div>
+          <div class="adm-kpi-delta adm-delta-down" id="kpiExpiringSoon">만료 임박 0명</div>
+        </div>
+        <div class="adm-kpi-card">
+          <div class="adm-kpi-icon">🔄</div>
+          <div class="adm-kpi-label">전환율</div>
+          <div class="adm-kpi-value" id="kpiConversion">0%</div>
+          <div class="adm-kpi-delta adm-delta-up">멤버십/전체</div>
+        </div>
+      </div>
+      <!-- 차트 + 최근 가입자 -->
+      <div class="adm-row">
+        <div class="adm-card adm-card-wide">
+          <div class="adm-card-title">📈 일별 사전예약 추이 <span class="adm-card-badge">최근 7일</span></div>
+          <div class="adm-chart-wrap">
+            <div class="adm-chart-bars" id="admChartBars"><!-- JS 렌더링 --></div>
+            <div class="adm-chart-labels" id="admChartLabels"><!-- JS 렌더링 --></div>
+          </div>
+          <div class="adm-stats-list" id="admWeekStats"><!-- JS 렌더링 --></div>
+        </div>
+        <div class="adm-card">
+          <div class="adm-card-title">👥 최근 가입자 <a class="adm-card-action" onclick="adminShowPage('members')">전체 보기 →</a></div>
+          <div class="adm-member-list" id="admRecentMembers"><!-- JS 렌더링 --></div>
+        </div>
+      </div>
+      <!-- 기능 설정 + 공석 알림 -->
+      <div class="adm-row">
+        <div class="adm-card">
+          <div class="adm-card-title">⚙️ 멤버십 기능 ON / OFF <span class="adm-card-badge">WTP 3가지</span></div>
+          <div class="adm-feature-list" id="admFeatureList"><!-- JS 렌더링 --></div>
+        </div>
+        <div class="adm-card">
+          <div class="adm-card-title">🔔 공석 알림 대기열 <span class="adm-card-badge adm-badge-green" id="admAlertCount">0건</span></div>
+          <div class="adm-alert-list" id="admAlertList"><!-- JS 렌더링 --></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 멤버십 관리 ── -->
+    <div id="admPageMembers" class="adm-page">
+      <div class="adm-page-header">
+        <div class="adm-page-title">👥 멤버십 관리</div>
+        <div class="adm-page-sub">전체 사전예약 회원 목록</div>
+        <button class="adm-export-btn" onclick="adminExportCSV()">📥 CSV 내보내기</button>
+      </div>
+      <div class="adm-filter-tabs" id="admMemberFilterTabs">
+        <button class="adm-filter-tab adm-filter-active" data-filter="all" onclick="adminFilterMembers(this,'all')">전체</button>
+        <button class="adm-filter-tab" data-filter="trial" onclick="adminFilterMembers(this,'trial')">체험 중</button>
+        <button class="adm-filter-tab" data-filter="active" onclick="adminFilterMembers(this,'active')">멤버십</button>
+        <button class="adm-filter-tab" data-filter="expired" onclick="adminFilterMembers(this,'expired')">만료</button>
+      </div>
+      <div class="adm-card" style="margin-top:0">
+        <div class="adm-table-wrap">
+          <table class="adm-table" id="admMemberTable">
+            <thead>
+              <tr>
+                <th>이메일</th><th>이름</th><th>가입일</th>
+                <th>상태</th><th>남은 기간</th><th>멤버십</th>
+              </tr>
+            </thead>
+            <tbody id="admMemberTableBody"><!-- JS 렌더링 --></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 기능 설정 ── -->
+    <div id="admPageFeatures" class="adm-page">
+      <div class="adm-page-header">
+        <div class="adm-page-title">⚙️ 기능 설정</div>
+        <div class="adm-page-sub">멤버십 구독자에게 제공할 기능을 관리하세요</div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-feature-list adm-feature-list-large" id="admFeatureListFull"><!-- JS 렌더링 --></div>
+      </div>
+    </div>
+
+    <!-- ── 공석 알림 ── -->
+    <div id="admPageAlerts" class="adm-page">
+      <div class="adm-page-header">
+        <div class="adm-page-title">🔔 공석 알림</div>
+        <div class="adm-page-sub">학부모가 등록한 공석 알림 대기열</div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-alert-list adm-alert-list-full" id="admAlertListFull"><!-- JS 렌더링 --></div>
+      </div>
+    </div>
+
+    <!-- ── 가입 통계 ── -->
+    <div id="admPageStats" class="adm-page">
+      <div class="adm-page-header">
+        <div class="adm-page-title">📈 가입 통계</div>
+        <div class="adm-page-sub">일별 가입 현황 및 전환율</div>
+      </div>
+      <div class="adm-row">
+        <div class="adm-card adm-card-wide">
+          <div class="adm-card-title">📊 일별 가입 추이 <span class="adm-card-badge">최근 14일</span></div>
+          <div class="adm-chart-wrap adm-chart-tall">
+            <div class="adm-chart-bars" id="admChartBars14"><!-- JS 렌더링 --></div>
+            <div class="adm-chart-labels" id="admChartLabels14"><!-- JS 렌더링 --></div>
+          </div>
+        </div>
+        <div class="adm-card">
+          <div class="adm-card-title">🔄 전환 현황</div>
+          <div id="admConversionStats"><!-- JS 렌더링 --></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
 </body>
 </html>
