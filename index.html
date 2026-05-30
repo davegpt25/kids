@@ -1807,6 +1807,61 @@
   .calc-results { flex-direction: column; }
   .calc-arrow { transform: rotate(90deg); }
 }
+/* ─── SIMULATION STEP ─── */
+.sim-badge { background: linear-gradient(135deg,#FF9A3C,#F97316); color:#fff; }
+.sim-cards { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 16px; }
+.sim-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  border-radius: 14px; padding: 12px 14px;
+}
+.sim-card-icon { font-size: 26px; flex-shrink: 0; }
+.sim-card-body { flex: 1; min-width: 0; }
+.sim-card-name { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
+.sim-card-meta { font-size: 12px; color: var(--gray-500); display: flex; gap: 8px; flex-wrap: wrap; }
+.sim-card-tag {
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px;
+  background: var(--blue-light); color: var(--blue);
+}
+.sim-card-tag.orange { background: #FFF7ED; color: var(--orange); }
+.sim-card-rank {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  background: var(--orange); color: #fff; font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.sim-schedule { margin: 4px 0 14px; }
+.sim-schedule-title { font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 8px; }
+.sim-grid { border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; font-size: 11px; }
+.sim-grid-head {
+  display: grid; grid-template-columns: 48px repeat(5, 1fr);
+  background: var(--gray-50); border-bottom: 1px solid var(--gray-200);
+}
+.sim-grid-head > div { padding: 5px 0; text-align: center; font-weight: 700; color: var(--gray-500); }
+.sim-grid-row {
+  display: grid; grid-template-columns: 48px repeat(5, 1fr);
+  border-bottom: 1px solid var(--gray-100);
+}
+.sim-grid-row:last-child { border-bottom: none; }
+.sim-grid-row > div { min-height: 28px; }
+.sim-time-label { padding: 6px 4px; color: var(--gray-500); text-align: right; font-size: 10px; line-height: 1.4; }
+.sim-slot {
+  margin: 2px; border-radius: 4px; font-size: 10px; font-weight: 700;
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  padding: 2px 0;
+}
+.sim-slot.c0 { background: #3B82F6; }
+.sim-slot.c1 { background: #F97316; }
+.sim-slot.c2 { background: #10B981; }
+.sim-blur-hint {
+  font-size: 12px; color: var(--gray-500); text-align: center;
+  padding: 10px 16px; background: var(--gray-50); border-radius: 10px;
+  margin-bottom: 4px;
+}
+.sim-skip-btn {
+  display: block; margin: 10px auto 0; background: none; border: none;
+  font-size: 12px; color: var(--gray-400); cursor: pointer; text-decoration: underline;
+}
+.sim-skip-btn:hover { color: var(--gray-600); }
 </style>
 </head>
 <body>
@@ -2708,7 +2763,7 @@
         <li><span class="cross">✗</span> <span style="color:var(--gray-300)">복수 자녀 관리</span></li>
         <li><span class="cross">✗</span> <span style="color:var(--gray-300)">예산 필터</span></li>
       </ul>
-      <button class="pricing-cta free-cta">무료로 시작하기</button>
+      <button class="pricing-cta free-cta" onclick="openDemoModal()">무료로 시작하기</button>
     </div>
     <div class="pricing-card highlight">
       <div class="pricing-badge">프리미엄</div>
@@ -2724,7 +2779,7 @@
         <li><span class="check">✓</span> 주간 캘린더 무제한</li>
         <li><span class="check">✓</span> 우선 고객 지원</li>
       </ul>
-      <button class="pricing-cta paid-cta">출시 알림 받기</button>
+      <button class="pricing-cta paid-cta" onclick="openLeadFormDirect()">출시 알림 받기</button>
     </div>
   </div>
 </section>
@@ -2977,6 +3032,51 @@
         <div class="demo-analyzing-sub" id="demoAnalyzingText">주변 학원 데이터를 탐색하고 있어요...</div>
         <div class="demo-progress"><div class="demo-progress-bar" id="demoProgressBar"></div></div>
       </div>
+    </div>
+
+    <!-- Step Sim: 시뮬레이션 결과 미리보기 -->
+    <div class="demo-step" id="demoStepSim">
+      <div class="demo-form-badge sim-badge">✨ 분석 완료</div>
+      <div class="demo-title" style="font-size:20px">이런 조합을 추천드려요!</div>
+      <div class="demo-sub" id="simSubText">반경 1km · 학원 3개 조합</div>
+
+      <!-- 추천 카드 목록 -->
+      <div class="sim-cards" id="simCards">
+        <!-- JS로 렌더링 -->
+      </div>
+
+      <!-- 미니 주간 스케줄 그리드 -->
+      <div class="sim-schedule">
+        <div class="sim-schedule-title">📅 이번 주 스케줄 미리보기</div>
+        <div class="sim-grid" id="simGrid">
+          <div class="sim-grid-head">
+            <div></div>
+            <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div>
+          </div>
+          <div class="sim-grid-row" id="simRow0">
+            <div class="sim-time-label">오후 4시</div>
+            <div></div><div></div><div></div><div></div><div></div>
+          </div>
+          <div class="sim-grid-row" id="simRow1">
+            <div class="sim-time-label">오후 5시</div>
+            <div></div><div></div><div></div><div></div><div></div>
+          </div>
+          <div class="sim-grid-row" id="simRow2">
+            <div class="sim-time-label">오후 6시</div>
+            <div></div><div></div><div></div><div></div><div></div>
+          </div>
+          <div class="sim-grid-row" id="simRow3">
+            <div class="sim-time-label">오후 7시</div>
+            <div></div><div></div><div></div><div></div><div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sim-blur-hint">🔒 전체 결과 및 맞춤 학원 정보를 이메일로 받아보세요</div>
+      <button class="demo-start-btn" onclick="_showDemoStep('demoStep4')" style="margin-top:12px">
+        📧 맞춤 결과 이메일로 받기
+      </button>
+      <button class="sim-skip-btn" onclick="_showDemoStep('demoStep4')">나중에 받을게요</button>
     </div>
 
     <!-- Step 4: 리드 폼 -->
@@ -3649,7 +3749,7 @@ function handleDemoOverlayClick(e) {
 }
 
 function _showDemoStep(stepId) {
-  ['demoStep1','demoStep2','demoStep3','demoStep4','demoStep5'].forEach(id => {
+  ['demoStep1','demoStep2','demoStep3','demoStepSim','demoStep4','demoStep5'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -3921,7 +4021,7 @@ function startDemoAnalysis() {
       ['leadEmail','leadName'].forEach(id => { const f = document.getElementById(id); if(f) f.value=''; });
       const sel = document.getElementById('leadAge');
       if (sel) sel.selectedIndex = 0;
-      setTimeout(() => _showDemoStep('demoStep4'), 400);
+      setTimeout(() => { _showDemoStep('demoStepSim'); _renderSimCards(); }, 400);
     }
   }, 220);
 }
@@ -4602,6 +4702,105 @@ function _copyLink() {
     calcUpdate(); // init on load
   }
 })();
+
+// ─── Simulation Step ───
+var _SIM_POOLS = {
+  math:     { icon:'📐', label:'수학',   academies:['강남 베스트 수학','TOP 수학학원','수학의 왕도'] },
+  english:  { icon:'🔤', label:'영어',   academies:['YBM 영어','민사고 영어','케임브릿지 어학원'] },
+  piano:    { icon:'🎹', label:'피아노', academies:['예원 피아노','한빛 음악학원','클래식 피아노'] },
+  art:      { icon:'🎨', label:'미술',   academies:['서울 아트스쿨','창의 미술학원','그림나라'] },
+  taekwondo:{ icon:'🥋', label:'태권도', academies:['강남 태권도','금강 태권도','청룡 체육관'] },
+  default:  { icon:'📚', label:'학원',   academies:['우리 학원','베스트 학원','탑 교육'] }
+};
+var _SIM_SCHEDULES = [
+  { days:[0,2,4], row:1 },
+  { days:[1,3],   row:2 },
+  { days:[0,2],   row:0 }
+];
+function _renderSimCards() {
+  var query = (document.getElementById('demoTypewriter') || {}).textContent || '';
+  var radius = typeof _demoRadius !== 'undefined' ? _demoRadius : 1000;
+  var shuttle = typeof _demoShuttle !== 'undefined' ? _demoShuttle : false;
+  var radiusLabel = radius >= 1000 ? (radius/1000)+'km' : radius+'m';
+
+  var subjects = [];
+  if (/수학/.test(query))   subjects.push('math');
+  if (/영어/.test(query))   subjects.push('english');
+  if (/피아노/.test(query)) subjects.push('piano');
+  if (/미술/.test(query))   subjects.push('art');
+  if (/태권도/.test(query)) subjects.push('taekwondo');
+  if (subjects.length === 0) subjects = ['math','english','piano'];
+  subjects = subjects.slice(0,3);
+
+  var subEl = document.getElementById('simSubText');
+  if (subEl) subEl.textContent = '반경 ' + radiusLabel + ' · 학원 ' + subjects.length + '개 조합';
+
+  var cardsEl = document.getElementById('simCards');
+  if (!cardsEl) return;
+  cardsEl.innerHTML = '';
+  var distances = [320, 550, 810];
+  var ratings   = ['4.9', '4.7', '4.6'];
+  var times     = ['월·수·금 오후 5:00-6:30', '화·목 오후 6:00-7:30', '월·수 오후 4:00-5:30'];
+
+  subjects.forEach(function(subj, i) {
+    var pool   = _SIM_POOLS[subj] || _SIM_POOLS['default'];
+    var acName = pool.academies[i % pool.academies.length];
+    var dist   = distances[i] || 400 + i*150;
+    var walkMin = Math.round(dist / 67);
+    var rating  = ratings[i] || '4.5';
+    var time    = times[i]   || '월·수·금 오후 5:00-6:30';
+    var tag1    = i === 0 ? '<span class="sim-card-tag">1위 추천</span>' : '';
+    var tag2    = (shuttle && i === 0) ? '<span class="sim-card-tag orange">셔틀 있음</span>' : '';
+    var noOverlap = '<span class="sim-card-tag">시간 겹침 없음</span>';
+
+    var card = document.createElement('div');
+    card.className = 'sim-card';
+    card.innerHTML =
+      '<div class="sim-card-rank">' + (i+1) + '</div>' +
+      '<div class="sim-card-icon">' + pool.icon + '</div>' +
+      '<div class="sim-card-body">' +
+        '<div class="sim-card-name">' + acName + '</div>' +
+        '<div class="sim-card-meta">⭐ ' + rating + ' &nbsp;·&nbsp; 🚶 ' + walkMin + '분 (' + dist + 'm)&nbsp;·&nbsp; 🕐 ' + time + '</div>' +
+        '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">' + tag1 + tag2 + noOverlap + '</div>' +
+      '</div>';
+    cardsEl.appendChild(card);
+  });
+
+  var rows = [
+    document.getElementById('simRow0'),
+    document.getElementById('simRow1'),
+    document.getElementById('simRow2'),
+    document.getElementById('simRow3')
+  ];
+  rows.forEach(function(row) {
+    if (!row) return;
+    var cells = row.querySelectorAll('div:not(.sim-time-label)');
+    cells.forEach(function(c) { c.innerHTML = ''; c.className = ''; });
+  });
+  subjects.forEach(function(subj, i) {
+    var sched = _SIM_SCHEDULES[i] || { days:[0,2,4], row:1 };
+    var row   = rows[sched.row];
+    if (!row) return;
+    var cells = row.querySelectorAll('div');
+    sched.days.forEach(function(dayIdx) {
+      var cell = cells[dayIdx + 1];
+      if (cell) {
+        var pool = _SIM_POOLS[subj] || _SIM_POOLS['default'];
+        cell.innerHTML = '<div class="sim-slot c' + i + '">' + pool.icon + '</div>';
+      }
+    });
+  });
+}
+function openLeadFormDirect() {
+  document.getElementById('demoOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  _showDemoStep('demoStep4');
+  ['leadEmail','leadName'].forEach(function(id) {
+    var f = document.getElementById(id); if (f) f.value = '';
+  });
+  var sel = document.getElementById('leadAge');
+  if (sel) sel.selectedIndex = 0;
+}
 </script>
 
 <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">↑</button>
