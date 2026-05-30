@@ -1807,6 +1807,35 @@
   .calc-results { flex-direction: column; }
   .calc-arrow { transform: rotate(90deg); }
 }
+/* ─── SUBJECT + TIME SELECTORS (Step 2) ─── */
+.demo-subject-section, .demo-time-section { margin: 14px 0; }
+.demo-subject-title, .demo-time-title {
+  font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 8px;
+}
+.demo-subject-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.demo-subject-chip {
+  padding: 6px 12px; border-radius: 100px; border: 1.5px solid var(--gray-200);
+  font-size: 13px; font-weight: 600; color: var(--gray-700); cursor: pointer;
+  background: #fff; transition: all 0.15s; user-select: none;
+}
+.demo-subject-chip.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+.demo-subject-chip:hover:not(.active) { border-color: var(--orange); color: var(--orange); }
+.demo-day-row { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.demo-day-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--gray-200);
+  font-size: 13px; font-weight: 700; color: var(--gray-500); cursor: pointer;
+  background: #fff; transition: all 0.15s;
+}
+.demo-day-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.demo-day-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+.demo-time-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.demo-time-btn {
+  padding: 6px 12px; border-radius: 100px; border: 1.5px solid var(--gray-200);
+  font-size: 12px; font-weight: 600; color: var(--gray-500); cursor: pointer;
+  background: #fff; transition: all 0.15s;
+}
+.demo-time-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.demo-time-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
 /* ─── SIMULATION STEP ─── */
 .sim-badge { background: linear-gradient(135deg,#FF9A3C,#F97316); color:#fff; }
 .sim-cards { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 16px; }
@@ -3021,6 +3050,40 @@
         </div>
       </div>
 
+      <!-- 과목 선택 -->
+      <div class="demo-subject-section">
+        <div class="demo-subject-title">📚 원하는 과목 선택 <small style="font-weight:400;color:var(--gray-400)">(복수 선택 가능)</small></div>
+        <div class="demo-subject-chips" id="demoSubjectChips">
+          <div class="demo-subject-chip" data-subj="math"      onclick="toggleSubject(this)">📐 수학</div>
+          <div class="demo-subject-chip" data-subj="english"   onclick="toggleSubject(this)">🔤 영어</div>
+          <div class="demo-subject-chip" data-subj="piano"     onclick="toggleSubject(this)">🎹 피아노</div>
+          <div class="demo-subject-chip" data-subj="art"       onclick="toggleSubject(this)">🎨 미술</div>
+          <div class="demo-subject-chip" data-subj="taekwondo" onclick="toggleSubject(this)">🥋 태권도</div>
+          <div class="demo-subject-chip" data-subj="science"   onclick="toggleSubject(this)">🔬 과학</div>
+          <div class="demo-subject-chip" data-subj="coding"    onclick="toggleSubject(this)">💻 코딩</div>
+          <div class="demo-subject-chip" data-subj="sports"    onclick="toggleSubject(this)">⚽ 체육</div>
+        </div>
+      </div>
+
+      <!-- 선호 요일 / 시간대 -->
+      <div class="demo-time-section">
+        <div class="demo-time-title">🕐 선호 요일 &amp; 시간대</div>
+        <div class="demo-day-row">
+          <button class="demo-day-btn active" data-day="0" onclick="toggleDay(this)">월</button>
+          <button class="demo-day-btn"        data-day="1" onclick="toggleDay(this)">화</button>
+          <button class="demo-day-btn active" data-day="2" onclick="toggleDay(this)">수</button>
+          <button class="demo-day-btn"        data-day="3" onclick="toggleDay(this)">목</button>
+          <button class="demo-day-btn active" data-day="4" onclick="toggleDay(this)">금</button>
+          <button class="demo-day-btn"        data-day="5" onclick="toggleDay(this)">토</button>
+        </div>
+        <div class="demo-time-row">
+          <button class="demo-time-btn"        data-t="0" onclick="selectTimeSlot(this)">오후 4시</button>
+          <button class="demo-time-btn active" data-t="1" onclick="selectTimeSlot(this)">오후 5시</button>
+          <button class="demo-time-btn"        data-t="2" onclick="selectTimeSlot(this)">오후 6시</button>
+          <button class="demo-time-btn"        data-t="3" onclick="selectTimeSlot(this)">오후 7시</button>
+        </div>
+      </div>
+
       <button class="demo-start-btn" onclick="startDemoAnalysis()" style="margin-top:14px">학원 탐색 시작하기 →</button>
     </div>
 
@@ -3047,7 +3110,7 @@
 
       <!-- 미니 주간 스케줄 그리드 -->
       <div class="sim-schedule">
-        <div class="sim-schedule-title">📅 이번 주 스케줄 미리보기</div>
+        <div class="sim-schedule-title">📅 이번주 스케줄 미리보기</div>
         <div class="sim-grid" id="simGrid">
           <div class="sim-grid-head">
             <div></div>
@@ -3312,6 +3375,9 @@ let _pendingOAuthFill = null; // redirect 복귀 후 demo form 채우기용
 let _demoRadius = 1000;
 let _demoShuttle = false;
 let _demoPickup  = false;
+let _demoSubjects   = [];
+let _demoPreferDays = [0,2,4];
+let _demoPreferTime = 1;
 let _demoMap = null, _demoMarker = null, _demoCircle = null;
 let _demoGPSLat = 37.5665, _demoGPSLng = 126.9780; // default: Seoul
 
@@ -3735,6 +3801,15 @@ function openDemoModal() {
   // Reset radius to 1km default
   _demoRadius = 1000;
   document.querySelectorAll('.demo-radius-btn').forEach((b,i) => b.classList.toggle('active', i===1));
+  // Reset subject/day/time selections
+  _demoSubjects   = [];
+  _demoPreferDays = [0,2,4];
+  _demoPreferTime = 1;
+  document.querySelectorAll('.demo-subject-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.demo-day-btn').forEach(b => {
+    b.classList.toggle('active', [0,2,4].includes(parseInt(b.dataset.day)));
+  });
+  document.querySelectorAll('.demo-time-btn').forEach((b,i) => b.classList.toggle('active', i===1));
   _startTypewriterCycle();
 }
 
@@ -4705,50 +4780,81 @@ function _copyLink() {
 
 // ─── Simulation Step ───
 var _SIM_POOLS = {
-  math:     { icon:'📐', label:'수학',   academies:['강남 베스트 수학','TOP 수학학원','수학의 왕도'] },
-  english:  { icon:'🔤', label:'영어',   academies:['YBM 영어','민사고 영어','케임브릿지 어학원'] },
-  piano:    { icon:'🎹', label:'피아노', academies:['예원 피아노','한빛 음악학원','클래식 피아노'] },
-  art:      { icon:'🎨', label:'미술',   academies:['서울 아트스쿨','창의 미술학원','그림나라'] },
-  taekwondo:{ icon:'🥋', label:'태권도', academies:['강남 태권도','금강 태권도','청룡 체육관'] },
-  default:  { icon:'📚', label:'학원',   academies:['우리 학원','베스트 학원','탑 교육'] }
+  math:      { icon:'📐', label:'수학',   academies:['강남 베스트 수학','TOP 수학학원','수학의 왕도'] },
+  english:   { icon:'🔤', label:'영어',   academies:['YBM 영어','민사고 영어','케임브릿지 어학원'] },
+  piano:     { icon:'🎹', label:'피아노', academies:['예원 피아노','한빛 음악학원','클래식 피아노'] },
+  art:       { icon:'🎨', label:'미술',   academies:['서울 아트스쿨','창의 미술학원','그림나라'] },
+  taekwondo: { icon:'🥋', label:'태권도', academies:['강남 태권도','금강 태권도','청룡 체육관'] },
+  science:   { icon:'🔬', label:'과학',   academies:['과학영재 학원','STEM 교육원','사이언스 킹'] },
+  coding:    { icon:'💻', label:'코딩',   academies:['코딩 팩토리','SW 아카데미','구름 EDU'] },
+  sports:    { icon:'⚽', label:'체육',   academies:['JFC 축구스쿨','리틀 스포츠','메가 체육관'] },
+  'default': { icon:'📚', label:'학원',   academies:['우리 학원','베스트 학원','탑 교육'] }
 };
-var _SIM_SCHEDULES = [
-  { days:[0,2,4], row:1 },
-  { days:[1,3],   row:2 },
-  { days:[0,2],   row:0 }
-];
 function _renderSimCards() {
-  var query = (document.getElementById('demoTypewriter') || {}).textContent || '';
-  var radius = typeof _demoRadius !== 'undefined' ? _demoRadius : 1000;
-  var shuttle = typeof _demoShuttle !== 'undefined' ? _demoShuttle : false;
+  var radius      = typeof _demoRadius     !== 'undefined' ? _demoRadius     : 1000;
+  var shuttle     = typeof _demoShuttle    !== 'undefined' ? _demoShuttle    : false;
+  var rawSubjects = (typeof _demoSubjects  !== 'undefined' && _demoSubjects.length > 0)
+                    ? _demoSubjects.slice(0,3) : ['math','english','piano'];
+  var preferDays  = (typeof _demoPreferDays !== 'undefined' && _demoPreferDays.length > 0)
+                    ? _demoPreferDays.filter(function(d){ return d <= 4; }) : [0,2,4];
+  if (preferDays.length === 0) preferDays = [0,2,4];
+  var preferTime  = typeof _demoPreferTime !== 'undefined' ? _demoPreferTime : 1;
+
+  var WEEK_NAMES  = ['월','화','수','목','금'];
+  var TIME_STARTS = ['오후 4:00','오후 5:00','오후 6:00','오후 7:00'];
+  var TIME_ENDS   = ['오후 5:30','오후 6:30','오후 7:30','오후 8:30'];
   var radiusLabel = radius >= 1000 ? (radius/1000)+'km' : radius+'m';
 
-  var subjects = [];
-  if (/수학/.test(query))   subjects.push('math');
-  if (/영어/.test(query))   subjects.push('english');
-  if (/피아노/.test(query)) subjects.push('piano');
-  if (/미술/.test(query))   subjects.push('art');
-  if (/태권도/.test(query)) subjects.push('taekwondo');
-  if (subjects.length === 0) subjects = ['math','english','piano'];
-  subjects = subjects.slice(0,3);
+  // Assign days per subject with minimal overlap in same row:
+  // Subject 0: even-indexed slots of preferDays (e.g. Mon/Fri from Mon/Wed/Fri)
+  // Subject 1: odd-indexed slots, falling back to non-selected weekdays
+  // Subject 2: first 2 of preferDays (different time row → no visual conflict)
+  var subjectDayMap = rawSubjects.map(function(_, i) {
+    if (i === 0) {
+      var days = preferDays.filter(function(_, idx){ return idx % 2 === 0; });
+      return days.length > 0 ? days : [preferDays[0]];
+    } else if (i === 1) {
+      var days = preferDays.filter(function(_, idx){ return idx % 2 === 1; });
+      if (days.length === 0) {
+        days = [0,1,2,3,4].filter(function(d){ return preferDays.indexOf(d) < 0; }).slice(0,2);
+      }
+      return days.length > 0 ? days : [preferDays[0]];
+    } else {
+      return preferDays.slice(0, 2);
+    }
+  });
 
+  // Subject 0 & 1 share same time row (different days), subject 2 goes +1 row
+  var subjectTimeRow = rawSubjects.map(function(_, i) {
+    return Math.min(preferTime + (i === 2 ? 1 : 0), 3);
+  });
+
+  // Sub-title: include location if GPS was used
   var subEl = document.getElementById('simSubText');
-  if (subEl) subEl.textContent = '반경 ' + radiusLabel + ' · 학원 ' + subjects.length + '개 조합';
+  if (subEl) {
+    var locEl  = document.getElementById('demoLocationText');
+    var locTxt = locEl ? locEl.textContent : '';
+    var locStr = (locTxt && locTxt !== '클릭해서 위치를 불러오세요')
+                  ? locTxt.split(' ').slice(0,3).join(' ') + ' · ' : '';
+    subEl.textContent = locStr + '반경 ' + radiusLabel + ' · ' + rawSubjects.length + '개 과목 조합';
+  }
 
+  // Render academy cards
   var cardsEl = document.getElementById('simCards');
   if (!cardsEl) return;
   cardsEl.innerHTML = '';
   var distances = [320, 550, 810];
   var ratings   = ['4.9', '4.7', '4.6'];
-  var times     = ['월·수·금 오후 5:00-6:30', '화·목 오후 6:00-7:30', '월·수 오후 4:00-5:30'];
 
-  subjects.forEach(function(subj, i) {
-    var pool   = _SIM_POOLS[subj] || _SIM_POOLS['default'];
-    var acName = pool.academies[i % pool.academies.length];
-    var dist   = distances[i] || 400 + i*150;
+  rawSubjects.forEach(function(subj, i) {
+    var pool    = _SIM_POOLS[subj] || _SIM_POOLS['default'];
+    var acName  = pool.academies[i % pool.academies.length];
+    var dist    = distances[i] || 400 + i * 150;
     var walkMin = Math.round(dist / 67);
     var rating  = ratings[i] || '4.5';
-    var time    = times[i]   || '월·수·금 오후 5:00-6:30';
+    var ts      = subjectTimeRow[i];
+    var daysStr = subjectDayMap[i].map(function(d){ return WEEK_NAMES[d] || ''; }).join('·');
+    var timeStr = daysStr + ' ' + TIME_STARTS[ts] + '–' + TIME_ENDS[ts];
     var tag1    = i === 0 ? '<span class="sim-card-tag">1위 추천</span>' : '';
     var tag2    = (shuttle && i === 0) ? '<span class="sim-card-tag orange">셔틀 있음</span>' : '';
     var noOverlap = '<span class="sim-card-tag">시간 겹침 없음</span>';
@@ -4760,12 +4866,13 @@ function _renderSimCards() {
       '<div class="sim-card-icon">' + pool.icon + '</div>' +
       '<div class="sim-card-body">' +
         '<div class="sim-card-name">' + acName + '</div>' +
-        '<div class="sim-card-meta">⭐ ' + rating + ' &nbsp;·&nbsp; 🚶 ' + walkMin + '분 (' + dist + 'm)&nbsp;·&nbsp; 🕐 ' + time + '</div>' +
+        '<div class="sim-card-meta">⭐ ' + rating + ' &nbsp;·&nbsp; 🚶 ' + walkMin + '분 (' + dist + 'm)&nbsp;·&nbsp; 🕐 ' + timeStr + '</div>' +
         '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">' + tag1 + tag2 + noOverlap + '</div>' +
       '</div>';
     cardsEl.appendChild(card);
   });
 
+  // Render weekly schedule grid
   var rows = [
     document.getElementById('simRow0'),
     document.getElementById('simRow1'),
@@ -4774,22 +4881,50 @@ function _renderSimCards() {
   ];
   rows.forEach(function(row) {
     if (!row) return;
-    var cells = row.querySelectorAll('div:not(.sim-time-label)');
-    cells.forEach(function(c) { c.innerHTML = ''; c.className = ''; });
+    row.querySelectorAll('div:not(.sim-time-label)').forEach(function(c){ c.innerHTML = ''; c.className = ''; });
   });
-  subjects.forEach(function(subj, i) {
-    var sched = _SIM_SCHEDULES[i] || { days:[0,2,4], row:1 };
-    var row   = rows[sched.row];
+  rawSubjects.forEach(function(subj, i) {
+    var pool = _SIM_POOLS[subj] || _SIM_POOLS['default'];
+    var ts   = subjectTimeRow[i];
+    var row  = rows[ts];
     if (!row) return;
     var cells = row.querySelectorAll('div');
-    sched.days.forEach(function(dayIdx) {
+    subjectDayMap[i].forEach(function(dayIdx) {
+      if (dayIdx > 4) return;
       var cell = cells[dayIdx + 1];
-      if (cell) {
-        var pool = _SIM_POOLS[subj] || _SIM_POOLS['default'];
-        cell.innerHTML = '<div class="sim-slot c' + i + '">' + pool.icon + '</div>';
-      }
+      if (cell) cell.innerHTML = '<div class="sim-slot c' + i + '">' + pool.icon + '</div>';
     });
   });
+}
+function toggleSubject(el) {
+  var subj = el.dataset.subj;
+  var idx  = _demoSubjects.indexOf(subj);
+  if (idx >= 0) {
+    _demoSubjects.splice(idx, 1);
+    el.classList.remove('active');
+  } else {
+    if (_demoSubjects.length >= 4) return;
+    _demoSubjects.push(subj);
+    el.classList.add('active');
+  }
+}
+function toggleDay(el) {
+  var day = parseInt(el.dataset.day, 10);
+  var idx = _demoPreferDays.indexOf(day);
+  if (idx >= 0) {
+    if (_demoPreferDays.length <= 1) return;
+    _demoPreferDays.splice(idx, 1);
+    el.classList.remove('active');
+  } else {
+    _demoPreferDays.push(day);
+    _demoPreferDays.sort(function(a,b){return a-b;});
+    el.classList.add('active');
+  }
+}
+function selectTimeSlot(el) {
+  document.querySelectorAll('.demo-time-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  _demoPreferTime = parseInt(el.dataset.t, 10);
 }
 function openLeadFormDirect() {
   document.getElementById('demoOverlay').classList.add('open');
