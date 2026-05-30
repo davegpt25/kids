@@ -1838,6 +1838,30 @@
 }
 .demo-time-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 .demo-time-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+/* ─── SIM PARTIAL REVEAL ─── */
+.sim-lock-wrap { position: relative; overflow: hidden; }
+.sim-card:nth-child(2) {
+  filter: blur(4px); opacity: 0.5;
+  pointer-events: none; user-select: none;
+}
+.sim-card:nth-child(n+3) {
+  filter: blur(8px); opacity: 0.22;
+  pointer-events: none; user-select: none;
+}
+.sim-lock-fade {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 220px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.93) 48%, #fff 100%);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 14px;
+}
+.sim-lock-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fff; border: 1.5px solid var(--gray-200);
+  border-radius: 100px; padding: 8px 18px;
+  font-size: 12px; font-weight: 700; color: var(--gray-600);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.09);
+}
 /* ─── SIMULATION STEP ─── */
 .sim-badge { background: linear-gradient(135deg,#FF9A3C,#F97316); color:#fff; }
 .sim-cards { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 16px; }
@@ -3111,39 +3135,45 @@
       <div class="demo-title" style="font-size:20px">이런 조합을 추천드려요!</div>
       <div class="demo-sub" id="simSubText">반경 1km · 학원 3개 조합</div>
 
-      <!-- 추천 카드 목록 -->
-      <div class="sim-cards" id="simCards">
-        <!-- JS로 렌더링 -->
-      </div>
+      <!-- 추천 카드 목록 + 스케줄 (부분 공개) -->
+      <div class="sim-lock-wrap">
+        <div class="sim-cards" id="simCards">
+          <!-- JS로 렌더링 -->
+        </div>
 
-      <!-- 미니 주간 스케줄 그리드 -->
-      <div class="sim-schedule">
-        <div class="sim-schedule-title">📅 이번주 스케줄 미리보기</div>
-        <div class="sim-grid" id="simGrid">
-          <div class="sim-grid-head">
-            <div></div>
-            <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div>
+        <!-- 미니 주간 스케줄 그리드 -->
+        <div class="sim-schedule">
+          <div class="sim-schedule-title">📅 이번주 스케줄 미리보기</div>
+          <div class="sim-grid" id="simGrid">
+            <div class="sim-grid-head">
+              <div></div>
+              <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div>
+            </div>
+            <div class="sim-grid-row" id="simRow0">
+              <div class="sim-time-label">오후 4시</div>
+              <div></div><div></div><div></div><div></div><div></div>
+            </div>
+            <div class="sim-grid-row" id="simRow1">
+              <div class="sim-time-label">오후 5시</div>
+              <div></div><div></div><div></div><div></div><div></div>
+            </div>
+            <div class="sim-grid-row" id="simRow2">
+              <div class="sim-time-label">오후 6시</div>
+              <div></div><div></div><div></div><div></div><div></div>
+            </div>
+            <div class="sim-grid-row" id="simRow3">
+              <div class="sim-time-label">오후 7시</div>
+              <div></div><div></div><div></div><div></div><div></div>
+            </div>
           </div>
-          <div class="sim-grid-row" id="simRow0">
-            <div class="sim-time-label">오후 4시</div>
-            <div></div><div></div><div></div><div></div><div></div>
-          </div>
-          <div class="sim-grid-row" id="simRow1">
-            <div class="sim-time-label">오후 5시</div>
-            <div></div><div></div><div></div><div></div><div></div>
-          </div>
-          <div class="sim-grid-row" id="simRow2">
-            <div class="sim-time-label">오후 6시</div>
-            <div></div><div></div><div></div><div></div><div></div>
-          </div>
-          <div class="sim-grid-row" id="simRow3">
-            <div class="sim-time-label">오후 7시</div>
-            <div></div><div></div><div></div><div></div><div></div>
-          </div>
+        </div>
+
+        <!-- 잠금 페이드 오버레이 -->
+        <div class="sim-lock-fade">
+          <div class="sim-lock-badge">🔒 나머지 결과를 이메일로 확인하세요</div>
         </div>
       </div>
 
-      <div class="sim-blur-hint">🔒 전체 결과 및 맞춤 학원 정보를 이메일로 받아보세요</div>
       <button class="demo-start-btn" onclick="_showDemoStep('demoStep4')" style="margin-top:12px">
         📧 맞춤 결과 이메일로 받기
       </button>
