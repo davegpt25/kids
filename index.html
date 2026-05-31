@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=5dq02tmsku&submodules=geocoder"></script>
 <title>키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄">
@@ -6507,53 +6506,71 @@ function urSetView(mode) {
   else { urInitMap(); }
 }
 
-// ── Leaflet 지도 초기화 ──
+// ── 네이버 지도 초기화 ──
 function urInitMap() {
-  if (!window.L) return;
+  if (!window.naver || !naver.maps) return;
   var el = document.getElementById('urMapEl');
   if (!el) return;
   if (!_urMap) {
-    _urMap = L.map('urMapEl', { zoomControl: false }).setView([_urUserLat, _urUserLng], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19
-    }).addTo(_urMap);
-    L.control.zoom({ position: 'topright' }).addTo(_urMap);
-    // 지도 이동 시 거리 재계산
-    _urMap.on('moveend', function() {
+    _urMap = new naver.maps.Map('urMapEl', {
+      center: new naver.maps.LatLng(_urUserLat, _urUserLng),
+      zoom: 14,
+      zoomControl: true,
+      zoomControlOptions: { position: naver.maps.Position.TOP_RIGHT, style: naver.maps.ZoomControlStyle.SMALL }
+    });
+    // 지도 idle(이동 완료) 시 거리 재계산
+    naver.maps.Event.addListener(_urMap, 'idle', function() {
       var c = _urMap.getCenter();
-      _urUserLat = c.lat; _urUserLng = c.lng;
+      _urUserLat = c.lat(); _urUserLng = c.lng();
       urUpdateDistances();
       urRenderMapMarkers();
+      urReverseGeocode(_urUserLat, _urUserLng);
     });
-  } else {
-    setTimeout(function() { _urMap.invalidateSize(); }, 100);
+    // 지도 클릭 시 InfoWindow 닫기
+    naver.maps.Event.addListener(_urMap, 'click', function() {
+      if (_urInfoWindow) _urInfoWindow.close();
+    });
+    _urInfoWindow = new naver.maps.InfoWindow({
+      borderWidth: 0,
+      disableAnchor: false,
+      backgroundColor: 'transparent',
+      pixelOffset: new naver.maps.Point(0, -8)
+    });
   }
   urUpdateUserMarker();
   urUpdateCircle();
   urRenderMapMarkers();
+  urReverseGeocode(_urUserLat, _urUserLng);
 }
 
-// ── 내 위치 마커 ──
+// ── 내 위치 마커 (파란 점) ──
 function urUpdateUserMarker() {
   if (!_urMap) return;
-  if (_urUserMarker) _urMap.removeLayer(_urUserMarker);
-  var icon = L.divIcon({
-    html: '<div class="ur-user-dot"></div>',
-    className: '', iconSize: [16, 16], iconAnchor: [8, 8]
+  if (_urUserMarker) _urUserMarker.setMap(null);
+  _urUserMarker = new naver.maps.Marker({
+    position: new naver.maps.LatLng(_urUserLat, _urUserLng),
+    map: _urMap,
+    icon: {
+      content: '<div class="ur-user-dot"></div>',
+      size: new naver.maps.Size(16, 16),
+      anchor: new naver.maps.Point(8, 8)
+    },
+    zIndex: 100
   });
-  _urUserMarker = L.marker([_urUserLat, _urUserLng], { icon: icon, zIndexOffset: 1000 }).addTo(_urMap);
 }
 
 // ── 반경 원 ──
 function urUpdateCircle() {
   if (!_urMap) return;
-  if (_urCircle) _urMap.removeLayer(_urCircle);
-  _urCircle = L.circle([_urUserLat, _urUserLng], {
+  if (_urCircle) _urCircle.setMap(null);
+  _urCircle = new naver.maps.Circle({
+    map: _urMap,
+    center: new naver.maps.LatLng(_urUserLat, _urUserLng),
     radius: _urRadius,
-    color: '#F97316', fillColor: '#F97316',
-    fillOpacity: 0.07, weight: 2, dashArray: '6 4'
-  }).addTo(_urMap);
+    strokeColor: '#F97316', strokeOpacity: 0.7,
+    strokeWeight: 2, strokeStyle: 'shortdash',
+    fillColor: '#F97316', fillOpacity: 0.07
+  });
 }
 
 // ── 반경 변경 ──
@@ -6567,15 +6584,14 @@ function urSetRadius(btn) {
   urRenderMapMarkers();
 }
 
-// ── 거리 재계산 (지도 이동 시) ──
+// ── 거리 재계산 ──
 function urUpdateDistances() {
   UR_ACADEMIES.forEach(function(a) {
     var R = 6371000;
     var dLat = (a.lat - _urUserLat) * Math.PI / 180;
     var dLng = (a.lng - _urUserLng) * Math.PI / 180;
     var aa = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(_urUserLat*Math.PI/180)*Math.cos(a.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
-    var dist = R * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
-    a.dist = Math.round(dist / 100) / 10;
+    a.dist = Math.round(6371000 * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa)) / 100) / 10;
   });
 }
 
@@ -6583,53 +6599,64 @@ function urUpdateDistances() {
 function urRenderMapMarkers() {
   if (!_urMap) return;
   // 기존 마커 제거
-  Object.keys(_urMarkers).forEach(function(id) {
-    _urMap.removeLayer(_urMarkers[id]);
-  });
+  Object.keys(_urMarkers).forEach(function(id) { _urMarkers[id].setMap(null); });
   _urMarkers = {};
   var schedule = urGetSchedule();
   var addedIds = schedule.map(function(s) { return s.academyId; });
   var filtered = urGetFiltered();
+  var emoji = { math:'📐', english:'🔤', piano:'🎹', art:'🎨', taekwondo:'🥋', coding:'💻', sports:'⚽', science:'🔬' };
   filtered.forEach(function(a) {
     var isAdded = addedIds.indexOf(a.id) >= 0;
-    var isHighlight = _urHighlightId === a.id;
-    var emoji = { math:'📐', english:'🔤', piano:'🎹', art:'🎨', taekwondo:'🥋', coding:'💻', sports:'⚽', science:'🔬' };
-    var icon = L.divIcon({
-      html: '<div style="width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + a.color + ';border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.25)' + (isHighlight ? ';outline:3px solid ' + a.color + ';outline-offset:3px' : '') + ';display:flex;align-items:center;justify-content:center">'
-        + '<span style="transform:rotate(45deg);font-size:15px">' + (isAdded ? '✓' : (emoji[a.subj]||'🏫')) + '</span>'
-        + '</div>',
-      className: '', iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -38]
+    var isHL = _urHighlightId === a.id;
+    var markerHtml = '<div style="width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);'
+      + 'background:' + a.color + ';border:2.5px solid #fff;'
+      + 'box-shadow:0 2px 8px rgba(0,0,0,0.25)' + (isHL ? ',0 0 0 3px ' + a.color : '') + ';'
+      + 'display:flex;align-items:center;justify-content:center">'
+      + '<span style="transform:rotate(45deg);font-size:15px">' + (isAdded ? '✓' : (emoji[a.subj]||'🏫')) + '</span>'
+      + '</div>';
+    var marker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(a.lat, a.lng),
+      map: _urMap,
+      icon: {
+        content: markerHtml,
+        size: new naver.maps.Size(36, 36),
+        anchor: new naver.maps.Point(18, 36)
+      },
+      zIndex: isHL ? 20 : 10
     });
-    var marker = L.marker([a.lat, a.lng], { icon: icon }).addTo(_urMap);
-    var isAddedNow = addedIds.indexOf(a.id) >= 0;
-    marker.bindPopup(
-      '<div class="ur-map-popup">'
-      + '<div class="ur-map-popup-name">' + _escHtml(a.name) + '</div>'
-      + '<div class="ur-map-popup-meta">'
-      +   '📍 ' + a.dist + 'km &nbsp; ⭐ ' + a.rating + '<br>'
-      +   '🏷️ ' + a.label + (a.shuttle ? ' &nbsp; 🚌 셔틀' : '') + '<br>'
-      +   '💰 월 ' + (a.fee/10000).toFixed(0) + '만원'
-      + '</div>'
-      + '<button class="ur-map-popup-btn' + (isAddedNow ? ' added' : '') + '" onclick="urToggleSchedule(' + a.id + ',this);this.textContent=document.querySelectorAll(\'.ur-map-popup-btn\')[0]?.classList.contains(\'added\')?\'✓ 등록됨\':\'+ 스케줄 추가\'">'
-      +   (isAddedNow ? '✓ 등록됨' : '+ 스케줄 추가')
-      + '</button>'
-      + '</div>'
-    , { maxWidth: 200 });
-    marker.on('click', function() { urHighlightCard(a.id); });
+    // 마커 클릭 → InfoWindow + 카드 하이라이트
+    (function(academy, mk) {
+      naver.maps.Event.addListener(mk, 'click', function() {
+        urHighlightCard(academy.id);
+        var isAddedNow = urGetSchedule().some(function(s) { return s.academyId === academy.id; });
+        var content = '<div class="ur-map-popup">'
+          + '<div class="ur-map-popup-name">' + _escHtml(academy.name) + '</div>'
+          + '<div class="ur-map-popup-meta">'
+          +   '📍 ' + academy.dist + 'km &nbsp;⭐ ' + academy.rating + ' (' + academy.reviews + ')<br>'
+          +   '🏷️ ' + academy.label + (academy.shuttle ? ' &nbsp;🚌 셔틀' : '') + '<br>'
+          +   '💰 월 ' + (academy.fee/10000).toFixed(0) + '만원'
+          + '</div>'
+          + '<button class="ur-map-popup-btn' + (isAddedNow ? ' added' : '') + '" '
+          +   'onclick="var a=urGetSchedule().some(function(s){return s.academyId===' + academy.id + '});urToggleSchedule(' + academy.id + ',this);urRenderMapMarkers()">'
+          +   (isAddedNow ? '✓ 등록됨' : '+ 스케줄 추가')
+          + '</button>'
+          + '</div>';
+        _urInfoWindow.setContent(content);
+        _urInfoWindow.open(_urMap, mk);
+      });
+    })(a, marker);
     _urMarkers[a.id] = marker;
   });
-  // 하단 카드 렌더링
   urRenderMapCards(filtered);
 }
 
-// ── 하단 슬라이더 카드 ──
+// ── 하단 카드 슬라이더 ──
 function urRenderMapCards(list) {
   var count = document.getElementById('urMapCount');
-  if (count) count.textContent = list.length + '개 학원';
+  if (count) count.textContent = list.length + '개 학원 검색됨';
   var container = document.getElementById('urMapCards');
   if (!container) return;
-  var schedule = urGetSchedule();
-  var addedIds = schedule.map(function(s) { return s.academyId; });
+  var addedIds = urGetSchedule().map(function(s) { return s.academyId; });
   container.innerHTML = list.map(function(a) {
     var added = addedIds.indexOf(a.id) >= 0;
     return '<div class="ur-map-mini-card' + (_urHighlightId === a.id ? ' highlight' : '') + '" id="urCard' + a.id + '" onclick="urFlyToAcademy(' + a.id + ')">'
@@ -6637,38 +6664,32 @@ function urRenderMapCards(list) {
       +   '<span style="width:8px;height:8px;border-radius:50%;background:' + a.color + ';flex-shrink:0"></span>'
       +   '<div class="ur-mini-name">' + _escHtml(a.name) + '</div>'
       + '</div>'
-      + '<div class="ur-mini-meta">📍 ' + a.dist + 'km &nbsp; ⭐ ' + a.rating + ' &nbsp; 월 ' + (a.fee/10000).toFixed(0) + '만</div>'
-      + '<button class="ur-mini-add' + (added ? ' added' : '') + '" onclick="event.stopPropagation();urToggleSchedule(' + a.id + ',this)">'
+      + '<div class="ur-mini-meta">📍 ' + a.dist + 'km &nbsp;⭐ ' + a.rating + ' &nbsp;월 ' + (a.fee/10000).toFixed(0) + '만</div>'
+      + '<button class="ur-mini-add' + (added ? ' added' : '') + '" onclick="event.stopPropagation();urToggleSchedule(' + a.id + ',this);urRenderMapMarkers()">'
       +   (added ? '✓ 등록됨' : '+ 추가')
       + '</button>'
       + '</div>';
   }).join('');
 }
 
-// ── 마커 클릭 시 카드 하이라이트 ──
+// ── 카드 하이라이트 ──
 function urHighlightCard(id) {
   _urHighlightId = id;
-  Array.prototype.forEach.call(document.querySelectorAll('.ur-map-mini-card'), function(el) {
-    el.classList.remove('highlight');
-  });
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-map-mini-card'), function(el) { el.classList.remove('highlight'); });
   var card = document.getElementById('urCard' + id);
-  if (card) {
-    card.classList.add('highlight');
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }
+  if (card) { card.classList.add('highlight'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
 }
 
-// ── 카드 클릭 시 지도 이동 + 팝업 열기 ──
+// ── 카드 클릭 → 지도 이동 + 마커 팝업 ──
 function urFlyToAcademy(id) {
   _urHighlightId = id;
   urHighlightCard(id);
-  var a = null;
-  for (var i = 0; i < UR_ACADEMIES.length; i++) { if (UR_ACADEMIES[i].id === id) { a = UR_ACADEMIES[i]; break; } }
+  var a = UR_ACADEMIES.filter(function(x) { return x.id === id; })[0];
   if (!a || !_urMap) return;
-  _urMap.flyTo([a.lat, a.lng], 15, { duration: 0.8 });
+  _urMap.morph(new naver.maps.LatLng(a.lat, a.lng), 16);
   setTimeout(function() {
-    if (_urMarkers[id]) _urMarkers[id].openPopup();
-  }, 900);
+    if (_urMarkers[id]) naver.maps.Event.trigger(_urMarkers[id], 'click');
+  }, 500);
 }
 
 // ── 내 위치로 이동 ──
@@ -6680,11 +6701,12 @@ function urMoveToMyLocation() {
     function(pos) {
       _urUserLat = pos.coords.latitude;
       _urUserLng = pos.coords.longitude;
-      if (_urMap) _urMap.flyTo([_urUserLat, _urUserLng], 15, { duration: 1 });
+      if (_urMap) _urMap.morph(new naver.maps.LatLng(_urUserLat, _urUserLng), 15);
       urUpdateUserMarker();
       urUpdateCircle();
       urUpdateDistances();
       urRenderMapMarkers();
+      urReverseGeocode(_urUserLat, _urUserLng);
       if (btn) btn.textContent = '📍';
       showToast('현재 위치로 이동했어요 📍');
     },
@@ -6694,6 +6716,50 @@ function urMoveToMyLocation() {
     },
     { timeout: 8000 }
   );
+}
+
+// ── Reverse Geocoding — 현재 위치 주소 표시 ──
+function urReverseGeocode(lat, lng) {
+  if (!window.naver || !naver.maps || !naver.maps.Service) return;
+  naver.maps.Service.reverseGeocode({
+    coords: new naver.maps.LatLng(lat, lng),
+    orders: [naver.maps.Service.OrderType.ROAD_ADDR, naver.maps.Service.OrderType.ADDR]
+  }, function(status, response) {
+    var badge = document.getElementById('urAddrBadge');
+    if (!badge) return;
+    if (status !== naver.maps.Service.Status.OK) { badge.style.display = 'none'; return; }
+    var addr = '';
+    try {
+      addr = response.v2.address.roadAddress || response.v2.address.jibunAddress || '';
+      // 시/도 제거하고 구/동 부터만 표시
+      addr = addr.replace(/^(서울특별시|서울시|경기도|부산광역시)\s*/, '');
+    } catch(e) { addr = ''; }
+    if (addr) { badge.textContent = '📍 ' + addr; badge.style.display = 'block'; }
+    else { badge.style.display = 'none'; }
+  });
+}
+
+// ── 주소 검색 (Geocoding) ──
+function urSearchAddress() {
+  if (!window.naver || !naver.maps || !naver.maps.Service) return;
+  var input = document.getElementById('urAddrInput');
+  var query = input ? input.value.trim() : '';
+  if (!query) { showToast('검색어를 입력해주세요'); return; }
+  naver.maps.Service.geocode({ query: query }, function(status, response) {
+    if (status !== naver.maps.Service.Status.OK || !response.v2.addresses.length) {
+      showToast('검색 결과가 없어요. 다른 주소로 시도해보세요'); return;
+    }
+    var result = response.v2.addresses[0];
+    _urUserLat = parseFloat(result.y);
+    _urUserLng = parseFloat(result.x);
+    if (_urMap) _urMap.morph(new naver.maps.LatLng(_urUserLat, _urUserLng), 15);
+    urUpdateUserMarker();
+    urUpdateCircle();
+    urUpdateDistances();
+    urRenderMapMarkers();
+    showToast('📍 ' + (result.roadAddress || result.jibunAddress));
+    if (input) input.value = '';
+  });
 }
 
 // ── 필터 적용된 학원 목록 반환 ──
@@ -7071,6 +7137,16 @@ function urToggleNotif(btn) {
 
       <!-- 지도 뷰 -->
       <div id="urMapContainer">
+        <!-- 주소 검색 -->
+        <div style="padding:8px 16px;background:#fff;border-bottom:1px solid #F0F0F0;display:flex;gap:8px">
+          <div style="flex:1;display:flex;align-items:center;gap:8px;background:#F4F4F5;border-radius:10px;padding:8px 12px">
+            <span style="font-size:14px">🔎</span>
+            <input type="text" id="urAddrInput" placeholder="주소 또는 지역 검색 (예: 강남구 역삼동)"
+              style="flex:1;border:none;background:none;font-size:13px;outline:none;font-family:'Pretendard',sans-serif"
+              onkeydown="if(event.key==='Enter') urSearchAddress()">
+          </div>
+          <button onclick="urSearchAddress()" style="padding:8px 14px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0">검색</button>
+        </div>
         <!-- 반경 선택 -->
         <div class="ur-radius-row">
           <span style="font-size:12px;font-weight:700;color:#6B7280;align-self:center;flex-shrink:0">반경</span>
@@ -7080,8 +7156,10 @@ function urToggleNotif(btn) {
           <button class="ur-radius-btn" data-r="3000" onclick="urSetRadius(this)">3km</button>
           <button class="ur-radius-btn" data-r="5000" onclick="urSetRadius(this)">5km</button>
         </div>
-        <!-- Leaflet 지도 -->
+        <!-- 네이버 지도 -->
         <div id="urMapEl"></div>
+        <!-- 현재 위치 주소 표시 (지도 위 플로팅) -->
+        <div id="urAddrBadge" style="position:absolute;top:130px;left:50%;transform:translateX(-50%);z-index:500;background:rgba(255,255,255,0.95);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#374151;box-shadow:0 2px 8px rgba(0,0,0,0.15);pointer-events:none;white-space:nowrap;display:none"></div>
         <!-- 내 위치 버튼 -->
         <button id="urLocBtn" onclick="urMoveToMyLocation()" title="내 위치로">📍</button>
         <!-- 하단 학원 카드 슬라이더 -->
