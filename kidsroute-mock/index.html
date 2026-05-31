@@ -2817,35 +2817,11 @@
               <!-- 테헤란로 라벨 -->
               <text x="20" y="113" font-size="6.5" fill="#8C8578" font-family="sans-serif" font-weight="600" letter-spacing="1">테 헤 란 로</text>
 
-              <!-- ── 플랫폼 반경 원 ── -->
-              <circle cx="136" cy="95" r="72" fill="#F97316" fill-opacity="0.07" stroke="#F97316" stroke-width="1.5" stroke-dasharray="5,4" stroke-opacity="0.65"/>
+              <!-- ── 플랫폼 반경 원 (JS 업데이트) ── -->
+              <circle id="heroCircle" cx="136" cy="95" r="72" fill="#F97316" fill-opacity="0.07" stroke="#F97316" stroke-width="1.5" stroke-dasharray="5,4" stroke-opacity="0.65"/>
 
-              <!-- ── 학원 핀들 ── -->
-              <!-- 수학 (주황) -->
-              <g transform="translate(88,72)">
-                <circle r="8" fill="#F97316" stroke="#fff" stroke-width="1.5" filter="url(#shadow)"/>
-                <text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">📐</text>
-              </g>
-              <!-- 영어 (파랑) -->
-              <g transform="translate(155,88)">
-                <circle r="8" fill="#3B82F6" stroke="#fff" stroke-width="1.5"/>
-                <text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">🔤</text>
-              </g>
-              <!-- 미술 (핑크) -->
-              <g transform="translate(175,120)">
-                <circle r="8" fill="#EC4899" stroke="#fff" stroke-width="1.5"/>
-                <text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">🎨</text>
-              </g>
-              <!-- 피아노 (보라) -->
-              <g transform="translate(112,125)">
-                <circle r="8" fill="#8B5CF6" stroke="#fff" stroke-width="1.5"/>
-                <text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">🎹</text>
-              </g>
-              <!-- 태권도 (빨강) -->
-              <g transform="translate(65,120)">
-                <circle r="7" fill="#EF4444" stroke="#fff" stroke-width="1.5"/>
-                <text x="0" y="3.5" text-anchor="middle" font-size="7" fill="white">🥋</text>
-              </g>
+              <!-- ── 학원 핀들 (JS 업데이트) ── -->
+              <g id="heroPins"></g>
 
               <!-- ── 내 위치 GPS 점 ── -->
               <circle cx="136" cy="95" r="9" fill="#4285F4" fill-opacity="0.18"/>
@@ -2865,7 +2841,7 @@
           <div class="home-content">
             <div class="home-loc-bar">
               <span class="loc-icon">📍</span>
-              <span class="loc-text">서울 강남구 역삼동</span>
+              <span class="loc-text" id="heroLocText">서울 강남구 역삼동</span>
               <span class="loc-edit">변경</span>
             </div>
             <div class="radius-label">탐색 반경</div>
@@ -2875,32 +2851,7 @@
               <div class="radius-btn" onclick="setRadius(this,2000)">2km</div>
             </div>
             <div class="radius-label" style="margin-bottom:6px">반경 내 학원 <span style="color:var(--blue);font-weight:800">8개</span> 발견</div>
-            <div class="academy-mini-list">
-              <div class="academy-mini">
-                <div class="academy-mini-icon" style="background:#FFF7ED">📐</div>
-                <div class="academy-mini-info">
-                  <div class="academy-mini-name">강남수학학원</div>
-                  <div class="academy-mini-sub">수학 · 월수금 16:00~18:00</div>
-                </div>
-                <div class="academy-mini-dist">350m</div>
-              </div>
-              <div class="academy-mini">
-                <div class="academy-mini-icon" style="background:#FFF7ED">🔤</div>
-                <div class="academy-mini-info">
-                  <div class="academy-mini-name">영어나라어학원</div>
-                  <div class="academy-mini-sub">영어 · 화목 18:30~20:00</div>
-                </div>
-                <div class="academy-mini-dist">520m</div>
-              </div>
-              <div class="academy-mini">
-                <div class="academy-mini-icon" style="background:#F0FDF4">🎨</div>
-                <div class="academy-mini-info">
-                  <div class="academy-mini-name">창의미술스튜디오</div>
-                  <div class="academy-mini-sub">미술 · 수금 15:00~17:00</div>
-                </div>
-                <div class="academy-mini-dist">780m</div>
-              </div>
-            </div>
+            <div class="academy-mini-list" id="heroAcademyList"><!-- JS 렌더링 --></div>
           </div>
           <div class="app-btn" onclick="heroNav('subject')">과목 선택하기 →</div>
         </div>
@@ -6447,7 +6398,131 @@ function adminSeed() {
   console.log('Seed data added! Members:', KR.getMembers().length);
 }
 
-// 히어로 폰 지도: SVG 삽화로 구현 (API 불필요)
+// 히어로 폰 지도: SVG 삽화 + 동네 로테이션
+var _HERO_DATA = [
+  {
+    addr: '서울 강남구 역삼동',
+    pins: [
+      { x:88,  y:72,  c:'#F97316', e:'📐' },
+      { x:155, y:88,  c:'#3B82F6', e:'🔤' },
+      { x:175, y:120, c:'#EC4899', e:'🎨' },
+      { x:112, y:125, c:'#8B5CF6', e:'🎹' },
+      { x:65,  y:120, c:'#EF4444', e:'🥋' }
+    ],
+    academies: [
+      { bg:'#FFF7ED', e:'📐', name:'강남수학학원',    sub:'수학 · 월수금 16:00~18:00', dist:'350m' },
+      { bg:'#EFF6FF', e:'🔤', name:'영어나라어학원',   sub:'영어 · 화목 18:30~20:00',  dist:'520m' },
+      { bg:'#F0FDF4', e:'🎨', name:'창의미술스튜디오', sub:'미술 · 수금 15:00~17:00',  dist:'780m' }
+    ]
+  },
+  {
+    addr: '서울 서초구 사당동',
+    pins: [
+      { x:95,  y:65,  c:'#3B82F6', e:'🔤' },
+      { x:148, y:95,  c:'#8B5CF6', e:'🎹' },
+      { x:75,  y:128, c:'#10B981', e:'💻' },
+      { x:170, y:75,  c:'#F97316', e:'📐' },
+      { x:120, y:112, c:'#EC4899', e:'🎨' }
+    ],
+    academies: [
+      { bg:'#EFF6FF', e:'🔤', name:'사당영어학원',   sub:'영어 · 월화수목 17:00~19:00', dist:'280m' },
+      { bg:'#F5F3FF', e:'🎹', name:'사당피아노교실', sub:'피아노 · 화목 16:00~17:30',   dist:'430m' },
+      { bg:'#F0FDF4', e:'💻', name:'코딩두뇌사당점', sub:'코딩 · 화목 18:00~20:00',     dist:'670m' }
+    ]
+  },
+  {
+    addr: '서울 강남구 대치동',
+    pins: [
+      { x:100, y:80,  c:'#F97316', e:'📐' },
+      { x:160, y:100, c:'#06B6D4', e:'🔬' },
+      { x:80,  y:115, c:'#EF4444', e:'🥋' },
+      { x:145, y:70,  c:'#3B82F6', e:'🔤' },
+      { x:178, y:130, c:'#8B5CF6', e:'🎹' }
+    ],
+    academies: [
+      { bg:'#FFF7ED', e:'📐', name:'대치수학전문학원', sub:'수학 · 월수금 17:00~19:30', dist:'180m' },
+      { bg:'#EFF6FF', e:'🔬', name:'대치과학탐구',    sub:'과학 · 화목 17:00~19:00',   dist:'390m' },
+      { bg:'#FEF2F2', e:'🥋', name:'대치태권도장',    sub:'체육 · 월~금 16:30~17:30',  dist:'550m' }
+    ]
+  },
+  {
+    addr: '서울 송파구 잠실동',
+    pins: [
+      { x:70,  y:75,  c:'#F97316', e:'📐' },
+      { x:155, y:68,  c:'#EC4899', e:'🎨' },
+      { x:130, y:118, c:'#3B82F6', e:'🔤' },
+      { x:90,  y:125, c:'#10B981', e:'💻' },
+      { x:168, y:115, c:'#F59E0B', e:'🎵' }
+    ],
+    academies: [
+      { bg:'#FFF7ED', e:'📐', name:'잠실수학왕',    sub:'수학 · 월수금 16:00~18:00',  dist:'220m' },
+      { bg:'#FDF4FF', e:'🎨', name:'잠실창의미술',  sub:'미술 · 화목 15:00~17:00',   dist:'460m' },
+      { bg:'#EFF6FF', e:'🔤', name:'잠실ECC영어',   sub:'영어 · 월화수목 18:00~20:00', dist:'610m' }
+    ]
+  }
+];
+
+var _heroIdx = 0;
+
+function _heroRenderPins(pins) {
+  var g = document.getElementById('heroPins');
+  if (!g) return;
+  g.innerHTML = pins.map(function(p) {
+    return '<g transform="translate(' + p.x + ',' + p.y + ')" style="transition:all 0.4s">'
+      + '<circle r="8" fill="' + p.c + '" stroke="#fff" stroke-width="1.5"/>'
+      + '<text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">' + p.e + '</text>'
+      + '</g>';
+  }).join('');
+}
+
+function _heroRenderAcademies(list) {
+  var el = document.getElementById('heroAcademyList');
+  if (!el) return;
+  el.innerHTML = list.map(function(a) {
+    return '<div class="academy-mini">'
+      + '<div class="academy-mini-icon" style="background:' + a.bg + '">' + a.e + '</div>'
+      + '<div class="academy-mini-info">'
+      +   '<div class="academy-mini-name">' + a.name + '</div>'
+      +   '<div class="academy-mini-sub">' + a.sub + '</div>'
+      + '</div>'
+      + '<div class="academy-mini-dist">' + a.dist + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function heroRotate() {
+  _heroIdx = (_heroIdx + 1) % _HERO_DATA.length;
+  var d = _HERO_DATA[_heroIdx];
+  // Fade out
+  var wrap = document.getElementById('heroMapWrap');
+  var loc  = document.getElementById('heroLocText');
+  var list = document.getElementById('heroAcademyList');
+  if (wrap) wrap.style.opacity = '0.4';
+  if (loc)  loc.style.opacity  = '0';
+  if (list) list.style.opacity = '0';
+  setTimeout(function() {
+    _heroRenderPins(d.pins);
+    _heroRenderAcademies(d.academies);
+    if (loc) { loc.textContent = d.addr; loc.style.opacity = '1'; }
+    if (wrap) wrap.style.opacity = '1';
+    if (list) list.style.opacity = '1';
+  }, 350);
+}
+
+// 초기 렌더링 + 자동 로테이션 시작
+(function initHeroRotation() {
+  var d = _HERO_DATA[0];
+  _heroRenderPins(d.pins);
+  _heroRenderAcademies(d.academies);
+  // transition 스타일 적용
+  var wrap = document.getElementById('heroMapWrap');
+  var loc  = document.getElementById('heroLocText');
+  var list = document.getElementById('heroAcademyList');
+  if (wrap) wrap.style.transition = 'opacity 0.35s ease';
+  if (loc)  loc.style.transition  = 'opacity 0.35s ease';
+  if (list) list.style.transition = 'opacity 0.35s ease';
+  setInterval(heroRotate, 3000);
+})();
 
 /* ═══════════════════════════════════════════
    학부모 앱 뷰 — User Dashboard JS
