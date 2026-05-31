@@ -10,6 +10,53 @@
 
 ---
 
+## ✅ 추가 구현 이력 (2026-05-31~)
+
+> Tasks 1~12 완료 후 추가된 기능들
+
+### 네비게이션 개편
+- 상단 네비 순서: `사전예약 | 로그인 | 기능 | 이용방법 | 요금제 | 데모 체험`
+- 로그인 버튼 → `openGoogleLogin()` → 학부모 앱 뷰 전환
+- 관리자 로그인은 Footer 전용 유지 (`openAdminLogin()`)
+- 관리자 사이드바 하단: 로컬 컴패니언 링크 `http://localhost:63523/`
+
+### 랜딩 페이지 정리
+- 시간 절약 계산기 섹션 삭제
+- 단계별 성과 지표 섹션 삭제
+
+### 히어로 폰 목업 지도 (SVG 삽화)
+- CSS 격자 → SVG 역삼동 도로/블록 패턴으로 교체
+- 3초마다 동네 자동 로테이션 (역삼동 → 사당동 → 대치동 → 잠실동)
+- 각 동네마다 학원 핀 위치·이름·학원 목록 변경 (opacity fade 전환)
+
+### 데모 Step 2 지도 (네이버 지도 실제 연동)
+- `ncpKeyId: 5dq02tmsku`
+- GPS + Reverse Geocoding 주소 표시
+- 지도 확대/축소 버튼 (200px ↔ 340px)
+
+### 이메일 발송 (EmailJS)
+- `@emailjs/browser@4` SDK
+- `service_rkuc4g7` / `template_6brgdse` / `UJDqX9x6UVJC12UTT`
+- `_buildEmailHTML()`: 추천 학원 TOP3, 주간 스케줄 표, 얼리버드 혜택 동적 생성
+- `sendKidsrouteEmail()`: EmailJS REST 호출
+- 트리거: `submitLeadForm()` → Reverse Geocoding → 이메일 발송
+
+### 학부모 앱 뷰 (`#userRoot`, z-index: 9000)
+**학원 검색 탭**
+- 목록 뷰: 과목 필터 칩, 거리/평점/요금 정렬, 10개 목업 학원 카드
+- 지도 뷰: 네이버 지도, Geocoding 주소 검색, 반경 원, 마커 InfoWindow, 하단 슬라이더
+
+**스케줄 탭**
+- 주간 캘린더 (오늘 강조), 등록 학원 목록, AI 추천 연결
+
+**내 정보 탭**
+- 학부모 정보: 실제 이름, 핸드폰 번호 (인라인 편집)
+- 전자 서명: 캔버스 손글씨 (하단 시트)
+- 아이 추가 폼: 📷 사진, 닉네임, 👦/👧 성별, 학년(미취학5/6/7세 포함)
+- `kr_children`, `kr_parent_info`, `kr_user_schedule`, `kr_notif_prefs`
+
+---
+
 ## File Structure
 
 | File | Changes |

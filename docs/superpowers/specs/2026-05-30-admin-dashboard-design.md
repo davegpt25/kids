@@ -1,7 +1,7 @@
 # KidsRoute 관리자 대시보드 + 멤버십 구독 시스템 Design Spec
 
-**날짜:** 2026-05-30  
-**상태:** ✅ 승인됨
+**날짜:** 2026-05-30 → **최종 업데이트:** 2026-05-31  
+**상태:** ✅ 승인됨 + 구현 완료
 
 ---
 
@@ -60,6 +60,33 @@ localStorage['kr_alerts'] = JSON.stringify([
   { id: 1, academy: "강남 베스트 수학", slots: 1, waitCount: 8, status: "pending", createdAt: ... },
   ...
 ])
+
+// ── 2026-05-31 추가 키 ──
+// 학부모 앱 — 등록 학원 스케줄
+localStorage['kr_user_schedule'] = JSON.stringify([
+  { academyId: 1, name: '강남 베스트 수학', subj: 'math', label: '수학',
+    color: '#F97316', times: ['월수금 오후4시'], addedAt: timestamp }
+])
+
+// 학부모 앱 — 아이 정보 (사진/성별/학년 포함)
+localStorage['kr_children'] = JSON.stringify([
+  { id: 'c1748600000', name: '지수', birthYear: '2018', grade: '초2',
+    emoji: '👧', gender: 'female', photo: 'data:image/png;base64,...' }
+])
+
+// 학부모 앱 — 학부모 상세 정보
+localStorage['kr_parent_info'] = JSON.stringify({
+  realName: '김민지',
+  phone: '010-1234-5678',
+  signature: 'data:image/png;base64,...'
+})
+
+// 학부모 앱 — 알림 설정
+localStorage['kr_notif_prefs'] = JSON.stringify({
+  vacancy: true,
+  reminder: true,
+  news: false
+})
 ```
 
 ---
@@ -258,6 +285,7 @@ Footer 하단 "관리자" 텍스트 링크 (작은 크기, 회색)
 
 ## 구현 범위 (In Scope)
 
+### 원래 계획 (2026-05-30)
 - [x] Footer 관리자 링크 + 로그인 모달
 - [x] 랜딩 ↔ 대시보드 뷰 전환
 - [x] localStorage 기반 멤버 데이터 관리
@@ -272,12 +300,68 @@ Footer 하단 "관리자" 텍스트 링크 (작은 크기, 회색)
 - [x] WTP 기능 3가지 UI (저장 버튼, 신뢰도 배지, 공석 등록 버튼)
 - [x] 만료 사용자 잠금 모달
 
+### 추가 구현 (2026-05-31~)
+
+**네비게이션 개편**
+- [x] 상단 네비: `사전예약 | 로그인 | 기능 이용방법 요금제 데모 체험` 순서
+- [x] 로그인 버튼 → 학부모 앱 뷰 전환 (사전예약과 분리)
+- [x] 관리자 로그인은 Footer 전용 유지
+- [x] 사이드바 하단 로컬 컴패니언 링크 (`http://localhost:63523/`)
+
+**랜딩 페이지 정리**
+- [x] 시간 절약 계산기 섹션 제거
+- [x] 단계별 성과 지표 섹션 제거
+- [x] 데모 섹션 → 심플 CTA 카드로 교체
+
+**히어로 폰 목업 지도**
+- [x] CSS 가짜 지도 → SVG 삽화 (역삼동 도로/블록 패턴)
+- [x] 3초마다 동네 자동 로테이션: 역삼동 → 사당동 → 대치동 → 잠실동
+- [x] 각 동네별 학원 핀 위치·이름·목록 다르게 표시 (fade 전환)
+
+**데모 Step 2 지도**
+- [x] 네이버 지도 실제 연동 (`ncpKeyId: 5dq02tmsku`)
+- [x] GPS 현재 위치 + Reverse Geocoding 주소 표시
+- [x] 지도 크기 확대/축소 버튼 (200px ↔ 340px)
+
+**이메일 발송 (EmailJS)**
+- [x] 이메일 등록 시 실제 이메일 발송
+- [x] 발송 내용: 추천 학원 TOP3 + 주간 스케줄 표 + 얼리버드 혜택
+- [x] EmailJS 연동: `service_rkuc4g7` / `template_6brgdse` / `UJDqX9x6UVJC12UTT`
+- [x] Reverse Geocoding으로 현재 위치 주소를 이메일에 포함
+
+**학부모 앱 뷰 (`#userRoot`, z-index:9000)**
+- [x] 로그인 시 전체화면 학부모 앱으로 전환
+- [x] 하단 3탭: 학원 검색 / 스케줄 / 내 정보
+
+**학원 검색 탭**
+- [x] 목록 뷰: 과목 필터, 정렬(거리/평점/요금), 10개 목업 학원 카드
+- [x] 지도 뷰: 네이버 지도, 주소 검색(Geocoding), 내 위치, 반경 원
+- [x] 마커 클릭 → InfoWindow (학원 정보 + 스케줄 추가)
+- [x] 하단 가로 슬라이더 카드 (탭 → 지도 fly 이동)
+- [x] 지도 이동 시 거리 자동 재계산
+
+**스케줄 탭**
+- [x] 월~일 주간 캘린더 (등록 학원 시간별 표시, 오늘 강조)
+- [x] 등록 학원 목록 (삭제, 과목 색상)
+- [x] AI 추천 받기 → 데모 시뮬레이션 연결
+
+**내 정보 탭**
+- [x] 학부모 정보: 실제 이름, 핸드폰 번호 (인라인 편집)
+- [x] 전자 서명: 캔버스 손글씨 서명 등록 (하단 시트)
+- [x] 아이 추가 폼 개편:
+  - 📷 사진 업로드 (원형, base64)
+  - 아이 닉네임 = 학부모 표시명
+  - 👦 남아 / 👧 여아 성별 선택
+  - 학년 optgroup: 미취학 5세/6세/7세, 초1~6, 중1~3
+- [x] 알림 설정 토글 3개
+
 ## 구현 제외 (Out of Scope)
 
-- 실제 이메일 발송 (카카오 알림톡)
 - 실제 결제 연동
-- 백엔드 API
+- 백엔드 API / 서버
 - 다중 관리자 계정
+- 실제 학원 데이터 (공공 API)
+- ~~실제 이메일 발송~~ → ✅ EmailJS로 구현 완료
 
 ---
 
