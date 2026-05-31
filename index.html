@@ -2742,8 +2742,115 @@
             <span>9:41</span><span>📶 🔋</span>
           </div>
           <div class="home-map" id="heroMapWrap">
-            <div id="heroMapEl"></div>
-            <div class="hero-map-badge" id="heroMapBadge">반경 1km</div>
+            <!-- 역삼동 SVG 삽화 지도 -->
+            <svg viewBox="0 0 272 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+              <!-- 배경 (토지) -->
+              <rect width="272" height="180" fill="#F0EAD6"/>
+
+              <!-- ── 블록들 ── -->
+              <!-- 북서 블록 -->
+              <rect x="0"   y="0"   width="52"  height="38" fill="#E8E0CC" rx="1"/>
+              <rect x="57"  y="0"   width="46"  height="38" fill="#EBE3CF" rx="1"/>
+              <rect x="108" y="0"   width="52"  height="38" fill="#E8E0CC" rx="1"/>
+              <rect x="165" y="0"   width="38"  height="38" fill="#EDE5D0" rx="1"/>
+              <rect x="208" y="0"   width="64"  height="38" fill="#E8E0CC" rx="1"/>
+              <!-- 2번째 행 블록 -->
+              <rect x="0"   y="44"  width="52"  height="32" fill="#EDE5D0" rx="1"/>
+              <rect x="57"  y="44"  width="46"  height="32" fill="#E8E0CC" rx="1"/>
+              <rect x="108" y="44"  width="52"  height="32" fill="#EBE3CF" rx="1"/>
+              <rect x="165" y="44"  width="38"  height="32" fill="#E8E0CC" rx="1"/>
+              <rect x="208" y="44"  width="64"  height="32" fill="#EDE5D0" rx="1"/>
+              <!-- 테헤란로 위 블록 -->
+              <rect x="0"   y="82"  width="52"  height="22" fill="#EBE3CF" rx="1"/>
+              <rect x="57"  y="82"  width="46"  height="22" fill="#E8E0CC" rx="1"/>
+              <rect x="108" y="82"  width="52"  height="22" fill="#EDE5D0" rx="1"/>
+              <rect x="165" y="82"  width="38"  height="22" fill="#EBE3CF" rx="1"/>
+              <rect x="208" y="82"  width="64"  height="22" fill="#E8E0CC" rx="1"/>
+              <!-- 테헤란로 아래 블록 -->
+              <rect x="0"   y="116" width="52"  height="34" fill="#EDE5D0" rx="1"/>
+              <rect x="57"  y="116" width="46"  height="34" fill="#E8E0CC" rx="1"/>
+              <rect x="108" y="116" width="52"  height="34" fill="#EBE3CF" rx="1"/>
+              <rect x="165" y="116" width="38"  height="34" fill="#E8E0CC" rx="1"/>
+              <rect x="208" y="116" width="64"  height="34" fill="#EDE5D0" rx="1"/>
+              <!-- 남쪽 블록 -->
+              <rect x="0"   y="156" width="52"  height="24" fill="#E8E0CC" rx="1"/>
+              <rect x="57"  y="156" width="46"  height="24" fill="#EDE5D0" rx="1"/>
+              <rect x="108" y="156" width="52"  height="24" fill="#E8E0CC" rx="1"/>
+              <rect x="165" y="156" width="38"  height="24" fill="#EBE3CF" rx="1"/>
+              <rect x="208" y="156" width="64"  height="24" fill="#E8E0CC" rx="1"/>
+
+              <!-- ── 공원 (역삼문화공원) ── -->
+              <rect x="57" y="44" width="22" height="16" fill="#C8DBA8" rx="2"/>
+              <rect x="60" y="47" width="16" height="10" fill="#B8CF98" rx="1"/>
+
+              <!-- ── 도로망 ── -->
+              <!-- 세로 주요도로 (선릉로 방향) x=53~56 -->
+              <rect x="53" y="0" width="4" height="180" fill="#D8D2C4"/>
+              <!-- 세로 주요도로 x=104~107 -->
+              <rect x="104" y="0" width="4" height="180" fill="#D8D2C4"/>
+              <!-- 세로 주요도로 x=161~164 -->
+              <rect x="161" y="0" width="4" height="180" fill="#D8D2C4"/>
+              <!-- 세로 주요도로 x=204~207 -->
+              <rect x="204" y="0" width="4" height="180" fill="#D8D2C4"/>
+
+              <!-- 가로 소도로 y=38~43 -->
+              <rect x="0" y="38" width="272" height="6" fill="#DDD7C8"/>
+              <!-- 가로 소도로 y=76~81 -->
+              <rect x="0" y="76" width="272" height="6" fill="#DDD7C8"/>
+              <!-- 가로 소도로 y=150~155 -->
+              <rect x="0" y="150" width="272" height="6" fill="#DDD7C8"/>
+
+              <!-- ── 테헤란로 (메인 8차선) y=104~115 ── -->
+              <rect x="0" y="104" width="272" height="12" fill="#CCC6B5"/>
+              <!-- 차선 구분선 (중앙) -->
+              <line x1="0" y1="110" x2="272" y2="110" stroke="#BEB8A8" stroke-width="0.8" stroke-dasharray="10,7"/>
+              <!-- 테헤란로 라벨 -->
+              <text x="20" y="113" font-size="6.5" fill="#8C8578" font-family="sans-serif" font-weight="600" letter-spacing="1">테 헤 란 로</text>
+
+              <!-- ── 플랫폼 반경 원 ── -->
+              <circle cx="136" cy="95" r="72" fill="#F97316" fill-opacity="0.07" stroke="#F97316" stroke-width="1.5" stroke-dasharray="5,4" stroke-opacity="0.65"/>
+
+              <!-- ── 학원 핀들 ── -->
+              <!-- 수학 (주황) -->
+              <g transform="translate(88,72)">
+                <circle r="8" fill="#F97316" stroke="#fff" stroke-width="1.5" filter="url(#shadow)"/>
+                <text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">📐</text>
+              </g>
+              <!-- 영어 (파랑) -->
+              <g transform="translate(155,88)">
+                <circle r="8" fill="#3B82F6" stroke="#fff" stroke-width="1.5"/>
+                <text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">🔤</text>
+              </g>
+              <!-- 미술 (핑크) -->
+              <g transform="translate(175,120)">
+                <circle r="8" fill="#EC4899" stroke="#fff" stroke-width="1.5"/>
+                <text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">🎨</text>
+              </g>
+              <!-- 피아노 (보라) -->
+              <g transform="translate(112,125)">
+                <circle r="8" fill="#8B5CF6" stroke="#fff" stroke-width="1.5"/>
+                <text x="0" y="3.5" text-anchor="middle" font-size="8" fill="white">🎹</text>
+              </g>
+              <!-- 태권도 (빨강) -->
+              <g transform="translate(65,120)">
+                <circle r="7" fill="#EF4444" stroke="#fff" stroke-width="1.5"/>
+                <text x="0" y="3.5" text-anchor="middle" font-size="7" fill="white">🥋</text>
+              </g>
+
+              <!-- ── 내 위치 GPS 점 ── -->
+              <circle cx="136" cy="95" r="9" fill="#4285F4" fill-opacity="0.18"/>
+              <circle cx="136" cy="95" r="5.5" fill="#4285F4" stroke="#fff" stroke-width="2"/>
+
+              <!-- ── 역삼역 아이콘 ── -->
+              <g transform="translate(53,108)">
+                <rect x="-8" y="-5" width="16" height="10" rx="5" fill="#3C5BFA"/>
+                <text x="0" y="3" text-anchor="middle" font-size="7" fill="white" font-weight="800">M</text>
+              </g>
+
+              <!-- ── 반경 배지 ── -->
+              <rect x="216" y="165" width="50" height="12" rx="4" fill="rgba(255,255,255,0.92)"/>
+              <text x="241" y="174" text-anchor="middle" font-size="7.5" fill="#F97316" font-weight="700" font-family="sans-serif">반경 1km</text>
+            </svg>
           </div>
           <div class="home-content">
             <div class="home-loc-bar">
@@ -6313,97 +6420,7 @@ function adminSeed() {
   console.log('Seed data added! Members:', KR.getMembers().length);
 }
 
-/* ═══════════════════════════════════════════
-   히어로 폰 목업 — 실제 네이버 지도
-════════════════════════════════════════════ */
-function initHeroMap() {
-  if (!window.naver || !naver.maps || !naver.maps.Map) {
-    setTimeout(initHeroMap, 400); return;
-  }
-  var el = document.getElementById('heroMapEl');
-  if (!el || el._heroInited) return;
-  el._heroInited = true;
-
-  // 강남구 역삼동 중심
-  var center = new naver.maps.LatLng(37.4990, 127.0276);
-
-  var map = new naver.maps.Map('heroMapEl', {
-    center: center,
-    zoom: 15,
-    zoomControl: false,
-    scaleControl: false,
-    mapDataControl: false,
-    logoControl: false,
-    mapTypeControl: false,
-    scrollWheel: false,
-    draggable: false,
-    pinchZoom: false,
-    keyboardShortcuts: false,
-    mapTypeId: naver.maps.MapTypeId.NORMAL
-  });
-
-  // 플랫폼 색상 반경 원 (1km)
-  new naver.maps.Circle({
-    map: map, center: center, radius: 600,
-    strokeColor: '#F97316', strokeOpacity: 0.75, strokeWeight: 2,
-    strokeStyle: 'shortdash',
-    fillColor: '#F97316', fillOpacity: 0.07
-  });
-
-  // 내 위치 (파란 GPS 점)
-  new naver.maps.Marker({
-    position: center, map: map,
-    icon: {
-      content: '<div style="width:13px;height:13px;border-radius:50%;background:#4285F4;border:2.5px solid #fff;box-shadow:0 0 0 5px rgba(66,133,244,0.22)"></div>',
-      anchor: new naver.maps.Point(6, 6)
-    }, zIndex: 20
-  });
-
-  // 학원 마커 (플랫폼 컬러 핀)
-  var pins = [
-    { lat:37.5003, lng:127.0299, color:'#F97316', e:'📐' },
-    { lat:37.4974, lng:127.0248, color:'#3B82F6', e:'🔤' },
-    { lat:37.5008, lng:127.0253, color:'#EC4899', e:'🎨' },
-    { lat:37.4968, lng:127.0310, color:'#8B5CF6', e:'🎹' },
-    { lat:37.4982, lng:127.0335, color:'#10B981', e:'🔬' }
-  ];
-  pins.forEach(function(p) {
-    new naver.maps.Marker({
-      position: new naver.maps.LatLng(p.lat, p.lng),
-      map: map,
-      icon: {
-        content: '<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'
-          + p.color + ';border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.22);display:flex;align-items:center;justify-content:center">'
-          + '<span style="transform:rotate(45deg);font-size:12px">' + p.e + '</span></div>',
-        size: new naver.maps.Size(26, 26),
-        anchor: new naver.maps.Point(13, 26)
-      }, zIndex: 10
-    });
-  });
-
-  // 배지에 주소 표시
-  if (window.naver && naver.maps.Service) {
-    naver.maps.Service.reverseGeocode({
-      coords: center,
-      orders: [naver.maps.Service.OrderType.ADDR]
-    }, function(status, response) {
-      var badge = document.getElementById('heroMapBadge');
-      if (!badge) return;
-      if (status === naver.maps.Service.Status.OK) {
-        var addr = '';
-        try { addr = response.v2.address.jibunAddress || ''; } catch(e) {}
-        if (addr) badge.textContent = '📍 ' + addr.replace(/^(서울특별시|서울시)\s*/, '').replace(/\s+\d+.*$/, '');
-      }
-    });
-  }
-}
-
-// 페이지 로드 시 히어로 지도 초기화
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initHeroMap);
-} else {
-  initHeroMap();
-}
+// 히어로 폰 지도: SVG 삽화로 구현 (API 불필요)
 
 /* ═══════════════════════════════════════════
    학부모 앱 뷰 — User Dashboard JS
