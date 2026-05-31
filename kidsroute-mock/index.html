@@ -6,6 +6,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=5dq02tmsku&submodules=geocoder"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <title>키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄">
@@ -4130,8 +4131,20 @@
 // ─── 소셜 로그인 설정 ───
 const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com';
 const KAKAO_APP_KEY    = '1550b9b3a098d276139c9f66eabb7a64';
-// ▼ Naver Cloud Platform → Application → Maps(JavaScript) → Client ID 를 넣어주세요
 const NAVER_CLIENT_ID  = '5dq02tmsku';
+
+// ── EmailJS 설정 ──────────────────────────────────────────────────
+// 발급 방법: https://www.emailjs.com → Add New Service(Gmail) → Create Template
+const EMAILJS_PUBLIC_KEY   = 'YOUR_PUBLIC_KEY';   // Account → General → Public Key
+const EMAILJS_SERVICE_ID   = 'YOUR_SERVICE_ID';   // Email Services → Service ID
+const EMAILJS_TEMPLATE_ID  = 'YOUR_TEMPLATE_ID';  // Email Templates → Template ID
+// EmailJS 초기화
+(function() {
+  if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  else document.addEventListener('DOMContentLoaded', function() {
+    if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  });
+})();
 
 let _toastTimer = null;
 let _tokenClient = null;
@@ -5001,17 +5014,201 @@ function submitLeadForm() {
   }
   // 멤버 등록
   var nameEl = document.getElementById('leadName');
-  KR.addMember(email, nameEl ? nameEl.value.trim() : '');
+  var name   = nameEl ? nameEl.value.trim() : '';
+  KR.addMember(email, name);
   _sessionEmail = email;
+
+  // ── 이메일 발송 ──
+  var location = (typeof _demoGPSLat !== 'undefined' && _demoGPSLat !== 37.5665)
+    ? '현재 위치' : '강남구 역삼동';
+  var radius   = typeof _demoRadius !== 'undefined' ? _demoRadius : 1000;
+  var subjects = typeof _demoSubjects !== 'undefined' && _demoSubjects.length
+    ? _demoSubjects : ['math','english','piano'];
+
+  // Reverse Geocoding으로 동네명 업데이트 후 발송
+  function _doSend(loc) {
+    sendKidsrouteEmail(email, name || '학부모', loc, radius, subjects, null)
+      .then(function() { showToast('✉️ 맞춤 결과를 이메일로 보냈어요!'); })
+      .catch(function(err) { console.warn('[KidsRoute] 이메일 발송 오류:', err); });
+  }
+  if (window.naver && naver.maps && naver.maps.Service && _demoGPSLat !== 37.5665) {
+    naver.maps.Service.reverseGeocode({
+      coords: new naver.maps.LatLng(_demoGPSLat, _demoGPSLng),
+      orders: [naver.maps.Service.OrderType.ADDR]
+    }, function(status, response) {
+      var loc = '강남구 역삼동';
+      try { loc = response.v2.address.jibunAddress.replace(/^(서울특별시|서울시)\s*/,'').replace(/\s+\d+.*$/,'') || loc; } catch(e) {}
+      _doSend(loc);
+    });
+  } else {
+    _doSend(location);
+  }
 
   const msg = document.getElementById('demoSuccessMsg');
   if (msg) {
     msg.innerHTML =
       '<strong>' + email + '</strong>으로<br>등록이 완료됐어요! 🎉<br>' +
       '<span style="font-size:13px;color:var(--text-sub);display:block;margin-top:8px">' +
-      '🎁 <strong>7일 무료 멤버십 체험</strong>이 시작됐어요.<br>스케줄 저장, 신뢰도 점수, 공석 알림을 모두 사용해보세요!</span>';
+      '📧 맞춤 결과 이메일을 발송했어요.<br>' +
+      '🎁 <strong>7일 무료 멤버십 체험</strong>이 시작됐어요!</span>';
   }
   _showDemoStep('demoStep5');
+}
+
+// ═══════════════════════════════════════════
+//  이메일 발송 — EmailJS 연동
+// ═══════════════════════════════════════════
+
+function _buildEmailHTML(name, email, location, radius, subjects, cards) {
+  var EMOJIS  = { math:'📐', english:'🔤', piano:'🎹', art:'🎨', taekwondo:'🥋', coding:'💻', sports:'⚽', science:'🔬' };
+  var LABELS  = { math:'수학', english:'영어', piano:'피아노', art:'미술', taekwondo:'태권도', coding:'코딩', sports:'체육', science:'과학' };
+  var COLORS  = { math:'#3B82F6', english:'#F97316', piano:'#10B981', art:'#EC4899', taekwondo:'#EF4444', coding:'#06B6D4', sports:'#84CC16', science:'#8B5CF6' };
+  var subjs   = (subjects && subjects.length ? subjects : ['math','english','piano']).slice(0,3);
+  var subjText = subjs.map(function(s){ return (EMOJIS[s]||'🏫')+' '+(LABELS[s]||s); }).join(' · ');
+  var radLabel = radius >= 1000 ? (radius/1000)+'km' : radius+'m';
+  var loc     = location || '강남구 역삼동';
+  var nm      = name || '학부모';
+
+  var topCards = (cards && cards.length ? cards : [
+    { name:'강남 베스트 수학', subj:'math', rating:4.9, distStr:'320m', walkMin:5, timeStr:'월·수·금 오후 5시' },
+    { name:'YBM 영어',        subj:'english', rating:4.7, distStr:'550m', walkMin:8, timeStr:'화·목 오후 5시' },
+    { name:'클래식 피아노',   subj:'piano', rating:4.6, distStr:'810m', walkMin:12, timeStr:'월·수 오후 6시' }
+  ]).slice(0,3);
+
+  function card(idx, ac) {
+    var isBest = idx === 0;
+    var bg   = isBest ? 'background:#FFF8F3;border:2px solid #F97316;' : 'background:#fff;border:1.5px solid #E5E7EB;';
+    var numBg = isBest ? 'background:linear-gradient(135deg,#FF9A3C,#F97316);color:#fff;' : 'background:#E5E7EB;color:#6B7280;';
+    var badge = isBest ? '<span style="display:inline-block;font-size:10px;font-weight:700;background:#F97316;color:#fff;border-radius:100px;padding:2px 9px;margin-right:5px;">1위 추천</span>' : '';
+    return '<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:10px;'+bg+'border-radius:14px;overflow:hidden;">'
+      +'<tr><td style="padding:16px 18px;">'
+      +'<table role="presentation" cellpadding="0" cellspacing="0" width="100%"><tr>'
+      +'<td style="vertical-align:middle;padding-right:14px;width:44px;">'
+      +'<div style="width:40px;height:40px;'+numBg+'border-radius:50%;text-align:center;line-height:40px;font-size:'+(isBest?'18':'16')+'px;font-weight:900;">'+(idx+1)+'</div>'
+      +'</td>'
+      +'<td style="vertical-align:top;">'
+      +'<div style="font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:3px;">'+(EMOJIS[ac.subj]||'🏫')+' '+ac.name+'</div>'
+      +'<div style="font-size:12px;color:#6B7280;line-height:1.8;margin-bottom:6px;">⭐ '+(ac.rating||4.5)+' &nbsp;·&nbsp; 🚶 '+(ac.walkMin||5)+'분 ('+(ac.distStr||'?')+')'+(ac.timeStr ? ' &nbsp;·&nbsp; 🕐 '+ac.timeStr : '')+'</div>'
+      +badge+'<span style="display:inline-block;font-size:10px;font-weight:700;background:#EFF6FF;color:#3B82F6;border-radius:100px;padding:2px 9px;">시간 겹침 없음</span>'
+      +'</td></tr></table>'
+      +'</td></tr></table>';
+  }
+
+  // 주간 스케줄 컬럼 빌더 (최대 3과목)
+  var DAYS = ['월','화','수','목','금'];
+  var dayMap = { math:[1,3,5], english:[2,4], piano:[1,3], art:[2,4], taekwondo:[1,2,3,4,5], coding:[2,4], sports:[1,3,5], science:[2,4] };
+  var TIME_ROWS = ['오후 4시','오후 5시','오후 6시','오후 7시'];
+  var timeIdx = { 'math':1,'english':1,'piano':2,'art':1,'taekwondo':0,'coding':1,'sports':0,'science':1 };
+  function schedRow(timeLabel, rowIdx) {
+    var cells = DAYS.map(function(_, di) {
+      var dayNum = di+1;
+      var found = null;
+      subjs.forEach(function(s) {
+        var dm = dayMap[s]||[];
+        if (!found && dm.indexOf(dayNum)>=0 && timeIdx[s]===rowIdx) found = s;
+      });
+      return found
+        ? '<td style="padding:3px;border-right:1px solid #E5E7EB;border-bottom:1px solid #F3F4F6;"><div style="background:'+COLORS[found]+';color:#fff;border-radius:5px;text-align:center;padding:5px 2px;font-size:12px;min-height:28px;display:flex;align-items:center;justify-content:center;">'+(EMOJIS[found]||'')+'</div></td>'
+        : '<td style="border-right:1px solid #E5E7EB;border-bottom:1px solid #F3F4F6;height:32px;"></td>';
+    });
+    return '<tr><td style="padding:8px 6px;text-align:right;color:#9CA3AF;font-size:10px;font-weight:600;white-space:nowrap;border-right:1px solid #E5E7EB;border-bottom:1px solid #F3F4F6;">'+timeLabel+'</td>'+cells.join('')+'</tr>';
+  }
+
+  var legendHtml = subjs.map(function(s) {
+    return '<td style="padding-right:14px;"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+      +'<td style="width:12px;height:12px;background:'+COLORS[s]+';border-radius:3px;"></td>'
+      +'<td style="padding-left:5px;font-size:11px;color:#6B7280;">'+(LABELS[s]||s)+'</td>'
+      +'</tr></table></td>';
+  }).join('');
+
+  return '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
+    +'<body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,\'Apple SD Gothic Neo\',\'Malgun Gothic\',Arial,sans-serif;">'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#F3F4F6;padding:32px 16px;"><tr><td align="center">'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">'
+
+    // ① 헤더
+    +'<tr><td style="background:linear-gradient(135deg,#FF9A3C 0%,#F97316 100%);padding:28px 32px 24px;text-align:center;">'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 10px;"><tr>'
+    +'<td style="padding-right:10px;vertical-align:middle;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="40" height="40" style="display:block;"><rect width="96" height="96" rx="22" fill="rgba(255,255,255,0.25)"/><circle cx="48" cy="22" r="11" fill="white"/><line x1="48" y1="33" x2="48" y2="50" stroke="white" stroke-width="5" stroke-linecap="round"/><line x1="33" y1="41" x2="63" y2="41" stroke="white" stroke-width="4.5" stroke-linecap="round"/><line x1="48" y1="50" x2="38" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/><line x1="48" y1="50" x2="58" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/></svg></td>'
+    +'<td style="vertical-align:middle;"><span style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">키즈루트</span></td>'
+    +'</tr></table>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,0.85);font-weight:500;">아이 학원 스케줄 최적화 서비스</div>'
+    +'</td></tr>'
+
+    // ② 히어로
+    +'<tr><td style="background:#FFF8F3;padding:28px 32px 24px;text-align:center;border-bottom:2px solid #FFE4CC;">'
+    +'<div style="font-size:36px;margin-bottom:10px;">✨</div>'
+    +'<h1 style="margin:0 0 10px;font-size:22px;font-weight:900;color:#1A1A2E;letter-spacing:-0.5px;line-height:1.3;">'+nm+'님, 맞춤 분석이 완료됐어요!</h1>'
+    +'<p style="margin:0 0 14px;font-size:14px;color:#6B7280;line-height:1.7;"><strong style="color:#F97316;">'+loc+'</strong> 기준 반경 <strong style="color:#F97316;">'+radLabel+'</strong><br>'+subjText+' — 시간 겹침 없는 최적 조합을 찾았어요 🎯</p>'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>'
+    +'<td style="padding:0 4px;"><span style="display:inline-block;font-size:12px;font-weight:600;background:#FFF0E5;color:#F97316;border-radius:100px;padding:4px 12px;">📍 '+loc+'</span></td>'
+    +'<td style="padding:0 4px;"><span style="display:inline-block;font-size:12px;font-weight:600;background:#EFF6FF;color:#3B82F6;border-radius:100px;padding:4px 12px;">🔍 반경 '+radLabel+'</span></td>'
+    +'<td style="padding:0 4px;"><span style="display:inline-block;font-size:12px;font-weight:600;background:#ECFDF5;color:#10B981;border-radius:100px;padding:4px 12px;">✓ 시간 겹침 없음</span></td>'
+    +'</tr></table></td></tr>'
+
+    // ③ 학원 TOP 3
+    +'<tr><td style="padding:28px 32px 20px;">'
+    +'<h2 style="margin:0 0 16px;font-size:15px;font-weight:800;color:#1A1A2E;border-left:3px solid #F97316;padding-left:10px;">추천 학원 TOP 3</h2>'
+    +topCards.map(function(ac,i){ return card(i,ac); }).join('')
+    +'</td></tr>'
+
+    // ④ 주간 스케줄
+    +'<tr><td style="padding:0 32px 28px;">'
+    +'<h2 style="margin:0 0 14px;font-size:15px;font-weight:800;color:#1A1A2E;border-left:3px solid #3B82F6;padding-left:10px;">📅 이번주 스케줄 미리보기</h2>'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border:1.5px solid #E5E7EB;border-radius:12px;overflow:hidden;font-size:11px;border-collapse:separate;">'
+    +'<tr style="background:#F9FAFB;"><td style="padding:8px 6px;text-align:right;color:#9CA3AF;font-weight:700;font-size:10px;width:44px;border-right:1px solid #E5E7EB;border-bottom:1.5px solid #E5E7EB;"></td>'
+    +DAYS.map(function(d){ return '<td style="padding:8px 4px;text-align:center;color:#374151;font-weight:800;font-size:12px;border-right:1px solid #E5E7EB;border-bottom:1.5px solid #E5E7EB;">'+d+'</td>'; }).join('')
+    +'</tr>'
+    +TIME_ROWS.map(function(t,i){ return schedRow(t,i); }).join('')
+    +'</table>'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:10px;"><tr>'+legendHtml+'</tr></table>'
+    +'</td></tr>'
+
+    // ⑤ 사전예약 확인
+    +'<tr><td style="padding:0 32px 28px;">'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:linear-gradient(135deg,#FFF8F3,#FFF0E5);border:2px solid #FFD4A8;border-radius:16px;">'
+    +'<tr><td style="padding:22px 24px;">'
+    +'<div style="font-size:13px;font-weight:800;color:#F97316;margin-bottom:6px;">✅ 사전예약 완료</div>'
+    +'<div style="font-size:15px;font-weight:900;color:#1A1A2E;margin-bottom:6px;line-height:1.4;">출시 즉시 가장 먼저 알려드릴게요!</div>'
+    +'<div style="font-size:13px;color:#6B7280;">예약 이메일: <strong style="color:#1A1A2E;">'+email+'</strong></div>'
+    +'<div style="border-top:1px dashed #FFD4A8;margin:16px 0;"></div>'
+    +'<div style="font-size:12px;font-weight:700;color:#F97316;margin-bottom:8px;">🎁 얼리버드 전용 혜택</div>'
+    +'<div style="font-size:13px;color:#374151;line-height:1.8;">① <strong>프리미엄 3개월 무료</strong> — 출시 직후 자동 적용<br>② <strong>맞춤 분석 결과 즉시 발송</strong> — 출시 당일 오전<br>③ <strong>우선 고객 지원</strong> — 전담 온보딩 안내</div>'
+    +'</td></tr></table></td></tr>'
+
+    // ⑥ CTA
+    +'<tr><td style="padding:0 32px 32px;text-align:center;">'
+    +'<p style="margin:0 0 18px;font-size:13px;color:#6B7280;line-height:1.7;">2026년 7월 정식 출시 예정입니다.<br>출시 즉시 알림을 받고 얼리버드 혜택을 누려보세요.</p>'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>'
+    +'<td style="background:linear-gradient(135deg,#FF9A3C,#F97316);border-radius:100px;">'
+    +'<a href="https://davegpt25.github.io/kids" target="_blank" style="display:inline-block;font-size:16px;font-weight:800;color:#fff;text-decoration:none;padding:16px 40px;">🚀 출시 알림 받기</a>'
+    +'</td></tr></table></td></tr>'
+
+    // ⑦ 푸터
+    +'<tr><td style="padding:20px 32px 28px;text-align:center;border-top:1px solid #F3F4F6;">'
+    +'<p style="margin:0 0 8px;font-size:11px;color:#9CA3AF;">키즈루트 · 서울특별시 강남구 · contact@kidsroute.kr</p>'
+    +'<p style="margin:0 0 12px;font-size:11px;color:#9CA3AF;">© 2026 KidsRoute. All rights reserved.</p>'
+    +'<p style="margin:0;font-size:11px;"><a href="#" style="color:#9CA3AF;text-decoration:underline;margin:0 8px;">수신 거부</a> | <a href="#" style="color:#9CA3AF;text-decoration:underline;margin:0 8px;">개인정보처리방침</a></p>'
+    +'</td></tr>'
+
+    +'</table></td></tr></table></body></html>';
+}
+
+function sendKidsrouteEmail(toEmail, toName, location, radius, subjects, cards) {
+  if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
+    console.warn('[KidsRoute] EmailJS 키가 설정되지 않았습니다. emailjs.com에서 발급 후 EMAILJS_PUBLIC_KEY를 업데이트하세요.');
+    return Promise.resolve({ status: 'skipped' });
+  }
+  if (!window.emailjs) return Promise.reject(new Error('EmailJS SDK 로딩 중'));
+
+  var htmlBody = _buildEmailHTML(toName, toEmail, location, radius, subjects, cards);
+  return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    to_email:  toEmail,
+    to_name:   toName || '학부모',
+    subject:   '키즈루트 맞춤 분석 결과가 도착했어요 🎯',
+    html_body: htmlBody,
+    reply_to:  'contact@kidsroute.kr'
+  });
 }
 
 // ─── Live Stop Creation Section ───
