@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <title>키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄">
@@ -2578,6 +2580,94 @@
   transition: all .15s;
 }
 .ur-logout-btn:hover { border-color: #EF4444; color: #EF4444; background: #FEF2F2; }
+
+/* ── 지도 검색 뷰 ── */
+.ur-view-toggle {
+  display: flex; gap: 0; border-radius: 10px; overflow: hidden;
+  border: 1.5px solid #E5E7EB; flex-shrink: 0;
+}
+.ur-view-btn {
+  padding: 6px 14px; font-size: 12px; font-weight: 700; border: none;
+  background: #fff; color: #6B7280; cursor: pointer; transition: all .15s;
+}
+.ur-view-btn.active { background: var(--primary); color: #fff; }
+#urMapContainer {
+  display: none; flex-direction: column;
+  height: calc(100vh - 56px - 60px); /* topnav + tabs */
+  position: relative;
+}
+#urMapContainer.active { display: flex; }
+#urMapEl {
+  flex: 1; min-height: 0;
+  z-index: 1;
+}
+/* Leaflet popup 커스텀 */
+.ur-map-popup { font-family: 'Pretendard', sans-serif; min-width: 160px; }
+.ur-map-popup-name { font-size: 13px; font-weight: 800; color: #1C1C1C; margin-bottom: 4px; }
+.ur-map-popup-meta { font-size: 11px; color: #6B7280; margin-bottom: 8px; line-height: 1.6; }
+.ur-map-popup-btn {
+  width: 100%; padding: 7px; border-radius: 8px; border: none;
+  background: #F97316; color: #fff; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: 'Pretendard', sans-serif;
+}
+.ur-map-popup-btn.added { background: #10B981; }
+/* 내 위치 버튼 */
+#urLocBtn {
+  position: absolute; bottom: 120px; right: 14px; z-index: 500;
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+/* 지도 하단 학원 카드 슬라이더 */
+#urMapBottomSheet {
+  flex-shrink: 0; background: #fff;
+  border-top: 1px solid #F0F0F0;
+  padding: 10px 0 10px 16px; z-index: 400;
+}
+.ur-map-cards {
+  display: flex; gap: 10px; overflow-x: auto; padding-right: 16px;
+  scrollbar-width: none;
+}
+.ur-map-cards::-webkit-scrollbar { display: none; }
+.ur-map-mini-card {
+  flex-shrink: 0; width: 200px; background: #fff;
+  border-radius: 12px; padding: 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  border: 1.5px solid transparent; cursor: pointer; transition: all .15s;
+}
+.ur-map-mini-card.highlight { border-color: var(--primary); box-shadow: 0 2px 10px rgba(249,115,22,0.2); }
+.ur-mini-name { font-size: 13px; font-weight: 800; color: #1C1C1C; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ur-mini-meta { font-size: 11px; color: #6B7280; margin-bottom: 8px; }
+.ur-mini-add {
+  width: 100%; padding: 6px; border-radius: 8px; border: none;
+  background: var(--primary); color: #fff; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: background .15s;
+}
+.ur-mini-add.added { background: #10B981; }
+/* 반경 선택 */
+.ur-radius-row {
+  display: flex; gap: 6px; padding: 8px 16px;
+  background: #fff; border-bottom: 1px solid #F0F0F0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.ur-radius-row::-webkit-scrollbar { display: none; }
+.ur-radius-btn {
+  flex-shrink: 0; padding: 4px 13px; border-radius: 100px;
+  font-size: 12px; font-weight: 600; border: 1.5px solid #E5E7EB;
+  background: #fff; color: #6B7280; cursor: pointer; transition: all .15s;
+}
+.ur-radius-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+/* 마커 커스텀 */
+.ur-marker {
+  width: 32px; height: 32px; border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg); border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center;
+}
+.ur-marker-inner { transform: rotate(45deg); font-size: 14px; }
+.ur-user-dot {
+  width: 16px; height: 16px; border-radius: 50%; background: #3B82F6;
+  border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.3);
+}
 </style>
 </head>
 <body>
@@ -6298,24 +6388,33 @@ function adminSeed() {
    학부모 앱 뷰 — User Dashboard JS
 ════════════════════════════════════════════ */
 
-// ── 학원 목업 데이터 ──
+// ── 학원 목업 데이터 (좌표 포함) ──
 var UR_ACADEMIES = [
-  { id:1,  name:'강남 베스트 수학',  subj:'math',      label:'수학',   color:'#F97316', addr:'서초구 서초동',    dist:0.4, rating:4.8, reviews:127, times:['월수금 오후4시','화목 오후5시'],   fee:300000, shuttle:true,  badge:'인기'  },
-  { id:2,  name:'YBM 영어 서초점',   subj:'english',   label:'영어',   color:'#3B82F6', addr:'서초구 반포동',    dist:0.7, rating:4.6, reviews:89,  times:['월화수목금 오후4시'],              fee:280000, shuttle:false, badge:''      },
-  { id:3,  name:'예원 피아노',       subj:'piano',     label:'피아노', color:'#8B5CF6', addr:'강남구 개포동',    dist:0.9, rating:4.9, reviews:54,  times:['월수금 오후5시','화목 오후4시'],   fee:200000, shuttle:false, badge:'신규'  },
-  { id:4,  name:'하늘 미술학원',     subj:'art',       label:'미술',   color:'#EC4899', addr:'서초구 방배동',    dist:1.1, rating:4.5, reviews:43,  times:['화목 오후4시','주말반'],           fee:250000, shuttle:true,  badge:''      },
-  { id:5,  name:'스피드 수학',       subj:'math',      label:'수학',   color:'#F97316', addr:'강남구 논현동',    dist:1.3, rating:4.3, reviews:31,  times:['월수금 오후5시'],                  fee:260000, shuttle:false, badge:''      },
-  { id:6,  name:'ABC 영어 마을',     subj:'english',   label:'영어',   color:'#3B82F6', addr:'강남구 압구정동',  dist:1.5, rating:4.7, reviews:72,  times:['월수금 오후4시','화목 오후5시'],   fee:320000, shuttle:true,  badge:'인기'  },
-  { id:7,  name:'챔피언 태권도',     subj:'taekwondo', label:'태권도', color:'#EF4444', addr:'서초구 양재동',    dist:0.6, rating:4.4, reviews:38,  times:['월화수목금 오후4시'],              fee:120000, shuttle:false, badge:''      },
-  { id:8,  name:'코딩 두뇌 lab',     subj:'coding',    label:'코딩',   color:'#10B981', addr:'강남구 삼성동',    dist:1.8, rating:4.6, reviews:29,  times:['화목 오후5시','주말반'],           fee:350000, shuttle:false, badge:'신규'  },
-  { id:9,  name:'반포 과학 탐구',    subj:'science',   label:'과학',   color:'#06B6D4', addr:'서초구 반포동',    dist:1.0, rating:4.5, reviews:22,  times:['화목 오후4시','주말반'],           fee:220000, shuttle:false, badge:''      },
-  { id:10, name:'윈윈 체육 센터',    subj:'sports',    label:'체육',   color:'#84CC16', addr:'강남구 역삼동',    dist:0.8, rating:4.3, reviews:47,  times:['월수금 오후4시','주말오전'],       fee:150000, shuttle:true,  badge:''      }
+  { id:1,  name:'강남 베스트 수학',  subj:'math',      label:'수학',   color:'#F97316', addr:'서초구 서초동',    lat:37.4953, lng:127.0277, dist:0.4, rating:4.8, reviews:127, times:['월수금 오후4시','화목 오후5시'],   fee:300000, shuttle:true,  badge:'인기'  },
+  { id:2,  name:'YBM 영어 서초점',   subj:'english',   label:'영어',   color:'#3B82F6', addr:'서초구 반포동',    lat:37.5034, lng:127.0107, dist:0.7, rating:4.6, reviews:89,  times:['월화수목금 오후4시'],              fee:280000, shuttle:false, badge:''      },
+  { id:3,  name:'예원 피아노',       subj:'piano',     label:'피아노', color:'#8B5CF6', addr:'강남구 대치동',    lat:37.4931, lng:127.0583, dist:0.9, rating:4.9, reviews:54,  times:['월수금 오후5시','화목 오후4시'],   fee:200000, shuttle:false, badge:'신규'  },
+  { id:4,  name:'하늘 미술학원',     subj:'art',       label:'미술',   color:'#EC4899', addr:'서초구 방배동',    lat:37.4869, lng:127.0048, dist:1.1, rating:4.5, reviews:43,  times:['화목 오후4시','주말반'],           fee:250000, shuttle:true,  badge:''      },
+  { id:5,  name:'스피드 수학',       subj:'math',      label:'수학',   color:'#F97316', addr:'강남구 논현동',    lat:37.5161, lng:127.0235, dist:1.3, rating:4.3, reviews:31,  times:['월수금 오후5시'],                  fee:260000, shuttle:false, badge:''      },
+  { id:6,  name:'ABC 영어 마을',     subj:'english',   label:'영어',   color:'#3B82F6', addr:'강남구 압구정동',  lat:37.5270, lng:127.0300, dist:1.5, rating:4.7, reviews:72,  times:['월수금 오후4시','화목 오후5시'],   fee:320000, shuttle:true,  badge:'인기'  },
+  { id:7,  name:'챔피언 태권도',     subj:'taekwondo', label:'태권도', color:'#EF4444', addr:'서초구 양재동',    lat:37.4812, lng:127.0344, dist:0.6, rating:4.4, reviews:38,  times:['월화수목금 오후4시'],              fee:120000, shuttle:false, badge:''      },
+  { id:8,  name:'코딩 두뇌 lab',     subj:'coding',    label:'코딩',   color:'#10B981', addr:'강남구 삼성동',    lat:37.5145, lng:127.0583, dist:1.8, rating:4.6, reviews:29,  times:['화목 오후5시','주말반'],           fee:350000, shuttle:false, badge:'신규'  },
+  { id:9,  name:'반포 과학 탐구',    subj:'science',   label:'과학',   color:'#06B6D4', addr:'서초구 반포동',    lat:37.5039, lng:127.0174, dist:1.0, rating:4.5, reviews:22,  times:['화목 오후4시','주말반'],           fee:220000, shuttle:false, badge:''      },
+  { id:10, name:'윈윈 체육 센터',    subj:'sports',    label:'체육',   color:'#84CC16', addr:'강남구 역삼동',    lat:37.4990, lng:127.0345, dist:0.8, rating:4.3, reviews:47,  times:['월수금 오후4시','주말오전'],       fee:150000, shuttle:true,  badge:''      }
 ];
 
 var _urUser = { name: '', email: '', color: '#F97316' };
 var _urFilter = 'all';
 var _urSort = 'dist';
 var _urSearchText = '';
+var _urView = 'list'; // 'list' | 'map'
+var _urMap = null;
+var _urMarkers = {};
+var _urCircle = null;
+var _urUserMarker = null;
+var _urRadius = 1000;
+var _urUserLat = 37.4979;
+var _urUserLng = 127.0276;
+var _urHighlightId = null;
 var _urEditChildId = '';
 
 // localStorage helpers
@@ -6375,7 +6474,8 @@ function urSetFilter(el) {
   Array.prototype.forEach.call(document.querySelectorAll('.ur-filter-chip'), function(c) {
     c.classList.toggle('active', c === el);
   });
-  urRenderAcademies();
+  if (_urView === 'list') urRenderAcademies();
+  else urRenderMapMarkers();
 }
 function urSetSort(el) {
   _urSort = el.dataset.sort;
@@ -6384,19 +6484,230 @@ function urSetSort(el) {
   });
   urRenderAcademies();
 }
-function urFilterAcademies() {
+function urOnSearch() {
   var inp = document.getElementById('urSearchInput');
   _urSearchText = inp ? inp.value.trim().toLowerCase() : '';
-  urRenderAcademies();
+  if (_urView === 'list') urRenderAcademies();
+  else urRenderMapMarkers();
 }
-function urRenderAcademies() {
+function urFilterAcademies() { urOnSearch(); }
+
+// ── 뷰 전환 (목록 ↔ 지도) ──
+function urSetView(mode) {
+  _urView = mode;
+  var listView = document.getElementById('urListView');
+  var mapCont  = document.getElementById('urMapContainer');
+  var listBtn  = document.getElementById('urViewListBtn');
+  var mapBtn   = document.getElementById('urViewMapBtn');
+  if (listView) listView.style.display = mode === 'list' ? '' : 'none';
+  if (mapCont)  mapCont.classList.toggle('active', mode === 'map');
+  if (listBtn)  listBtn.classList.toggle('active', mode === 'list');
+  if (mapBtn)   mapBtn.classList.toggle('active', mode === 'map');
+  if (mode === 'list') { urRenderAcademies(); }
+  else { urInitMap(); }
+}
+
+// ── Leaflet 지도 초기화 ──
+function urInitMap() {
+  if (!window.L) return;
+  var el = document.getElementById('urMapEl');
+  if (!el) return;
+  if (!_urMap) {
+    _urMap = L.map('urMapEl', { zoomControl: false }).setView([_urUserLat, _urUserLng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19
+    }).addTo(_urMap);
+    L.control.zoom({ position: 'topright' }).addTo(_urMap);
+    // 지도 이동 시 거리 재계산
+    _urMap.on('moveend', function() {
+      var c = _urMap.getCenter();
+      _urUserLat = c.lat; _urUserLng = c.lng;
+      urUpdateDistances();
+      urRenderMapMarkers();
+    });
+  } else {
+    setTimeout(function() { _urMap.invalidateSize(); }, 100);
+  }
+  urUpdateUserMarker();
+  urUpdateCircle();
+  urRenderMapMarkers();
+}
+
+// ── 내 위치 마커 ──
+function urUpdateUserMarker() {
+  if (!_urMap) return;
+  if (_urUserMarker) _urMap.removeLayer(_urUserMarker);
+  var icon = L.divIcon({
+    html: '<div class="ur-user-dot"></div>',
+    className: '', iconSize: [16, 16], iconAnchor: [8, 8]
+  });
+  _urUserMarker = L.marker([_urUserLat, _urUserLng], { icon: icon, zIndexOffset: 1000 }).addTo(_urMap);
+}
+
+// ── 반경 원 ──
+function urUpdateCircle() {
+  if (!_urMap) return;
+  if (_urCircle) _urMap.removeLayer(_urCircle);
+  _urCircle = L.circle([_urUserLat, _urUserLng], {
+    radius: _urRadius,
+    color: '#F97316', fillColor: '#F97316',
+    fillOpacity: 0.07, weight: 2, dashArray: '6 4'
+  }).addTo(_urMap);
+}
+
+// ── 반경 변경 ──
+function urSetRadius(btn) {
+  _urRadius = parseInt(btn.dataset.r);
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-radius-btn'), function(b) {
+    b.classList.toggle('active', b === btn);
+  });
+  urUpdateCircle();
+  urUpdateDistances();
+  urRenderMapMarkers();
+}
+
+// ── 거리 재계산 (지도 이동 시) ──
+function urUpdateDistances() {
+  UR_ACADEMIES.forEach(function(a) {
+    var R = 6371000;
+    var dLat = (a.lat - _urUserLat) * Math.PI / 180;
+    var dLng = (a.lng - _urUserLng) * Math.PI / 180;
+    var aa = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(_urUserLat*Math.PI/180)*Math.cos(a.lat*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+    var dist = R * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
+    a.dist = Math.round(dist / 100) / 10;
+  });
+}
+
+// ── 마커 렌더링 ──
+function urRenderMapMarkers() {
+  if (!_urMap) return;
+  // 기존 마커 제거
+  Object.keys(_urMarkers).forEach(function(id) {
+    _urMap.removeLayer(_urMarkers[id]);
+  });
+  _urMarkers = {};
   var schedule = urGetSchedule();
   var addedIds = schedule.map(function(s) { return s.academyId; });
-  var list = UR_ACADEMIES.filter(function(a) {
+  var filtered = urGetFiltered();
+  filtered.forEach(function(a) {
+    var isAdded = addedIds.indexOf(a.id) >= 0;
+    var isHighlight = _urHighlightId === a.id;
+    var emoji = { math:'📐', english:'🔤', piano:'🎹', art:'🎨', taekwondo:'🥋', coding:'💻', sports:'⚽', science:'🔬' };
+    var icon = L.divIcon({
+      html: '<div style="width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + a.color + ';border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.25)' + (isHighlight ? ';outline:3px solid ' + a.color + ';outline-offset:3px' : '') + ';display:flex;align-items:center;justify-content:center">'
+        + '<span style="transform:rotate(45deg);font-size:15px">' + (isAdded ? '✓' : (emoji[a.subj]||'🏫')) + '</span>'
+        + '</div>',
+      className: '', iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -38]
+    });
+    var marker = L.marker([a.lat, a.lng], { icon: icon }).addTo(_urMap);
+    var isAddedNow = addedIds.indexOf(a.id) >= 0;
+    marker.bindPopup(
+      '<div class="ur-map-popup">'
+      + '<div class="ur-map-popup-name">' + _escHtml(a.name) + '</div>'
+      + '<div class="ur-map-popup-meta">'
+      +   '📍 ' + a.dist + 'km &nbsp; ⭐ ' + a.rating + '<br>'
+      +   '🏷️ ' + a.label + (a.shuttle ? ' &nbsp; 🚌 셔틀' : '') + '<br>'
+      +   '💰 월 ' + (a.fee/10000).toFixed(0) + '만원'
+      + '</div>'
+      + '<button class="ur-map-popup-btn' + (isAddedNow ? ' added' : '') + '" onclick="urToggleSchedule(' + a.id + ',this);this.textContent=document.querySelectorAll(\'.ur-map-popup-btn\')[0]?.classList.contains(\'added\')?\'✓ 등록됨\':\'+ 스케줄 추가\'">'
+      +   (isAddedNow ? '✓ 등록됨' : '+ 스케줄 추가')
+      + '</button>'
+      + '</div>'
+    , { maxWidth: 200 });
+    marker.on('click', function() { urHighlightCard(a.id); });
+    _urMarkers[a.id] = marker;
+  });
+  // 하단 카드 렌더링
+  urRenderMapCards(filtered);
+}
+
+// ── 하단 슬라이더 카드 ──
+function urRenderMapCards(list) {
+  var count = document.getElementById('urMapCount');
+  if (count) count.textContent = list.length + '개 학원';
+  var container = document.getElementById('urMapCards');
+  if (!container) return;
+  var schedule = urGetSchedule();
+  var addedIds = schedule.map(function(s) { return s.academyId; });
+  container.innerHTML = list.map(function(a) {
+    var added = addedIds.indexOf(a.id) >= 0;
+    return '<div class="ur-map-mini-card' + (_urHighlightId === a.id ? ' highlight' : '') + '" id="urCard' + a.id + '" onclick="urFlyToAcademy(' + a.id + ')">'
+      + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+      +   '<span style="width:8px;height:8px;border-radius:50%;background:' + a.color + ';flex-shrink:0"></span>'
+      +   '<div class="ur-mini-name">' + _escHtml(a.name) + '</div>'
+      + '</div>'
+      + '<div class="ur-mini-meta">📍 ' + a.dist + 'km &nbsp; ⭐ ' + a.rating + ' &nbsp; 월 ' + (a.fee/10000).toFixed(0) + '만</div>'
+      + '<button class="ur-mini-add' + (added ? ' added' : '') + '" onclick="event.stopPropagation();urToggleSchedule(' + a.id + ',this)">'
+      +   (added ? '✓ 등록됨' : '+ 추가')
+      + '</button>'
+      + '</div>';
+  }).join('');
+}
+
+// ── 마커 클릭 시 카드 하이라이트 ──
+function urHighlightCard(id) {
+  _urHighlightId = id;
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-map-mini-card'), function(el) {
+    el.classList.remove('highlight');
+  });
+  var card = document.getElementById('urCard' + id);
+  if (card) {
+    card.classList.add('highlight');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
+// ── 카드 클릭 시 지도 이동 + 팝업 열기 ──
+function urFlyToAcademy(id) {
+  _urHighlightId = id;
+  urHighlightCard(id);
+  var a = null;
+  for (var i = 0; i < UR_ACADEMIES.length; i++) { if (UR_ACADEMIES[i].id === id) { a = UR_ACADEMIES[i]; break; } }
+  if (!a || !_urMap) return;
+  _urMap.flyTo([a.lat, a.lng], 15, { duration: 0.8 });
+  setTimeout(function() {
+    if (_urMarkers[id]) _urMarkers[id].openPopup();
+  }, 900);
+}
+
+// ── 내 위치로 이동 ──
+function urMoveToMyLocation() {
+  if (!navigator.geolocation) { showToast('위치 서비스를 지원하지 않는 브라우저예요'); return; }
+  var btn = document.getElementById('urLocBtn');
+  if (btn) btn.textContent = '⏳';
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      _urUserLat = pos.coords.latitude;
+      _urUserLng = pos.coords.longitude;
+      if (_urMap) _urMap.flyTo([_urUserLat, _urUserLng], 15, { duration: 1 });
+      urUpdateUserMarker();
+      urUpdateCircle();
+      urUpdateDistances();
+      urRenderMapMarkers();
+      if (btn) btn.textContent = '📍';
+      showToast('현재 위치로 이동했어요 📍');
+    },
+    function() {
+      if (btn) btn.textContent = '📍';
+      showToast('위치 권한이 필요해요. 브라우저 설정을 확인해주세요');
+    },
+    { timeout: 8000 }
+  );
+}
+
+// ── 필터 적용된 학원 목록 반환 ──
+function urGetFiltered() {
+  return UR_ACADEMIES.filter(function(a) {
     if (_urFilter !== 'all' && a.subj !== _urFilter) return false;
     if (_urSearchText && a.name.toLowerCase().indexOf(_urSearchText) < 0 && a.label.indexOf(_urSearchText) < 0) return false;
     return true;
   });
+}
+function urRenderAcademies() {
+  var schedule = urGetSchedule();
+  var addedIds = schedule.map(function(s) { return s.academyId; });
+  var list = urGetFiltered();
   list = list.slice().sort(function(a, b) {
     if (_urSort === 'dist')   return a.dist - b.dist;
     if (_urSort === 'rating') return b.rating - a.rating;
@@ -6724,10 +7035,17 @@ function urToggleNotif(btn) {
 
     <!-- ── 학원 검색 탭 ── -->
     <div class="ur-page active" id="urPageSearch">
+      <!-- 검색바 + 뷰 토글 (목록/지도 공통) -->
       <div class="ur-search-bar">
-        <div class="ur-search-wrap">
-          <span>🔍</span>
-          <input type="text" id="urSearchInput" placeholder="학원 이름, 과목 검색..." oninput="urFilterAcademies()">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <div class="ur-search-wrap" style="flex:1;margin-bottom:0">
+            <span>🔍</span>
+            <input type="text" id="urSearchInput" placeholder="학원 이름, 과목 검색..." oninput="urOnSearch()">
+          </div>
+          <div class="ur-view-toggle">
+            <button class="ur-view-btn active" id="urViewListBtn" onclick="urSetView('list')">목록</button>
+            <button class="ur-view-btn" id="urViewMapBtn" onclick="urSetView('map')">지도</button>
+          </div>
         </div>
         <div class="ur-filter-row" id="urFilterRow">
           <div class="ur-filter-chip active" data-subj="all" onclick="urSetFilter(this)">전체</div>
@@ -6740,12 +7058,38 @@ function urToggleNotif(btn) {
           <div class="ur-filter-chip" data-subj="sports" onclick="urSetFilter(this)">⚽ 체육</div>
         </div>
       </div>
-      <div style="display:flex;gap:6px;padding:10px 16px 4px;background:#fff;border-bottom:1px solid #F0F0F0;">
-        <button class="ur-sort-btn active" data-sort="dist" onclick="urSetSort(this)">📍 거리순</button>
-        <button class="ur-sort-btn" data-sort="rating" onclick="urSetSort(this)">⭐ 평점순</button>
-        <button class="ur-sort-btn" data-sort="fee" onclick="urSetSort(this)">💰 요금순</button>
+
+      <!-- 목록 뷰 -->
+      <div id="urListView">
+        <div style="display:flex;gap:6px;padding:10px 16px 4px;background:#fff;border-bottom:1px solid #F0F0F0;">
+          <button class="ur-sort-btn active" data-sort="dist" onclick="urSetSort(this)">📍 거리순</button>
+          <button class="ur-sort-btn" data-sort="rating" onclick="urSetSort(this)">⭐ 평점순</button>
+          <button class="ur-sort-btn" data-sort="fee" onclick="urSetSort(this)">💰 요금순</button>
+        </div>
+        <div class="ur-academy-list" id="urAcademyList"><!-- JS 렌더링 --></div>
       </div>
-      <div class="ur-academy-list" id="urAcademyList"><!-- JS 렌더링 --></div>
+
+      <!-- 지도 뷰 -->
+      <div id="urMapContainer">
+        <!-- 반경 선택 -->
+        <div class="ur-radius-row">
+          <span style="font-size:12px;font-weight:700;color:#6B7280;align-self:center;flex-shrink:0">반경</span>
+          <button class="ur-radius-btn" data-r="500" onclick="urSetRadius(this)">500m</button>
+          <button class="ur-radius-btn active" data-r="1000" onclick="urSetRadius(this)">1km</button>
+          <button class="ur-radius-btn" data-r="2000" onclick="urSetRadius(this)">2km</button>
+          <button class="ur-radius-btn" data-r="3000" onclick="urSetRadius(this)">3km</button>
+          <button class="ur-radius-btn" data-r="5000" onclick="urSetRadius(this)">5km</button>
+        </div>
+        <!-- Leaflet 지도 -->
+        <div id="urMapEl"></div>
+        <!-- 내 위치 버튼 -->
+        <button id="urLocBtn" onclick="urMoveToMyLocation()" title="내 위치로">📍</button>
+        <!-- 하단 학원 카드 슬라이더 -->
+        <div id="urMapBottomSheet">
+          <div style="font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:8px" id="urMapCount"></div>
+          <div class="ur-map-cards" id="urMapCards"><!-- JS 렌더링 --></div>
+        </div>
+      </div>
     </div>
 
     <!-- ── 스케줄 탭 ── -->
