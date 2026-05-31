@@ -4076,7 +4076,7 @@
 const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com';
 const KAKAO_APP_KEY    = '1550b9b3a098d276139c9f66eabb7a64';
 // ▼ Naver Cloud Platform → Application → Maps(JavaScript) → Client ID 를 넣어주세요
-const NAVER_CLIENT_ID  = 'YOUR_NAVER_CLIENT_ID';
+const NAVER_CLIENT_ID  = '5dq02tmsku';
 
 let _toastTimer = null;
 let _tokenClient = null;
@@ -4633,13 +4633,21 @@ function getDemoGPS() {
     (pos) => {
       _demoGPSLat = pos.coords.latitude;
       _demoGPSLng = pos.coords.longitude;
-      if (txt) {
-        txt.textContent = `현재 위치 확인 완료 (${_demoGPSLat.toFixed(4)}, ${_demoGPSLng.toFixed(4)})`;
-      }
-      // Show GPS dot on mock map
-      const dot = document.getElementById('demoGpsDot');
-      if (dot) dot.style.display = 'block';
+      if (txt) txt.textContent = '현재 위치 확인 완료 ✓';
       _initDemoMap(_demoGPSLat, _demoGPSLng);
+      // Reverse Geocoding으로 주소 표시
+      if (window.naver && naver.maps && naver.maps.Service) {
+        naver.maps.Service.reverseGeocode({
+          coords: new naver.maps.LatLng(_demoGPSLat, _demoGPSLng),
+          orders: [naver.maps.Service.OrderType.ROAD_ADDR, naver.maps.Service.OrderType.ADDR]
+        }, function(status, response) {
+          if (status === naver.maps.Service.Status.OK && txt) {
+            var addr = '';
+            try { addr = response.v2.address.roadAddress || response.v2.address.jibunAddress || ''; } catch(e) {}
+            if (addr) txt.textContent = '📍 ' + addr.replace(/^(서울특별시|서울시|경기도)\s*/, '');
+          }
+        });
+      }
     },
     () => {
       if (txt) txt.textContent = '위치 권한 거부됨 — 서울 기본 위치로 탐색합니다';
@@ -4650,11 +4658,15 @@ function getDemoGPS() {
 }
 
 function _initDemoMap(lat, lng) {
-  const hasNaverKey = NAVER_CLIENT_ID !== 'YOUR_NAVER_CLIENT_ID';
-  if (hasNaverKey) {
-    _loadNaverMapScript(() => _initNaverMap(lat, lng));
+  // Naver Maps SDK is already loaded in <head>
+  if (window.naver && naver.maps && naver.maps.Map) {
+    _initNaverMap(lat, lng);
   } else {
-    _updateMockMap();
+    // SDK not ready yet — wait briefly then retry
+    setTimeout(function() {
+      if (window.naver && naver.maps && naver.maps.Map) _initNaverMap(lat, lng);
+      else _showMapFallback('네이버 지도를 불러오는 중이에요...');
+    }, 800);
   }
 }
 
