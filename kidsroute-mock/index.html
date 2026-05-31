@@ -1833,8 +1833,8 @@
   font-size: 13px; font-weight: 600; color: var(--gray-700); cursor: pointer;
   background: #fff; transition: all 0.15s; user-select: none;
 }
-.demo-subject-chip.active { background: var(--orange); border-color: var(--orange); color: #fff; }
-.demo-subject-chip:hover:not(.active) { border-color: var(--orange); color: var(--orange); }
+.demo-subject-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.demo-subject-chip:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
 .demo-day-row { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
 .demo-day-btn {
   width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--gray-200);
@@ -2365,11 +2365,11 @@
     </svg>키즈루트</a>
   <div class="nav-links">
     <button class="nav-cta" id="navCtaBtn" onclick="openGoogleLogin()">사전예약</button>
+    <button class="nav-login" id="navLoginBtn" onclick="openAdminLogin()">로그인</button>
     <a href="#features">기능</a>
     <a href="#howto">이용방법</a>
     <a href="#pricing">요금제</a>
     <a href="#demo">데모 체험</a>
-    <button class="nav-login" id="navLoginBtn" onclick="openAdminLogin()">로그인</button>
     <div class="nav-user" id="navUser" onclick="showUserMenu()">
       <div class="nav-user-avatar" id="navUserAvatar"></div>
       <span class="nav-user-name" id="navUserName"></span>
@@ -2379,11 +2379,11 @@
 </nav>
 <div class="nav-mobile-menu">
   <button class="nav-cta" style="width:fit-content" onclick="openGoogleLogin()">사전예약</button>
+  <button class="nav-login" style="width:fit-content" onclick="openAdminLogin()">로그인</button>
   <a href="#features" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">기능</a>
   <a href="#howto" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">이용방법</a>
   <a href="#pricing" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">요금제</a>
   <a href="#demo" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">데모 체험</a>
-  <button class="nav-login" style="width:fit-content" onclick="openAdminLogin()">로그인</button>
 </div>
 
 <!-- HERO -->
