@@ -2579,6 +2579,66 @@
   transition: all .15s;
 }
 .ur-logout-btn:hover { border-color: #EF4444; color: #EF4444; background: #FEF2F2; }
+/* 성별 선택 */
+.ur-gender-btns { display: flex; gap: 8px; }
+.ur-gender-btn {
+  flex: 1; padding: 9px; border-radius: 10px; border: 1.5px solid #E5E7EB;
+  background: #fff; font-size: 13px; font-weight: 600; color: #6B7280; cursor: pointer; transition: all .15s;
+}
+.ur-gender-btn.active { border-color: var(--primary); background: #FFF7ED; color: var(--primary); }
+/* 사진 업로드 */
+.ur-photo-upload {
+  display: flex; align-items: center; justify-content: center;
+  width: 80px; height: 80px; border-radius: 50%; border: 2px dashed #E5E7EB;
+  cursor: pointer; overflow: hidden; background: #F9FAFB; transition: border-color .15s; flex-shrink: 0;
+}
+.ur-photo-upload:hover { border-color: var(--primary); }
+.ur-photo-upload img { width: 100%; height: 100%; object-fit: cover; }
+.ur-photo-placeholder { font-size: 11px; color: #9CA3AF; text-align: center; line-height: 1.4; padding: 4px; }
+/* 학부모 정보 카드 */
+.ur-parent-info-card {
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 14px;
+}
+.ur-info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 16px; border-bottom: 1px solid #F4F4F5;
+}
+.ur-info-row:last-child { border-bottom: none; }
+.ur-info-row-label { font-size: 12px; color: #9CA3AF; margin-bottom: 2px; }
+.ur-info-row-val { font-size: 14px; font-weight: 600; color: var(--text-main); }
+.ur-info-row-val.empty { color: #D1D5DB; font-weight: 400; }
+.ur-info-edit-btn {
+  padding: 5px 12px; border-radius: 8px; border: 1px solid #E5E7EB;
+  background: #fff; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; flex-shrink: 0;
+}
+.ur-info-edit-btn:hover { border-color: var(--primary); color: var(--primary); }
+/* 인라인 편집 입력 */
+.ur-inline-input {
+  width: 100%; padding: 8px 12px; border-radius: 8px;
+  border: 1.5px solid var(--primary); font-size: 13px; outline: none;
+  font-family: 'Pretendard', sans-serif; margin-top: 6px;
+}
+/* 전자 서명 모달 */
+.ur-sign-overlay {
+  position: fixed; inset: 0; z-index: 9800; background: rgba(0,0,0,0.5);
+  display: none; align-items: flex-end; justify-content: center;
+}
+.ur-sign-overlay.open { display: flex; }
+.ur-sign-sheet {
+  background: #fff; border-radius: 24px 24px 0 0; padding: 20px 20px 32px; width: 100%; max-width: 480px;
+}
+.ur-sign-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.ur-sign-title { font-size: 16px; font-weight: 800; color: var(--text-main); }
+.ur-sign-canvas {
+  width: 100%; height: 180px; border-radius: 12px; border: 1.5px solid #E5E7EB;
+  background: #FAFAFA; cursor: crosshair; touch-action: none; display: block;
+}
+.ur-sign-btns { display: flex; gap: 8px; margin-top: 12px; }
+.ur-sign-clear { flex:1; padding:11px; border-radius:12px; border:1.5px solid #E5E7EB; background:#fff; font-size:14px; font-weight:600; color:#6B7280; cursor:pointer; }
+.ur-sign-save  { flex:2; padding:11px; border-radius:12px; border:none; background:var(--primary); color:#fff; font-size:14px; font-weight:700; cursor:pointer; }
+/* 서명 미리보기 썸네일 */
+.ur-sign-thumb { width:60px; height:30px; border-radius:6px; border:1px solid #E5E7EB; object-fit:contain; background:#fff; vertical-align:middle; }
 
 /* ── 지도 검색 뷰 ── */
 .ur-view-toggle {
@@ -7254,6 +7314,8 @@ function urRenderMyInfo() {
   if (av) { av.textContent = (_urUser.name||'?').charAt(0); av.style.background = _urUser.color||'#F97316'; }
   if (nm) nm.textContent = _urUser.name || '';
   if (em) em.textContent = _urUser.email || '';
+  // 학부모 상세 정보 카드
+  urRenderParentInfoCard();
   // 알림
   var prefs = urGetNotifPrefs();
   Array.prototype.forEach.call(['urNotifVacancy','urNotifReminder','urNotifNews'], function(id, i) {
@@ -7272,11 +7334,15 @@ function urRenderChildren() {
     return;
   }
   list.innerHTML = children.map(function(c) {
+    var avatarHtml = c.photo
+      ? '<div class="ur-child-emoji" style="overflow:hidden;padding:0"><img src="'+c.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>'
+      : '<div class="ur-child-emoji">' + (c.gender==='male'?'👦':c.gender==='female'?'👧':(c.emoji||'🧒')) + '</div>';
+    var genderTag = c.gender ? '<span style="font-size:10px;background:#F4F4F5;color:#6B7280;padding:1px 7px;border-radius:100px;font-weight:600">'+( c.gender==='male'?'남아':'여아')+'</span>' : '';
     return '<div class="ur-child-card">'
       + '<div class="ur-child-left">'
-      +   '<div class="ur-child-emoji">' + (c.emoji||'🧒') + '</div>'
+      +   avatarHtml
       +   '<div>'
-      +     '<div class="ur-child-name-text">' + _escHtml(c.name) + '</div>'
+      +     '<div style="display:flex;align-items:center;gap:6px"><span class="ur-child-name-text">' + _escHtml(c.name) + '</span>' + genderTag + '</div>'
       +     '<div class="ur-child-grade-text">' + _escHtml(c.grade) + ' · ' + c.birthYear + '년생</div>'
       +   '</div>'
       + '</div>'
@@ -7297,7 +7363,16 @@ function urShowChildForm(childId) {
   document.getElementById('urChildBirth').value = '';
   document.getElementById('urChildGrade').value = '';
   document.getElementById('urChildEmoji').value = '🧒';
+  document.getElementById('urChildGender').value = '';
+  document.getElementById('urChildPhotoData').value = '';
   document.getElementById('urChildEditId').value = childId || '';
+  // 사진 리셋
+  var preview = document.getElementById('urChildPhotoPreview');
+  var placeholder = document.getElementById('urPhotoPlaceholder');
+  if (preview) { preview.src=''; preview.style.display='none'; }
+  if (placeholder) placeholder.style.display='block';
+  // 성별 리셋
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-gender-btn'), function(b) { b.classList.remove('active'); });
   // 이모지 picker 리셋
   Array.prototype.forEach.call(document.querySelectorAll('#urEmojiPicker span'), function(s) {
     s.style.borderColor = 'transparent';
@@ -7312,6 +7387,21 @@ function urShowChildForm(childId) {
       document.getElementById('urChildBirth').value = c.birthYear;
       document.getElementById('urChildGrade').value = c.grade;
       document.getElementById('urChildEmoji').value = c.emoji || '🧒';
+      document.getElementById('urChildGender').value = c.gender || '';
+      document.getElementById('urChildPhotoData').value = c.photo || '';
+      // 성별 버튼 복원
+      if (c.gender) {
+        Array.prototype.forEach.call(document.querySelectorAll('.ur-gender-btn'), function(b) {
+          b.classList.toggle('active', b.dataset.gender === c.gender);
+        });
+      }
+      // 사진 복원
+      if (c.photo) {
+        var prev = document.getElementById('urChildPhotoPreview');
+        var ph = document.getElementById('urPhotoPlaceholder');
+        if (prev) { prev.src = c.photo; prev.style.display = 'block'; }
+        if (ph) ph.style.display = 'none';
+      }
       if (title) title.textContent = '✏️ 아이 정보 수정';
     }
   } else {
@@ -7328,20 +7418,25 @@ function urCancelChildForm() {
   if (addBtn) addBtn.style.display = 'block';
 }
 function urSaveChild() {
-  var name  = (document.getElementById('urChildName').value || '').trim();
-  var birth = (document.getElementById('urChildBirth').value || '').trim();
-  var grade = document.getElementById('urChildGrade').value;
-  var emoji = document.getElementById('urChildEmoji').value || '🧒';
+  var name   = (document.getElementById('urChildName').value || '').trim();
+  var birth  = (document.getElementById('urChildBirth').value || '').trim();
+  var grade  = document.getElementById('urChildGrade').value;
+  var emoji  = document.getElementById('urChildEmoji').value || '🧒';
+  var gender = document.getElementById('urChildGender').value;
+  var photo  = document.getElementById('urChildPhotoData').value;
   var editId = document.getElementById('urChildEditId').value;
-  if (!name || !birth || !grade) { showToast('이름, 출생연도, 학년을 입력해주세요'); return; }
+  if (!name || !birth || !grade) { showToast('닉네임, 출생연도, 학년을 입력해주세요'); return; }
   var children = urGetChildren();
   if (editId) {
     for (var i = 0; i < children.length; i++) {
-      if (children[i].id === editId) { children[i].name = name; children[i].birthYear = birth; children[i].grade = grade; children[i].emoji = emoji; break; }
+      if (children[i].id === editId) {
+        Object.assign(children[i], { name:name, birthYear:birth, grade:grade, emoji:emoji, gender:gender, photo:photo });
+        break;
+      }
     }
     showToast('아이 정보가 수정됐어요 ✏️');
   } else {
-    children.push({ id: 'c' + Date.now(), name: name, birthYear: birth, grade: grade, emoji: emoji });
+    children.push({ id:'c'+Date.now(), name:name, birthYear:birth, grade:grade, emoji:emoji, gender:gender, photo:photo });
     showToast(name + ' 추가 완료! 🎉');
   }
   urSaveChildren(children);
@@ -7361,6 +7456,146 @@ function urPickEmoji(el, emoji) {
   });
   el.style.borderColor = '#F97316'; el.style.background = '#FFF7ED';
 }
+// ── 학부모 상세 정보 ──
+function urGetParentInfo() {
+  try { return JSON.parse(localStorage.getItem('kr_parent_info') || '{}'); } catch(e) { return {}; }
+}
+function urSaveParentInfo(info) { localStorage.setItem('kr_parent_info', JSON.stringify(info)); }
+
+function urRenderParentInfoCard() {
+  var el = document.getElementById('urParentInfoCard');
+  if (!el) return;
+  var p = urGetParentInfo();
+  var sign = p.signature
+    ? '<img src="'+p.signature+'" class="ur-sign-thumb" alt="서명">'
+    : '<span style="color:#D1D5DB;font-size:13px">미등록</span>';
+
+  el.innerHTML = [
+    { key:'realName', label:'실제 이름',    val: p.realName||'', placeholder:'이름을 입력해주세요',       btn:'변경' },
+    { key:'phone',    label:'핸드폰 번호',  val: p.phone||'',    placeholder:'010-0000-0000',             btn:'변경' }
+  ].map(function(row) {
+    return '<div class="ur-info-row" id="urParentRow_'+row.key+'">'
+      +'<div style="flex:1;min-width:0">'
+      +  '<div class="ur-info-row-label">'+row.label+'</div>'
+      +  '<div class="ur-info-row-val'+(row.val?'':' empty')+'" id="urParentVal_'+row.key+'">'+(row.val||'미입력')+'</div>'
+      +  '<div id="urParentEdit_'+row.key+'" style="display:none">'
+      +    '<input class="ur-inline-input" id="urParentInput_'+row.key+'" type="text" value="'+_escHtml(row.val)+'" placeholder="'+row.placeholder+'" onkeydown="if(event.key===\'Enter\')urSaveParentField(\''+row.key+'\')">'
+      +    '<div style="display:flex;gap:6px;margin-top:6px">'
+      +      '<button class="ur-btn-save" style="flex:1;padding:8px" onclick="urSaveParentField(\''+row.key+'\')">저장</button>'
+      +      '<button class="ur-btn-cancel" style="padding:8px 14px" onclick="urCancelParentField(\''+row.key+'\')">취소</button>'
+      +    '</div>'
+      +  '</div>'
+      +'</div>'
+      +'<button class="ur-info-edit-btn" id="urParentBtn_'+row.key+'" onclick="urEditParentField(\''+row.key+'\')">'+row.btn+'</button>'
+      +'</div>';
+  }).join('')
+  +'<div class="ur-info-row">'
+  +  '<div><div class="ur-info-row-label">전자 서명</div><div style="margin-top:4px">'+sign+'</div></div>'
+  +  '<button class="ur-info-edit-btn" onclick="urOpenSignature()">'+(p.signature?'재등록':'등록하기')+'</button>'
+  +'</div>';
+}
+
+function urEditParentField(key) {
+  document.getElementById('urParentVal_'+key).style.display = 'none';
+  document.getElementById('urParentEdit_'+key).style.display = 'block';
+  document.getElementById('urParentBtn_'+key).style.display = 'none';
+  var inp = document.getElementById('urParentInput_'+key);
+  if (inp) { inp.focus(); inp.select(); }
+}
+function urCancelParentField(key) {
+  document.getElementById('urParentVal_'+key).style.display = 'block';
+  document.getElementById('urParentEdit_'+key).style.display = 'none';
+  document.getElementById('urParentBtn_'+key).style.display = 'block';
+}
+function urSaveParentField(key) {
+  var val = (document.getElementById('urParentInput_'+key).value || '').trim();
+  var p = urGetParentInfo();
+  p[key] = val;
+  urSaveParentInfo(p);
+  urCancelParentField(key);
+  var valEl = document.getElementById('urParentVal_'+key);
+  if (valEl) { valEl.textContent = val || '미입력'; valEl.classList.toggle('empty', !val); }
+  showToast('저장됐어요 ✓');
+}
+
+// ── 성별 선택 ──
+function urPickGender(btn) {
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-gender-btn'), function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('urChildGender').value = btn.dataset.gender;
+}
+
+// ── 사진 업로드 ──
+function urPreviewPhoto(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var preview = document.getElementById('urChildPhotoPreview');
+    var placeholder = document.getElementById('urPhotoPlaceholder');
+    if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
+    if (placeholder) placeholder.style.display = 'none';
+    var hidden = document.getElementById('urChildPhotoData');
+    if (hidden) hidden.value = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── 전자 서명 캔버스 ──
+var _signDrawing = false;
+var _signCtx = null;
+
+function urOpenSignature() {
+  var overlay = document.getElementById('urSignOverlay');
+  if (overlay) overlay.classList.add('open');
+  var canvas = document.getElementById('urSignCanvas');
+  if (!canvas) return;
+  _signCtx = canvas.getContext('2d');
+  _signCtx.clearRect(0, 0, canvas.width, canvas.height);
+  _signCtx.strokeStyle = '#1C1C1C';
+  _signCtx.lineWidth = 2.5;
+  _signCtx.lineCap = 'round';
+  _signCtx.lineJoin = 'round';
+
+  function getPos(e) {
+    var r = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / r.width;
+    var scaleY = canvas.height / r.height;
+    var src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - r.left) * scaleX, y: (src.clientY - r.top) * scaleY };
+  }
+  canvas.onmousedown = canvas.ontouchstart = function(e) {
+    e.preventDefault(); _signDrawing = true;
+    var p = getPos(e); _signCtx.beginPath(); _signCtx.moveTo(p.x, p.y);
+  };
+  canvas.onmousemove = canvas.ontouchmove = function(e) {
+    e.preventDefault();
+    if (!_signDrawing) return;
+    var p = getPos(e); _signCtx.lineTo(p.x, p.y); _signCtx.stroke();
+  };
+  canvas.onmouseup = canvas.ontouchend = function() { _signDrawing = false; };
+  canvas.onmouseleave = function() { _signDrawing = false; };
+}
+function urCloseSignature(e) {
+  if (e && e.target !== document.getElementById('urSignOverlay')) return;
+  document.getElementById('urSignOverlay').classList.remove('open');
+}
+function urClearSignature() {
+  var canvas = document.getElementById('urSignCanvas');
+  if (_signCtx && canvas) _signCtx.clearRect(0, 0, canvas.width, canvas.height);
+}
+function urSaveSignature() {
+  var canvas = document.getElementById('urSignCanvas');
+  if (!canvas) return;
+  var dataUrl = canvas.toDataURL('image/png');
+  var p = urGetParentInfo();
+  p.signature = dataUrl;
+  urSaveParentInfo(p);
+  document.getElementById('urSignOverlay').classList.remove('open');
+  urRenderParentInfoCard();
+  showToast('전자 서명이 등록됐어요 ✍️');
+}
+
 function urToggleNotif(btn) {
   var isOn = btn.classList.contains('on');
   btn.classList.toggle('on', !isOn); btn.classList.toggle('off', isOn);
@@ -7526,6 +7761,8 @@ function urToggleNotif(btn) {
 
     <!-- ── 내 정보 탭 ── -->
     <div class="ur-page" id="urPageMyInfo">
+
+      <!-- 계정 프로필 -->
       <div class="ur-info-section">
         <div class="ur-section-label">내 계정</div>
         <div class="ur-profile-card" id="urProfileCard">
@@ -7536,47 +7773,80 @@ function urToggleNotif(btn) {
           </div>
         </div>
       </div>
+
+      <!-- 학부모 상세 정보 -->
+      <div class="ur-info-section" style="padding-top:0">
+        <div class="ur-section-label">학부모 정보</div>
+        <div class="ur-parent-info-card" id="urParentInfoCard">
+          <!-- JS 렌더링 -->
+        </div>
+      </div>
+
+      <!-- 아이 정보 -->
       <div class="ur-info-section" style="padding-top:0">
         <div class="ur-section-label">아이 정보</div>
         <div id="urChildList"><!-- JS 렌더링 --></div>
-        <!-- 아이 추가 폼 (기본 숨김) -->
+
+        <!-- 아이 추가/수정 폼 -->
         <div class="ur-child-form" id="urChildForm" style="display:none">
           <div class="ur-form-title" id="urChildFormTitle">➕ 아이 추가</div>
-          <div class="ur-form-row">
-            <div class="ur-form-label">이름</div>
-            <input class="ur-form-input" id="urChildName" placeholder="아이 이름" type="text">
-          </div>
-          <div class="ur-form-row">
-            <div class="ur-form-label">출생연도</div>
-            <input class="ur-form-input" id="urChildBirth" placeholder="예: 2018" type="number" min="2010" max="2024">
-          </div>
-          <div class="ur-form-row">
-            <div class="ur-form-label">학년</div>
-            <select class="ur-form-select" id="urChildGrade">
-              <option value="">선택해주세요</option>
-              <option value="미취학">미취학</option>
-              <option value="초1">초등 1학년</option>
-              <option value="초2">초등 2학년</option>
-              <option value="초3">초등 3학년</option>
-              <option value="초4">초등 4학년</option>
-              <option value="초5">초등 5학년</option>
-              <option value="초6">초등 6학년</option>
-              <option value="중1">중학교 1학년</option>
-              <option value="중2">중학교 2학년</option>
-              <option value="중3">중학교 3학년</option>
-            </select>
-          </div>
-          <div class="ur-form-row">
-            <div class="ur-form-label">이모지 (선택)</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap" id="urEmojiPicker">
-              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'🧒')">🧒</span>
-              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'👦')">👦</span>
-              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'👧')">👧</span>
-              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'🧑')">🧑</span>
-              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'👨')">👨</span>
-              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'👩')">👩</span>
+
+          <!-- 사진 + 닉네임 -->
+          <div class="ur-form-row" style="display:flex;gap:14px;align-items:flex-start">
+            <label class="ur-photo-upload" for="urChildPhoto" title="사진 추가">
+              <img id="urChildPhotoPreview" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+              <div class="ur-photo-placeholder" id="urPhotoPlaceholder">📷<br>사진</div>
+            </label>
+            <input type="file" id="urChildPhoto" accept="image/*" style="display:none" onchange="urPreviewPhoto(this)">
+            <input type="hidden" id="urChildPhotoData" value="">
+            <div style="flex:1">
+              <div class="ur-form-label">아이 닉네임 <span style="color:#9CA3AF;font-weight:400">(학부모 표시명)</span></div>
+              <input class="ur-form-input" id="urChildName" placeholder="예: 지수, 민준이" type="text">
             </div>
           </div>
+
+          <!-- 성별 -->
+          <div class="ur-form-row">
+            <div class="ur-form-label">성별</div>
+            <div class="ur-gender-btns">
+              <button class="ur-gender-btn" data-gender="male" onclick="urPickGender(this)">👦 남아</button>
+              <button class="ur-gender-btn" data-gender="female" onclick="urPickGender(this)">👧 여아</button>
+            </div>
+            <input type="hidden" id="urChildGender" value="">
+          </div>
+
+          <!-- 출생연도 -->
+          <div class="ur-form-row">
+            <div class="ur-form-label">출생연도</div>
+            <input class="ur-form-input" id="urChildBirth" placeholder="예: 2018" type="number" min="2010" max="2025">
+          </div>
+
+          <!-- 학년 -->
+          <div class="ur-form-row">
+            <div class="ur-form-label">학년 / 나이</div>
+            <select class="ur-form-select" id="urChildGrade">
+              <option value="">선택해주세요</option>
+              <optgroup label="미취학">
+                <option value="미취학5">미취학 5세</option>
+                <option value="미취학6">미취학 6세</option>
+                <option value="미취학7">미취학 7세</option>
+              </optgroup>
+              <optgroup label="초등학교">
+                <option value="초1">초등 1학년</option>
+                <option value="초2">초등 2학년</option>
+                <option value="초3">초등 3학년</option>
+                <option value="초4">초등 4학년</option>
+                <option value="초5">초등 5학년</option>
+                <option value="초6">초등 6학년</option>
+              </optgroup>
+              <optgroup label="중학교">
+                <option value="중1">중학교 1학년</option>
+                <option value="중2">중학교 2학년</option>
+                <option value="중3">중학교 3학년</option>
+              </optgroup>
+            </select>
+          </div>
+
           <input type="hidden" id="urChildEmoji" value="🧒">
           <input type="hidden" id="urChildEditId" value="">
           <div class="ur-form-btns">
@@ -7586,34 +7856,44 @@ function urToggleNotif(btn) {
         </div>
         <button class="ur-add-child-btn" id="urAddChildBtn" onclick="urShowChildForm()">+ 아이 추가하기</button>
       </div>
+
+      <!-- 알림 설정 -->
       <div class="ur-info-section" style="padding-top:0">
         <div class="ur-section-label">알림 설정</div>
         <div class="ur-notif-card">
           <div class="ur-notif-row">
-            <div>
-              <div class="ur-notif-label">공석 알림</div>
-              <div class="ur-notif-sub">관심 학원 자리 생기면 즉시 알림</div>
-            </div>
+            <div><div class="ur-notif-label">공석 알림</div><div class="ur-notif-sub">관심 학원 자리 생기면 즉시 알림</div></div>
             <button class="ur-toggle-sw on" id="urNotifVacancy" onclick="urToggleNotif(this)"></button>
           </div>
           <div class="ur-notif-row">
-            <div>
-              <div class="ur-notif-label">스케줄 리마인더</div>
-              <div class="ur-notif-sub">학원 1시간 전 알림</div>
-            </div>
+            <div><div class="ur-notif-label">스케줄 리마인더</div><div class="ur-notif-sub">학원 1시간 전 알림</div></div>
             <button class="ur-toggle-sw on" id="urNotifReminder" onclick="urToggleNotif(this)"></button>
           </div>
           <div class="ur-notif-row">
-            <div>
-              <div class="ur-notif-label">키즈루트 소식</div>
-              <div class="ur-notif-sub">신기능·이벤트 안내</div>
-            </div>
+            <div><div class="ur-notif-label">키즈루트 소식</div><div class="ur-notif-sub">신기능·이벤트 안내</div></div>
             <button class="ur-toggle-sw off" id="urNotifNews" onclick="urToggleNotif(this)"></button>
           </div>
         </div>
       </div>
+
       <div class="ur-logout-wrap">
         <button class="ur-logout-btn" onclick="hideUserDashboard()">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- 전자 서명 모달 -->
+    <div class="ur-sign-overlay" id="urSignOverlay" onclick="urCloseSignature(event)">
+      <div class="ur-sign-sheet" onclick="event.stopPropagation()">
+        <div class="ur-sign-header">
+          <div class="ur-sign-title">✍️ 전자 서명 등록</div>
+          <button onclick="urCloseSignature()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#9CA3AF">✕</button>
+        </div>
+        <p style="font-size:12px;color:#9CA3AF;margin:0 0 10px">아래 영역에 서명해주세요</p>
+        <canvas id="urSignCanvas" class="ur-sign-canvas" width="440" height="180"></canvas>
+        <div class="ur-sign-btns">
+          <button class="ur-sign-clear" onclick="urClearSignature()">지우기</button>
+          <button class="ur-sign-save" onclick="urSaveSignature()">서명 저장</button>
+        </div>
       </div>
     </div>
 
