@@ -1052,7 +1052,17 @@
   position: relative; border-radius: 16px; overflow: hidden;
   border: 1.5px solid var(--border); margin-bottom: 16px;
   height: 200px; background: #f0ebe0;
+  transition: height 0.35s cubic-bezier(0.4,0,0.2,1);
 }
+.demo-map-wrap.expanded { height: 340px; }
+.demo-map-expand-btn {
+  position: absolute; top: 8px; right: 8px; z-index: 20;
+  background: rgba(255,255,255,0.93); border: none; border-radius: 8px;
+  padding: 4px 10px; font-size: 11px; font-weight: 700; color: #374151;
+  cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,0.14);
+  display: flex; align-items: center; gap: 4px; backdrop-filter: blur(4px);
+}
+.demo-map-expand-btn:hover { background: #fff; }
 /* CSS 모의 지도 (Naver API 키 미설정 시) */
 .demo-map-mock {
   width: 100%; height: 100%; position: relative; overflow: hidden;
@@ -3781,6 +3791,9 @@
 
       <!-- 지도 컨테이너 -->
       <div class="demo-map-wrap" id="demoMapWrap">
+        <button class="demo-map-expand-btn" id="demoMapExpandBtn" onclick="toggleDemoMapSize()">
+          <span id="demoMapExpandIcon">⤡</span> <span id="demoMapExpandText">크게 보기</span>
+        </button>
         <div id="demoMapCanvas"></div>
         <div class="demo-map-mock" id="demoMapMock">
           <div class="demo-map-ring" id="demoMapRing" style="width:120px;height:120px"></div>
@@ -4749,15 +4762,29 @@ function getDemoGPS() {
 }
 
 function _initDemoMap(lat, lng) {
-  // Naver Maps SDK is already loaded in <head>
+  // SDK가 이미 로드된 경우 즉시 실행
   if (window.naver && naver.maps && naver.maps.Map) {
     _initNaverMap(lat, lng);
-  } else {
-    // SDK not ready yet — wait briefly then retry
+    return;
+  }
+  // 동적 로드로 fallback (head 스크립트가 아직 준비 안 됐을 때)
+  _loadNaverMapScript(function() { _initNaverMap(lat, lng); });
+}
+
+// ── 지도 크기 토글 ──
+function toggleDemoMapSize() {
+  var wrap = document.getElementById('demoMapWrap');
+  var icon = document.getElementById('demoMapExpandIcon');
+  var text = document.getElementById('demoMapExpandText');
+  var expanded = wrap.classList.toggle('expanded');
+  if (icon) icon.textContent = expanded ? '⤢' : '⤡';
+  if (text) text.textContent = expanded ? '작게 보기' : '크게 보기';
+  // 네이버 지도가 있으면 크기 변경 후 중심 재설정
+  if (_demoMap) {
     setTimeout(function() {
-      if (window.naver && naver.maps && naver.maps.Map) _initNaverMap(lat, lng);
-      else _showMapFallback('네이버 지도를 불러오는 중이에요...');
-    }, 800);
+      _demoMap.setCenter(_demoMap.getCenter());
+      _demoMap.setZoom(_demoMap.getZoom());
+    }, 360);
   }
 }
 
@@ -4777,7 +4804,7 @@ function _loadNaverMapScript(cb) {
   _naverMapCbs = [cb];
   const s = document.createElement('script');
   s.id  = '_naverMapScript';
-  s.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + NAVER_CLIENT_ID + '&submodules=geocoder';
+  s.src = 'https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + NAVER_CLIENT_ID + '&submodules=geocoder';
   s.onerror = () => {
     console.error('[KidsRoute] 네이버맵 스크립트 로드 실패');
     const pending = _naverMapCbs || [];
