@@ -2338,6 +2338,246 @@
   transition: width 0.6s ease;
 }
 .adm-conv-value { font-size: 11px; color: #94A3B8; }
+
+/* ═══════════════════════════════════════════
+   학부모 앱 뷰 (USER DASHBOARD)
+════════════════════════════════════════════ */
+#userRoot { font-family: 'Pretendard', sans-serif; }
+.ur-topnav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; height: 56px; background: #fff;
+  border-bottom: 1px solid #F0F0F0; flex-shrink: 0;
+}
+.ur-logo { display: flex; align-items: center; gap: 7px; font-size: 17px; font-weight: 800; color: var(--primary); }
+.ur-topnav-right { display: flex; align-items: center; gap: 8px; }
+.ur-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff;
+  background: var(--primary); cursor: pointer; flex-shrink: 0;
+}
+.ur-content { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.ur-page { display: none; padding-bottom: 80px; min-height: calc(100vh - 116px); }
+.ur-page.active { display: block; }
+.ur-tabs {
+  display: flex; align-items: stretch;
+  height: 60px; background: #fff;
+  border-top: 1px solid #F0F0F0; flex-shrink: 0;
+}
+.ur-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; padding: 8px 0; background: none; border: none;
+  color: #9CA3AF; transition: color .15s;
+}
+.ur-tab.active { color: var(--primary); }
+.ur-tab-icon { font-size: 20px; line-height: 1; }
+.ur-tab-label { font-size: 11px; font-weight: 600; }
+/* 학원 검색 */
+.ur-search-bar {
+  padding: 12px 16px 8px; background: #fff;
+  border-bottom: 1px solid #F0F0F0;
+  position: sticky; top: 0; z-index: 10;
+}
+.ur-search-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: #F4F4F5; border-radius: 12px; padding: 10px 14px;
+  margin-bottom: 10px;
+}
+.ur-search-wrap input {
+  flex: 1; border: none; background: none; font-size: 14px; outline: none;
+  font-family: 'Pretendard', sans-serif; color: var(--text-main);
+}
+.ur-search-wrap input::placeholder { color: #9CA3AF; }
+.ur-filter-row {
+  display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.ur-filter-row::-webkit-scrollbar { display: none; }
+.ur-filter-chip {
+  flex-shrink: 0; padding: 5px 13px; border-radius: 100px;
+  border: 1.5px solid #E5E7EB; font-size: 12px; font-weight: 600;
+  color: #6B7280; background: #fff; cursor: pointer; transition: all .15s;
+}
+.ur-filter-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.ur-sort-row {
+  display: flex; gap: 6px; padding: 10px 16px 0; background: #fff;
+}
+.ur-sort-btn {
+  padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1px solid #E5E7EB; background: #fff; color: #6B7280; cursor: pointer;
+}
+.ur-sort-btn.active { background: #FFF7ED; border-color: #FED7AA; color: var(--primary); }
+.ur-academy-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; }
+.ur-academy-card {
+  background: #fff; border-radius: 16px; padding: 16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.07); cursor: pointer;
+  transition: box-shadow .15s;
+}
+.ur-academy-card:active { box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+.ur-academy-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.ur-academy-name { font-size: 15px; font-weight: 800; color: var(--text-main); }
+.ur-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
+  background: #FFF7ED; color: var(--primary); flex-shrink: 0; margin-left: 6px;
+}
+.ur-badge.new { background: #F0FDF4; color: #16A34A; }
+.ur-subj-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 5px; vertical-align: middle;
+}
+.ur-academy-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.ur-meta-item { font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 3px; }
+.ur-times { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+.ur-time-tag {
+  font-size: 11px; padding: 3px 9px; border-radius: 6px;
+  background: #F4F4F5; color: #374151; font-weight: 600;
+}
+.ur-academy-footer { display: flex; justify-content: space-between; align-items: center; }
+.ur-fee { font-size: 14px; font-weight: 700; color: var(--text-main); }
+.ur-fee small { font-size: 11px; font-weight: 400; color: #9CA3AF; }
+.ur-add-btn {
+  padding: 7px 16px; border-radius: 100px; border: none;
+  background: var(--primary); color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: background .15s; flex-shrink: 0;
+}
+.ur-add-btn.added { background: #10B981; }
+/* 스케줄 */
+.ur-sched-header {
+  padding: 16px; background: #fff; border-bottom: 1px solid #F0F0F0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.ur-sched-title { font-size: 17px; font-weight: 800; color: var(--text-main); }
+.ur-sched-sim-btn {
+  padding: 7px 14px; border-radius: 100px;
+  background: var(--primary); color: #fff; border: none;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.ur-week-scroll {
+  display: flex; overflow-x: auto; padding: 14px 16px; gap: 10px;
+  background: #fff; border-bottom: 1px solid #F0F0F0;
+  scrollbar-width: none;
+}
+.ur-week-scroll::-webkit-scrollbar { display: none; }
+.ur-day-col { flex-shrink: 0; width: 90px; }
+.ur-day-name {
+  font-size: 12px; font-weight: 700; color: #9CA3AF;
+  text-align: center; margin-bottom: 6px;
+}
+.ur-day-col.today .ur-day-name { color: var(--primary); }
+.ur-day-col.today .ur-day-slots { border: 1.5px solid #FED7AA; }
+.ur-day-slots {
+  min-height: 64px; background: #F8F9FA; border-radius: 10px;
+  padding: 6px; display: flex; flex-direction: column; gap: 4px;
+  border: 1.5px solid transparent;
+}
+.ur-slot-card {
+  background: #fff; border-radius: 6px; padding: 5px 7px;
+  border-left: 3px solid var(--primary); font-size: 11px;
+  font-weight: 700; color: var(--text-main); line-height: 1.3;
+}
+.ur-slot-time { font-size: 10px; color: #9CA3AF; font-weight: 400; }
+.ur-sched-section { padding: 14px 16px; }
+.ur-sched-section-title {
+  font-size: 14px; font-weight: 800; color: var(--text-main);
+  margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+}
+.ur-saved-card {
+  background: #fff; border-radius: 14px; padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ur-saved-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
+.ur-saved-date { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+.ur-saved-del {
+  background: none; border: none; font-size: 18px; cursor: pointer;
+  color: #D1D5DB; padding: 4px; flex-shrink: 0;
+}
+.ur-empty { text-align: center; padding: 36px 24px; color: #9CA3AF; font-size: 13px; }
+.ur-empty-icon { font-size: 36px; margin-bottom: 8px; }
+/* 내 정보 */
+.ur-info-section { padding: 14px 16px; }
+.ur-section-label { font-size: 12px; font-weight: 700; color: #9CA3AF; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 8px; }
+.ur-profile-card {
+  background: #fff; border-radius: 16px; padding: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 14px;
+}
+.ur-p-avatar {
+  width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800; color: #fff;
+  background: var(--primary);
+}
+.ur-p-name { font-size: 16px; font-weight: 800; color: var(--text-main); }
+.ur-p-email { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.ur-child-card {
+  background: #fff; border-radius: 14px; padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ur-child-left { display: flex; align-items: center; gap: 12px; }
+.ur-child-emoji {
+  width: 38px; height: 38px; border-radius: 50%; background: #FFF7ED;
+  display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.ur-child-name-text { font-size: 14px; font-weight: 700; color: var(--text-main); }
+.ur-child-grade-text { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.ur-child-btns { display: flex; gap: 6px; }
+.ur-btn-edit { padding: 5px 12px; border-radius: 8px; border: none; background: #F4F4F5; color: #374151; font-size: 12px; font-weight: 600; cursor: pointer; }
+.ur-btn-del  { padding: 5px 10px; border-radius: 8px; border: none; background: #FEF2F2; color: #EF4444; font-size: 12px; font-weight: 600; cursor: pointer; }
+.ur-add-child-btn {
+  width: 100%; padding: 13px; border-radius: 14px; border: 2px dashed #E5E7EB;
+  background: none; font-size: 14px; font-weight: 600; color: #9CA3AF;
+  cursor: pointer; transition: all .15s; margin-top: 4px;
+}
+.ur-add-child-btn:hover { border-color: var(--primary); color: var(--primary); }
+.ur-child-form {
+  background: #fff; border-radius: 16px; padding: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 12px;
+}
+.ur-form-title { font-size: 14px; font-weight: 800; margin-bottom: 14px; color: var(--text-main); }
+.ur-form-row { margin-bottom: 12px; }
+.ur-form-label { font-size: 12px; font-weight: 700; color: #6B7280; margin-bottom: 5px; }
+.ur-form-input, .ur-form-select {
+  width: 100%; padding: 11px 14px; border-radius: 10px;
+  border: 1.5px solid #E5E7EB; font-size: 14px; outline: none;
+  font-family: 'Pretendard', sans-serif; background: #fff; color: var(--text-main);
+  transition: border-color .15s;
+}
+.ur-form-input:focus, .ur-form-select:focus { border-color: var(--primary); }
+.ur-form-btns { display: flex; gap: 8px; }
+.ur-btn-save { flex: 1; padding: 12px; border-radius: 12px; border: none; background: var(--primary); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+.ur-btn-cancel { padding: 12px 18px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: none; font-size: 14px; font-weight: 600; color: #6B7280; cursor: pointer; }
+.ur-notif-card {
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 14px;
+}
+.ur-notif-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px; border-bottom: 1px solid #F4F4F5;
+}
+.ur-notif-row:last-child { border-bottom: none; }
+.ur-notif-label { font-size: 13px; font-weight: 600; color: var(--text-main); }
+.ur-notif-sub { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+.ur-toggle-sw {
+  width: 44px; height: 24px; border-radius: 12px; border: none; cursor: pointer;
+  position: relative; transition: background .2s; flex-shrink: 0;
+}
+.ur-toggle-sw.on { background: var(--primary); }
+.ur-toggle-sw.off { background: #D1D5DB; }
+.ur-toggle-sw::after {
+  content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; top: 2px; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.ur-toggle-sw.on::after { left: 22px; }
+.ur-toggle-sw.off::after { left: 2px; }
+.ur-logout-wrap { padding: 0 16px 24px; }
+.ur-logout-btn {
+  width: 100%; padding: 13px; border-radius: 14px; border: 1.5px solid #E5E7EB;
+  background: none; font-size: 14px; font-weight: 600; color: #6B7280; cursor: pointer;
+  transition: all .15s;
+}
+.ur-logout-btn:hover { border-color: #EF4444; color: #EF4444; background: #FEF2F2; }
 </style>
 </head>
 <body>
@@ -2365,7 +2605,7 @@
     </svg>키즈루트</a>
   <div class="nav-links">
     <button class="nav-cta" id="navCtaBtn" onclick="openGoogleLogin()">사전예약</button>
-    <button class="nav-login" id="navLoginBtn" onclick="openAdminLogin()">로그인</button>
+    <button class="nav-login" id="navLoginBtn" onclick="openGoogleLogin()">로그인</button>
     <a href="#features">기능</a>
     <a href="#howto">이용방법</a>
     <a href="#pricing">요금제</a>
@@ -2379,7 +2619,7 @@
 </nav>
 <div class="nav-mobile-menu">
   <button class="nav-cta" style="width:fit-content" onclick="openGoogleLogin()">사전예약</button>
-  <button class="nav-login" style="width:fit-content" onclick="openAdminLogin()">로그인</button>
+  <button class="nav-login" style="width:fit-content" onclick="openGoogleLogin()">로그인</button>
   <a href="#features" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">기능</a>
   <a href="#howto" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">이용방법</a>
   <a href="#pricing" onclick="this.closest('.nav-mobile-menu').classList.remove('open')">요금제</a>
@@ -4206,7 +4446,12 @@ function onLoginSuccess(name, email, color, provider) {
   document.getElementById('ctaLoggedDesc').innerHTML =
     '<strong>' + email + '</strong>으로 출시 알림을 보내드릴게요.<br>얼리버드 혜택도 자동 적용됩니다.';
 
-  showToast(name + '님, 사전예약 완료! 🎉');
+  // 학부모 앱 뷰 전환
+  if (typeof showUserDashboard === 'function') {
+    showUserDashboard(name, email, color);
+  } else {
+    showToast(name + '님, 환영해요! 🎉');
+  }
 }
 
 function showToast(msg) {
@@ -6048,6 +6293,367 @@ function adminSeed() {
   if (typeof adminRenderAll === 'function') adminRenderAll();
   console.log('Seed data added! Members:', KR.getMembers().length);
 }
+
+/* ═══════════════════════════════════════════
+   학부모 앱 뷰 — User Dashboard JS
+════════════════════════════════════════════ */
+
+// ── 학원 목업 데이터 ──
+var UR_ACADEMIES = [
+  { id:1,  name:'강남 베스트 수학',  subj:'math',      label:'수학',   color:'#F97316', addr:'서초구 서초동',    dist:0.4, rating:4.8, reviews:127, times:['월수금 오후4시','화목 오후5시'],   fee:300000, shuttle:true,  badge:'인기'  },
+  { id:2,  name:'YBM 영어 서초점',   subj:'english',   label:'영어',   color:'#3B82F6', addr:'서초구 반포동',    dist:0.7, rating:4.6, reviews:89,  times:['월화수목금 오후4시'],              fee:280000, shuttle:false, badge:''      },
+  { id:3,  name:'예원 피아노',       subj:'piano',     label:'피아노', color:'#8B5CF6', addr:'강남구 개포동',    dist:0.9, rating:4.9, reviews:54,  times:['월수금 오후5시','화목 오후4시'],   fee:200000, shuttle:false, badge:'신규'  },
+  { id:4,  name:'하늘 미술학원',     subj:'art',       label:'미술',   color:'#EC4899', addr:'서초구 방배동',    dist:1.1, rating:4.5, reviews:43,  times:['화목 오후4시','주말반'],           fee:250000, shuttle:true,  badge:''      },
+  { id:5,  name:'스피드 수학',       subj:'math',      label:'수학',   color:'#F97316', addr:'강남구 논현동',    dist:1.3, rating:4.3, reviews:31,  times:['월수금 오후5시'],                  fee:260000, shuttle:false, badge:''      },
+  { id:6,  name:'ABC 영어 마을',     subj:'english',   label:'영어',   color:'#3B82F6', addr:'강남구 압구정동',  dist:1.5, rating:4.7, reviews:72,  times:['월수금 오후4시','화목 오후5시'],   fee:320000, shuttle:true,  badge:'인기'  },
+  { id:7,  name:'챔피언 태권도',     subj:'taekwondo', label:'태권도', color:'#EF4444', addr:'서초구 양재동',    dist:0.6, rating:4.4, reviews:38,  times:['월화수목금 오후4시'],              fee:120000, shuttle:false, badge:''      },
+  { id:8,  name:'코딩 두뇌 lab',     subj:'coding',    label:'코딩',   color:'#10B981', addr:'강남구 삼성동',    dist:1.8, rating:4.6, reviews:29,  times:['화목 오후5시','주말반'],           fee:350000, shuttle:false, badge:'신규'  },
+  { id:9,  name:'반포 과학 탐구',    subj:'science',   label:'과학',   color:'#06B6D4', addr:'서초구 반포동',    dist:1.0, rating:4.5, reviews:22,  times:['화목 오후4시','주말반'],           fee:220000, shuttle:false, badge:''      },
+  { id:10, name:'윈윈 체육 센터',    subj:'sports',    label:'체육',   color:'#84CC16', addr:'강남구 역삼동',    dist:0.8, rating:4.3, reviews:47,  times:['월수금 오후4시','주말오전'],       fee:150000, shuttle:true,  badge:''      }
+];
+
+var _urUser = { name: '', email: '', color: '#F97316' };
+var _urFilter = 'all';
+var _urSort = 'dist';
+var _urSearchText = '';
+var _urEditChildId = '';
+
+// localStorage helpers
+function urGetSchedule() {
+  try { return JSON.parse(localStorage.getItem('kr_user_schedule') || '[]'); } catch(e) { return []; }
+}
+function urSaveSchedule(list) { localStorage.setItem('kr_user_schedule', JSON.stringify(list)); }
+function urGetChildren() {
+  try { return JSON.parse(localStorage.getItem('kr_children') || '[]'); } catch(e) { return []; }
+}
+function urSaveChildren(list) { localStorage.setItem('kr_children', JSON.stringify(list)); }
+function urGetNotifPrefs() {
+  try { return JSON.parse(localStorage.getItem('kr_notif_prefs') || '{"vacancy":true,"reminder":true,"news":false}'); } catch(e) { return {vacancy:true,reminder:true,news:false}; }
+}
+function urSaveNotifPrefs(p) { localStorage.setItem('kr_notif_prefs', JSON.stringify(p)); }
+
+// ── 대시보드 진입/퇴출 ──
+function showUserDashboard(name, email, color) {
+  _urUser = { name: name, email: email, color: color || '#F97316' };
+  var root = document.getElementById('userRoot');
+  if (!root) return;
+  root.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // 아바타
+  var av = document.getElementById('urAvatar');
+  if (av) { av.textContent = (name || '?').charAt(0); av.style.background = color || '#F97316'; }
+  // 초기 탭
+  userShowTab(0);
+}
+function hideUserDashboard() {
+  var root = document.getElementById('userRoot');
+  if (root) root.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ── 탭 전환 ──
+function userShowTab(idx) {
+  var pages = ['urPageSearch','urPageSchedule','urPageMyInfo'];
+  pages.forEach(function(id, i) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i === idx);
+  });
+  for (var i = 0; i < 3; i++) {
+    var tab = document.getElementById('urTab' + i);
+    if (tab) tab.classList.toggle('active', i === idx);
+  }
+  var content = document.getElementById('urContent');
+  if (content) content.scrollTop = 0;
+  if (idx === 0) urRenderAcademies();
+  if (idx === 1) urRenderSchedule();
+  if (idx === 2) urRenderMyInfo();
+}
+
+// ── 학원 검색 ──
+function urSetFilter(el) {
+  _urFilter = el.dataset.subj;
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-filter-chip'), function(c) {
+    c.classList.toggle('active', c === el);
+  });
+  urRenderAcademies();
+}
+function urSetSort(el) {
+  _urSort = el.dataset.sort;
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-sort-btn'), function(b) {
+    b.classList.toggle('active', b === el);
+  });
+  urRenderAcademies();
+}
+function urFilterAcademies() {
+  var inp = document.getElementById('urSearchInput');
+  _urSearchText = inp ? inp.value.trim().toLowerCase() : '';
+  urRenderAcademies();
+}
+function urRenderAcademies() {
+  var schedule = urGetSchedule();
+  var addedIds = schedule.map(function(s) { return s.academyId; });
+  var list = UR_ACADEMIES.filter(function(a) {
+    if (_urFilter !== 'all' && a.subj !== _urFilter) return false;
+    if (_urSearchText && a.name.toLowerCase().indexOf(_urSearchText) < 0 && a.label.indexOf(_urSearchText) < 0) return false;
+    return true;
+  });
+  list = list.slice().sort(function(a, b) {
+    if (_urSort === 'dist')   return a.dist - b.dist;
+    if (_urSort === 'rating') return b.rating - a.rating;
+    if (_urSort === 'fee')    return a.fee - b.fee;
+    return 0;
+  });
+  var container = document.getElementById('urAcademyList');
+  if (!container) return;
+  if (!list.length) {
+    container.innerHTML = '<div class="ur-empty"><div class="ur-empty-icon">🔍</div>검색 결과가 없어요</div>';
+    return;
+  }
+  container.innerHTML = list.map(function(a) {
+    var added = addedIds.indexOf(a.id) >= 0;
+    var badgeHtml = a.badge ? '<span class="ur-badge' + (a.badge === '신규' ? ' new' : '') + '">' + a.badge + '</span>' : '';
+    var timeTags = a.times.map(function(t) { return '<span class="ur-time-tag">' + t + '</span>'; }).join('');
+    var shuttleHtml = a.shuttle ? '<span class="ur-meta-item">🚌 셔틀</span>' : '';
+    return '<div class="ur-academy-card">'
+      + '<div class="ur-academy-top">'
+      +   '<div style="display:flex;align-items:center;flex:1;min-width:0">'
+      +     '<span class="ur-subj-dot" style="background:' + a.color + '"></span>'
+      +     '<span class="ur-academy-name">' + _escHtml(a.name) + '</span>'
+      +   '</div>'
+      +   badgeHtml
+      + '</div>'
+      + '<div class="ur-academy-meta">'
+      +   '<span class="ur-meta-item">📍 ' + a.dist + 'km</span>'
+      +   '<span class="ur-meta-item">⭐ ' + a.rating + ' (' + a.reviews + ')</span>'
+      +   '<span class="ur-meta-item">🏷️ ' + a.label + '</span>'
+      +   shuttleHtml
+      + '</div>'
+      + '<div class="ur-times">' + timeTags + '</div>'
+      + '<div class="ur-academy-footer">'
+      +   '<div class="ur-fee">' + (a.fee/10000).toFixed(0) + '만원 <small>/월</small></div>'
+      +   '<button class="ur-add-btn' + (added ? ' added' : '') + '" onclick="urToggleSchedule(' + a.id + ',this)">'
+      +     (added ? '✓ 등록됨' : '+ 추가')
+      +   '</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+function urToggleSchedule(academyId, btn) {
+  var schedule = urGetSchedule();
+  var idx = -1;
+  for (var i = 0; i < schedule.length; i++) { if (schedule[i].academyId === academyId) { idx = i; break; } }
+  if (idx >= 0) {
+    schedule.splice(idx, 1);
+    btn.textContent = '+ 추가'; btn.classList.remove('added');
+    showToast('스케줄에서 제거했어요');
+  } else {
+    var a = null;
+    for (var j = 0; j < UR_ACADEMIES.length; j++) { if (UR_ACADEMIES[j].id === academyId) { a = UR_ACADEMIES[j]; break; } }
+    if (!a) return;
+    schedule.push({ academyId: a.id, name: a.name, subj: a.subj, label: a.label, color: a.color, times: a.times, addedAt: Date.now() });
+    btn.textContent = '✓ 등록됨'; btn.classList.add('added');
+    showToast(_escHtml(a.name) + ' 스케줄 추가! 📅');
+  }
+  urSaveSchedule(schedule);
+}
+
+// ── 스케줄 탭 ──
+function urRenderSchedule() {
+  var schedule = urGetSchedule();
+  // 주간 뷰
+  var dayNames = ['일','월','화','수','목','금','토'];
+  var today = new Date().getDay();
+  var weekHtml = '';
+  // 월요일부터 일요일 순서로 표시
+  var dayOrder = [1,2,3,4,5,6,0];
+  var dayLabels = { 0:'일',1:'월',2:'화',3:'수',4:'목',5:'금',6:'토' };
+  var timeMap = {
+    '월화수목금 오후4시': [1,2,3,4,5],
+    '월수금 오후4시': [1,3,5],
+    '월수금 오후5시': [1,3,5],
+    '화목 오후4시': [2,4],
+    '화목 오후5시': [2,4],
+    '주말반': [6,0],
+    '주말오전': [6,0]
+  };
+  dayOrder.forEach(function(d) {
+    var isToday = d === today;
+    var slots = schedule.filter(function(s) {
+      return (s.times || []).some(function(t) {
+        var days = timeMap[t] || [];
+        return days.indexOf(d) >= 0;
+      });
+    });
+    var slotHtml = slots.map(function(s) {
+      var timeLabel = (s.times || [])[0] ? s.times[0].replace(/월화수목금|월수금|화목/g,'').trim() : '';
+      return '<div class="ur-slot-card" style="border-left-color:' + (s.color||'#F97316') + '">'
+        + _escHtml(s.name.length > 7 ? s.name.slice(0,7)+'…' : s.name)
+        + '<div class="ur-slot-time">' + timeLabel + '</div>'
+        + '</div>';
+    }).join('');
+    weekHtml += '<div class="ur-day-col' + (isToday ? ' today' : '') + '">'
+      + '<div class="ur-day-name">' + dayLabels[d] + (isToday ? ' •' : '') + '</div>'
+      + '<div class="ur-day-slots">' + (slotHtml || '') + '</div>'
+      + '</div>';
+  });
+  var weekEl = document.getElementById('urWeekScroll');
+  if (weekEl) weekEl.innerHTML = weekHtml;
+  // 등록 학원 목록
+  var countEl = document.getElementById('urSchedCount');
+  if (countEl) countEl.textContent = schedule.length + '개 학원';
+  var listEl = document.getElementById('urSchedList');
+  if (!listEl) return;
+  if (!schedule.length) {
+    listEl.innerHTML = '<div class="ur-empty"><div class="ur-empty-icon">📅</div>아직 등록된 학원이 없어요.<br>학원 검색에서 추가해보세요!</div>';
+    return;
+  }
+  listEl.innerHTML = schedule.map(function(s) {
+    var d = new Date(s.addedAt);
+    var dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' 등록';
+    return '<div class="ur-saved-card">'
+      + '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">'
+      +   '<span style="width:10px;height:10px;border-radius:50%;background:' + (s.color||'#F97316') + ';flex-shrink:0"></span>'
+      +   '<div style="min-width:0">'
+      +     '<div class="ur-saved-name">' + _escHtml(s.name) + '</div>'
+      +     '<div class="ur-saved-date">' + _escHtml(s.label) + ' · ' + (s.times||[]).join(', ') + '</div>'
+      +   '</div>'
+      + '</div>'
+      + '<button class="ur-saved-del" data-id="' + s.academyId + '" onclick="urRemoveSchedule(' + s.academyId + ')">✕</button>'
+      + '</div>';
+  }).join('');
+}
+function urRemoveSchedule(academyId) {
+  var schedule = urGetSchedule();
+  urSaveSchedule(schedule.filter(function(s) { return s.academyId !== academyId; }));
+  urRenderSchedule();
+  urRenderAcademies();
+  showToast('스케줄에서 제거했어요');
+}
+
+// ── 내 정보 탭 ──
+function urRenderMyInfo() {
+  // 프로필
+  var av = document.getElementById('urProfileAvatar');
+  var nm = document.getElementById('urProfileName');
+  var em = document.getElementById('urProfileEmail');
+  if (av) { av.textContent = (_urUser.name||'?').charAt(0); av.style.background = _urUser.color||'#F97316'; }
+  if (nm) nm.textContent = _urUser.name || '';
+  if (em) em.textContent = _urUser.email || '';
+  // 알림
+  var prefs = urGetNotifPrefs();
+  Array.prototype.forEach.call(['urNotifVacancy','urNotifReminder','urNotifNews'], function(id, i) {
+    var el = document.getElementById(id);
+    var keys = ['vacancy','reminder','news'];
+    if (el) { el.classList.toggle('on', !!prefs[keys[i]]); el.classList.toggle('off', !prefs[keys[i]]); }
+  });
+  urRenderChildren();
+}
+function urRenderChildren() {
+  var children = urGetChildren();
+  var list = document.getElementById('urChildList');
+  if (!list) return;
+  if (!children.length) {
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = children.map(function(c) {
+    return '<div class="ur-child-card">'
+      + '<div class="ur-child-left">'
+      +   '<div class="ur-child-emoji">' + (c.emoji||'🧒') + '</div>'
+      +   '<div>'
+      +     '<div class="ur-child-name-text">' + _escHtml(c.name) + '</div>'
+      +     '<div class="ur-child-grade-text">' + _escHtml(c.grade) + ' · ' + c.birthYear + '년생</div>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="ur-child-btns">'
+      +   '<button class="ur-btn-edit" data-id="' + c.id + '" onclick="urEditChild(\'' + c.id + '\')">수정</button>'
+      +   '<button class="ur-btn-del"  data-id="' + c.id + '" onclick="urDeleteChild(\'' + c.id + '\')">삭제</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+function urShowChildForm(childId) {
+  _urEditChildId = childId || '';
+  var form = document.getElementById('urChildForm');
+  var addBtn = document.getElementById('urAddChildBtn');
+  var title = document.getElementById('urChildFormTitle');
+  if (!form) return;
+  document.getElementById('urChildName').value = '';
+  document.getElementById('urChildBirth').value = '';
+  document.getElementById('urChildGrade').value = '';
+  document.getElementById('urChildEmoji').value = '🧒';
+  document.getElementById('urChildEditId').value = childId || '';
+  // 이모지 picker 리셋
+  Array.prototype.forEach.call(document.querySelectorAll('#urEmojiPicker span'), function(s) {
+    s.style.borderColor = 'transparent';
+    s.style.background = 'transparent';
+  });
+  if (childId) {
+    var children = urGetChildren();
+    var c = null;
+    for (var i = 0; i < children.length; i++) { if (children[i].id === childId) { c = children[i]; break; } }
+    if (c) {
+      document.getElementById('urChildName').value = c.name;
+      document.getElementById('urChildBirth').value = c.birthYear;
+      document.getElementById('urChildGrade').value = c.grade;
+      document.getElementById('urChildEmoji').value = c.emoji || '🧒';
+      if (title) title.textContent = '✏️ 아이 정보 수정';
+    }
+  } else {
+    if (title) title.textContent = '➕ 아이 추가';
+  }
+  form.style.display = 'block';
+  if (addBtn) addBtn.style.display = 'none';
+}
+function urEditChild(id) { urShowChildForm(id); }
+function urCancelChildForm() {
+  var form = document.getElementById('urChildForm');
+  var addBtn = document.getElementById('urAddChildBtn');
+  if (form) form.style.display = 'none';
+  if (addBtn) addBtn.style.display = 'block';
+}
+function urSaveChild() {
+  var name  = (document.getElementById('urChildName').value || '').trim();
+  var birth = (document.getElementById('urChildBirth').value || '').trim();
+  var grade = document.getElementById('urChildGrade').value;
+  var emoji = document.getElementById('urChildEmoji').value || '🧒';
+  var editId = document.getElementById('urChildEditId').value;
+  if (!name || !birth || !grade) { showToast('이름, 출생연도, 학년을 입력해주세요'); return; }
+  var children = urGetChildren();
+  if (editId) {
+    for (var i = 0; i < children.length; i++) {
+      if (children[i].id === editId) { children[i].name = name; children[i].birthYear = birth; children[i].grade = grade; children[i].emoji = emoji; break; }
+    }
+    showToast('아이 정보가 수정됐어요 ✏️');
+  } else {
+    children.push({ id: 'c' + Date.now(), name: name, birthYear: birth, grade: grade, emoji: emoji });
+    showToast(name + ' 추가 완료! 🎉');
+  }
+  urSaveChildren(children);
+  urCancelChildForm();
+  urRenderChildren();
+}
+function urDeleteChild(id) {
+  var children = urGetChildren();
+  urSaveChildren(children.filter(function(c) { return c.id !== id; }));
+  urRenderChildren();
+  showToast('삭제했어요');
+}
+function urPickEmoji(el, emoji) {
+  document.getElementById('urChildEmoji').value = emoji;
+  Array.prototype.forEach.call(document.querySelectorAll('#urEmojiPicker span'), function(s) {
+    s.style.borderColor = 'transparent'; s.style.background = 'transparent';
+  });
+  el.style.borderColor = '#F97316'; el.style.background = '#FFF7ED';
+}
+function urToggleNotif(btn) {
+  var isOn = btn.classList.contains('on');
+  btn.classList.toggle('on', !isOn); btn.classList.toggle('off', isOn);
+  var prefs = urGetNotifPrefs();
+  var keyMap = { urNotifVacancy:'vacancy', urNotifReminder:'reminder', urNotifNews:'news' };
+  var key = keyMap[btn.id];
+  if (key) { prefs[key] = !isOn; urSaveNotifPrefs(prefs); }
+}
 </script>
 
 <!-- 멤버십 잠금 모달 -->
@@ -6096,6 +6702,180 @@ function adminSeed() {
     <button class="admin-login-cancel" onclick="closeAdminLogin()">닫기</button>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════
+     학부모 앱 뷰 (로그인 후 표시)
+════════════════════════════════════════════ -->
+<div id="userRoot" style="display:none;position:fixed;inset:0;z-index:9000;background:#F8F9FA;flex-direction:column;overflow:hidden;">
+
+  <!-- 상단 네비 -->
+  <div class="ur-topnav">
+    <div class="ur-logo">
+      <svg width="22" height="22" viewBox="0 0 96 96" style="border-radius:5px"><defs><linearGradient id="ug" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FF9A3C"/><stop offset="100%" stop-color="#F97316"/></linearGradient></defs><rect width="96" height="96" rx="24" fill="url(#ug)"/><circle cx="48" cy="22" r="11" fill="white"/><line x1="48" y1="33" x2="48" y2="50" stroke="white" stroke-width="5" stroke-linecap="round"/><line x1="33" y1="41" x2="63" y2="41" stroke="white" stroke-width="4.5" stroke-linecap="round"/><line x1="48" y1="50" x2="38" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/><line x1="48" y1="50" x2="58" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/></svg>
+      키즈루트
+    </div>
+    <div class="ur-topnav-right">
+      <div class="ur-avatar" id="urAvatar" title="내 계정"></div>
+    </div>
+  </div>
+
+  <!-- 콘텐츠 영역 -->
+  <div class="ur-content" id="urContent">
+
+    <!-- ── 학원 검색 탭 ── -->
+    <div class="ur-page active" id="urPageSearch">
+      <div class="ur-search-bar">
+        <div class="ur-search-wrap">
+          <span>🔍</span>
+          <input type="text" id="urSearchInput" placeholder="학원 이름, 과목 검색..." oninput="urFilterAcademies()">
+        </div>
+        <div class="ur-filter-row" id="urFilterRow">
+          <div class="ur-filter-chip active" data-subj="all" onclick="urSetFilter(this)">전체</div>
+          <div class="ur-filter-chip" data-subj="math" onclick="urSetFilter(this)">📐 수학</div>
+          <div class="ur-filter-chip" data-subj="english" onclick="urSetFilter(this)">🔤 영어</div>
+          <div class="ur-filter-chip" data-subj="piano" onclick="urSetFilter(this)">🎹 피아노</div>
+          <div class="ur-filter-chip" data-subj="art" onclick="urSetFilter(this)">🎨 미술</div>
+          <div class="ur-filter-chip" data-subj="taekwondo" onclick="urSetFilter(this)">🥋 태권도</div>
+          <div class="ur-filter-chip" data-subj="coding" onclick="urSetFilter(this)">💻 코딩</div>
+          <div class="ur-filter-chip" data-subj="sports" onclick="urSetFilter(this)">⚽ 체육</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;padding:10px 16px 4px;background:#fff;border-bottom:1px solid #F0F0F0;">
+        <button class="ur-sort-btn active" data-sort="dist" onclick="urSetSort(this)">📍 거리순</button>
+        <button class="ur-sort-btn" data-sort="rating" onclick="urSetSort(this)">⭐ 평점순</button>
+        <button class="ur-sort-btn" data-sort="fee" onclick="urSetSort(this)">💰 요금순</button>
+      </div>
+      <div class="ur-academy-list" id="urAcademyList"><!-- JS 렌더링 --></div>
+    </div>
+
+    <!-- ── 스케줄 탭 ── -->
+    <div class="ur-page" id="urPageSchedule">
+      <div class="ur-sched-header">
+        <div class="ur-sched-title">📅 내 스케줄</div>
+        <button class="ur-sched-sim-btn" onclick="hideUserDashboard(); openDemoModal()">✨ AI 추천 받기</button>
+      </div>
+      <div class="ur-week-scroll" id="urWeekScroll"><!-- JS 렌더링 --></div>
+      <div class="ur-sched-section">
+        <div class="ur-sched-section-title">
+          <span>등록된 학원</span>
+          <span style="font-size:11px;color:#9CA3AF;font-weight:400" id="urSchedCount"></span>
+        </div>
+        <div id="urSchedList"><!-- JS 렌더링 --></div>
+      </div>
+    </div>
+
+    <!-- ── 내 정보 탭 ── -->
+    <div class="ur-page" id="urPageMyInfo">
+      <div class="ur-info-section">
+        <div class="ur-section-label">내 계정</div>
+        <div class="ur-profile-card" id="urProfileCard">
+          <div class="ur-p-avatar" id="urProfileAvatar"></div>
+          <div>
+            <div class="ur-p-name" id="urProfileName"></div>
+            <div class="ur-p-email" id="urProfileEmail"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ur-info-section" style="padding-top:0">
+        <div class="ur-section-label">아이 정보</div>
+        <div id="urChildList"><!-- JS 렌더링 --></div>
+        <!-- 아이 추가 폼 (기본 숨김) -->
+        <div class="ur-child-form" id="urChildForm" style="display:none">
+          <div class="ur-form-title" id="urChildFormTitle">➕ 아이 추가</div>
+          <div class="ur-form-row">
+            <div class="ur-form-label">이름</div>
+            <input class="ur-form-input" id="urChildName" placeholder="아이 이름" type="text">
+          </div>
+          <div class="ur-form-row">
+            <div class="ur-form-label">출생연도</div>
+            <input class="ur-form-input" id="urChildBirth" placeholder="예: 2018" type="number" min="2010" max="2024">
+          </div>
+          <div class="ur-form-row">
+            <div class="ur-form-label">학년</div>
+            <select class="ur-form-select" id="urChildGrade">
+              <option value="">선택해주세요</option>
+              <option value="미취학">미취학</option>
+              <option value="초1">초등 1학년</option>
+              <option value="초2">초등 2학년</option>
+              <option value="초3">초등 3학년</option>
+              <option value="초4">초등 4학년</option>
+              <option value="초5">초등 5학년</option>
+              <option value="초6">초등 6학년</option>
+              <option value="중1">중학교 1학년</option>
+              <option value="중2">중학교 2학년</option>
+              <option value="중3">중학교 3학년</option>
+            </select>
+          </div>
+          <div class="ur-form-row">
+            <div class="ur-form-label">이모지 (선택)</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap" id="urEmojiPicker">
+              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'🧒')">🧒</span>
+              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'👦')">👦</span>
+              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'👧')">👧</span>
+              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'🧑')">🧑</span>
+              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'👨')">👨</span>
+              <span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent" onclick="urPickEmoji(this,'👩')">👩</span>
+            </div>
+          </div>
+          <input type="hidden" id="urChildEmoji" value="🧒">
+          <input type="hidden" id="urChildEditId" value="">
+          <div class="ur-form-btns">
+            <button class="ur-btn-save" onclick="urSaveChild()">저장</button>
+            <button class="ur-btn-cancel" onclick="urCancelChildForm()">취소</button>
+          </div>
+        </div>
+        <button class="ur-add-child-btn" id="urAddChildBtn" onclick="urShowChildForm()">+ 아이 추가하기</button>
+      </div>
+      <div class="ur-info-section" style="padding-top:0">
+        <div class="ur-section-label">알림 설정</div>
+        <div class="ur-notif-card">
+          <div class="ur-notif-row">
+            <div>
+              <div class="ur-notif-label">공석 알림</div>
+              <div class="ur-notif-sub">관심 학원 자리 생기면 즉시 알림</div>
+            </div>
+            <button class="ur-toggle-sw on" id="urNotifVacancy" onclick="urToggleNotif(this)"></button>
+          </div>
+          <div class="ur-notif-row">
+            <div>
+              <div class="ur-notif-label">스케줄 리마인더</div>
+              <div class="ur-notif-sub">학원 1시간 전 알림</div>
+            </div>
+            <button class="ur-toggle-sw on" id="urNotifReminder" onclick="urToggleNotif(this)"></button>
+          </div>
+          <div class="ur-notif-row">
+            <div>
+              <div class="ur-notif-label">키즈루트 소식</div>
+              <div class="ur-notif-sub">신기능·이벤트 안내</div>
+            </div>
+            <button class="ur-toggle-sw off" id="urNotifNews" onclick="urToggleNotif(this)"></button>
+          </div>
+        </div>
+      </div>
+      <div class="ur-logout-wrap">
+        <button class="ur-logout-btn" onclick="hideUserDashboard()">로그아웃</button>
+      </div>
+    </div>
+
+  </div><!-- /ur-content -->
+
+  <!-- 하단 탭 바 -->
+  <div class="ur-tabs">
+    <button class="ur-tab active" id="urTab0" onclick="userShowTab(0)">
+      <div class="ur-tab-icon">🔍</div>
+      <div class="ur-tab-label">학원 검색</div>
+    </button>
+    <button class="ur-tab" id="urTab1" onclick="userShowTab(1)">
+      <div class="ur-tab-icon">📅</div>
+      <div class="ur-tab-label">스케줄</div>
+    </button>
+    <button class="ur-tab" id="urTab2" onclick="userShowTab(2)">
+      <div class="ur-tab-icon">👤</div>
+      <div class="ur-tab-label">내 정보</div>
+    </button>
+  </div>
+
+</div><!-- /userRoot -->
 
 <!-- ═══════════════════════════════════════════
      관리자 대시보드 루트 (로그인 후 표시)
