@@ -2734,7 +2734,7 @@
 
 <!-- NAV -->
 <nav>
-  <a class="nav-logo" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'}); return false;">
+  <a class="nav-logo" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'}); _logoClick(); return false;">
     <svg class="nav-logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
       <defs>
         <linearGradient id="navLogoGrad" x1="0" y1="0" x2="1" y2="1">
@@ -4597,6 +4597,13 @@ function onLoginSuccess(name, email, color, provider) {
   document.getElementById('ctaLoggedDesc').innerHTML =
     '<strong>' + email + '</strong>으로 출시 알림을 보내드릴게요.<br>얼리버드 혜택도 자동 적용됩니다.';
 
+  // 관리자 계정이면 대시보드 바로 진입
+  if (email === KR.ADMIN_EMAIL) {
+    KR.setAdminSession();
+    showAdminDashboard();
+    return;
+  }
+
   // 학부모 앱 뷰 전환
   if (typeof showUserDashboard === 'function') {
     showUserDashboard(name, email, color);
@@ -6240,6 +6247,19 @@ function submitVacancyAlert() {
   });
   closeAlertRegModal();
   showToast('🔔 공석 알림이 등록됐어요!');
+}
+
+// ─── 로고 5번 클릭 → 학원 원장 로그인 모달 ───
+var _logoClickCount = 0, _logoClickTimer = null;
+function _logoClick() {
+  _logoClickCount++;
+  clearTimeout(_logoClickTimer);
+  if (_logoClickCount >= 5) {
+    _logoClickCount = 0;
+    openAdminLogin();
+    return;
+  }
+  _logoClickTimer = setTimeout(function() { _logoClickCount = 0; }, 2500);
 }
 
 // ─── Admin Login / Logout ───
