@@ -2019,18 +2019,12 @@ setInterval(() => {
 // ── Admin overlay logic ──────────────────────────────────────
 const ADM_MASTER_EMAIL = 'davegpt25@gmail.com';
 
-// 트리거: 1) URL hash #admin  2) 로고 5번 클릭
-document.addEventListener('DOMContentLoaded', function() {
-  // URL hash 감지 — /kids/#admin 접속 시 바로 대시보드 진입
-  if (location.hash === '#admin') admAutoLogin();
-
-  // 로고 영역(이미지 + 텍스트 모두) 5번 클릭
-  // nav 왼쪽 절반(로고 있는 구역)에 클릭 감지
+// 로고 5번 클릭 트리거 (DOMContentLoaded 불필요 — 스크립트가 body 끝에 위치)
+(function() {
   let clicks = 0, timer = null;
   const navEl = document.querySelector('nav');
   if (navEl) {
     navEl.addEventListener('click', function(e) {
-      // nav 왼쪽 절반 클릭만 카운트 (링크 등 오른쪽 메뉴 제외)
       const rect = navEl.getBoundingClientRect();
       if (e.clientX > rect.left + rect.width * 0.4) return;
       clicks++;
@@ -2039,7 +2033,10 @@ document.addEventListener('DOMContentLoaded', function() {
       timer = setTimeout(() => { clicks = 0; }, 2500);
     });
   }
-});
+})();
+
+// URL hash #admin → 대시보드 바로 진입
+if (location.hash === '#admin') admAutoLogin();
 
 function admOpenModal() {
   document.getElementById('adm-modal-backdrop').classList.add('open');
