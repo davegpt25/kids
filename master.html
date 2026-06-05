@@ -72,16 +72,23 @@ body {
 .login-subtitle {
   font-size: 14px; color: var(--text-sub); margin-bottom: 36px; line-height: 1.6;
 }
-.login-google-btn {
+.login-email-input {
   width: 100%;
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  background: white; border: 1.5px solid var(--border);
-  border-radius: 12px; padding: 14px 20px;
-  font-size: 14px; font-weight: 700; color: var(--text-main);
-  cursor: pointer; transition: all .15s; font-family: inherit;
+  border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 13px 16px;
+  font-size: 14px; font-family: inherit; color: var(--text-main);
+  outline: none; transition: border-color .15s; margin-bottom: 10px;
 }
-.login-google-btn:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(249,115,22,0.15); }
-.login-google-icon { font-size: 20px; }
+.login-email-input:focus { border-color: var(--primary); }
+.login-email-input::placeholder { color: var(--text-muted); }
+.login-submit-btn {
+  width: 100%;
+  background: var(--primary); color: white; border: none;
+  border-radius: 12px; padding: 14px 20px;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background .15s; font-family: inherit;
+}
+.login-submit-btn:hover { background: var(--primary-dark); }
 .login-loading {
   margin-top: 20px; font-size: 12px; color: var(--text-muted);
   display: none;
@@ -358,11 +365,9 @@ textarea.field-input { resize: vertical; min-height: 72px; }
       <div class="login-logo-text">키즈<span>루트</span></div>
     </div>
     <p class="login-subtitle">관리자 및 학원 원장 포털에<br>오신 것을 환영합니다</p>
-    <button class="login-google-btn" id="googleLoginBtn" onclick="signInWithGoogle()">
-      <span class="login-google-icon">G</span>
-      Google 계정으로 로그인
-    </button>
-    <p class="login-loading" id="loginLoading">⏳ 로그인 처리 중...</p>
+    <input class="login-email-input" id="loginEmailInput" type="email" placeholder="이메일 주소 입력" onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-submit-btn" onclick="doLogin()">로그인</button>
+    <p class="login-loading" id="loginLoading">⏳ 처리 중...</p>
     <p class="login-error" id="loginError"></p>
   </div>
 </div>
@@ -680,70 +685,37 @@ textarea.field-input { resize: vertical; min-height: 72px; }
 </div>
 </div>
 
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
-// ── Firebase 초기화 ──────────────────────────────────────
-// ⚠️  TODO: Firebase Console에서 웹 앱 설정을 가져와 아래에 붙여넣으세요
-// https://console.firebase.google.com → 프로젝트 설정 → 내 앱 → 웹앱 → firebaseConfig
-const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
-};
-
-// Config 미설정 감지
-const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
-
-let auth = null;
-if (isConfigured) {
-  const app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-
-  // ── 인증 상태 감지 ──────────────────────────────────────
-  onAuthStateChanged(auth, routeUser);
-
-  // ── Google 로그인 ────────────────────────────────────────
-  window.signInWithGoogle = async function() {
-    document.getElementById('loginLoading').style.display = 'block';
-    document.getElementById('loginError').style.display = 'none';
-    document.getElementById('googleLoginBtn').disabled = true;
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (e) {
-      document.getElementById('loginLoading').style.display = 'none';
-      document.getElementById('googleLoginBtn').disabled = false;
-      document.getElementById('loginError').textContent = '로그인 실패: ' + e.message;
-      document.getElementById('loginError').style.display = 'block';
-    }
-  };
-
-  // ── 로그아웃 ──────────────────────────────────────────────
-  window.handleSignOut = async function() {
-    await signOut(auth);
-    showView('view-login');
-    document.getElementById('loginError').style.display = 'none';
-  };
-
-} else {
-  // Config 미설정 시 안내 메시지
-  window.signInWithGoogle = function() {
-    document.getElementById('loginError').textContent =
-      '⚠️ Firebase 설정이 필요합니다. master.html의 firebaseConfig를 채워주세요. (Firebase Console → 프로젝트 설정 → 웹앱)';
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('loginLoading').style.display = 'none';
-  };
-  window.handleSignOut = function() { showView('view-login'); };
-}
+<script>
+// ── 이메일 기반 로그인 (Firebase 없는 로컬 테스트 모드) ──────
 
 // ── 상수 ──────────────────────────────────────────────────
 const MASTER_EMAIL = 'davegpt25@gmail.com';
+
+// ── 이메일 입력 로그인 ────────────────────────────────────
+window.doLogin = function() {
+  const email = (document.getElementById('loginEmailInput').value || '').trim().toLowerCase();
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!email) {
+    errEl.textContent = '이메일 주소를 입력해 주세요.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = '올바른 이메일 형식이 아닙니다.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  routeUser({ email, displayName: email.split('@')[0] });
+};
+
+window.handleSignOut = function() {
+  document.getElementById('loginEmailInput').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  showView('view-login');
+};
 
 // ── 뷰 전환 헬퍼 ──────────────────────────────────────────
 function showView(id) {
