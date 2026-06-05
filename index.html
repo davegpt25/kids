@@ -4729,6 +4729,15 @@ function onLoginSuccess(name, email, color, provider) {
     return;
   }
 
+  // 초대된 원장 계정이면 원장 포털 진입
+  var invites = (function(){ try { return JSON.parse(localStorage.getItem('kidsroute_invites')||'[]'); } catch(e){ return []; } })();
+  var principalInvite = invites.filter(function(i){ return i.email === email; })[0];
+  if (principalInvite) {
+    localStorage.setItem('krap_session_email', email);
+    krapOpen();
+    return;
+  }
+
   // 학부모 앱 뷰 전환
   if (typeof showUserDashboard === 'function') {
     showUserDashboard(name, email, color);
@@ -6590,14 +6599,15 @@ function adminShowPage(pageId) {
   var pageEl = document.getElementById('admPage' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
   if (pageEl) pageEl.classList.add('adm-page-active');
   Array.prototype.forEach.call(document.querySelectorAll('.adm-nav-item'), function(item) { item.classList.remove('adm-active'); });
-  var navMap = { dashboard:'대시보드', members:'멤버십 관리', features:'기능 설정', alerts:'공석 알림', stats:'가입 통계' };
+  var navMap = { dashboard:'대시보드', members:'멤버십 관리', features:'기능 설정', alerts:'공석 알림', stats:'가입 통계', academies:'학원 관리' };
   Array.prototype.forEach.call(document.querySelectorAll('.adm-nav-item'), function(item) {
     if (item.textContent.trim().indexOf(navMap[pageId]) >= 0) item.classList.add('adm-active');
   });
-  if (pageId === 'members') adminRenderMemberTable('all');
-  if (pageId === 'features') adminRenderFeaturesFull();
-  if (pageId === 'alerts') adminRenderAlertsFull();
-  if (pageId === 'stats') adminRenderStats();
+  if (pageId === 'members')   adminRenderMemberTable('all');
+  if (pageId === 'features')  adminRenderFeaturesFull();
+  if (pageId === 'alerts')    adminRenderAlertsFull();
+  if (pageId === 'stats')     adminRenderStats();
+  if (pageId === 'academies') adminRenderAcademies();
 }
 
 // ── HTML 이스케이프 헬퍼 ──
@@ -6619,6 +6629,70 @@ function adminRenderAll() {
   adminRenderFeatures();
   adminRenderAlerts();
   adminUpdateBadges();
+  adminRenderAcademies();
+}
+
+// ── 🏫 학원 관리 (KR_SYNC 기반) ──────────────────────────
+function adminRenderAcademies() {
+  var container = document.getElementById('admAcadList');
+  if (!container) return;
+  var syncMap = KR_SYNC.all();
+  var invites = (function(){ try { return JSON.parse(localStorage.getItem('kidsroute_invites')||'[]'); } catch(e){ return []; } })();
+  var emailMap = {};
+  invites.forEach(function(inv){ if (inv.academyId) emailMap[String(inv.academyId)] = { email: inv.email, status: inv.status }; });
+
+  container.innerHTML = UR_ACADEMIES.map(function(a) {
+    var over     = syncMap[String(a.id)] || {};
+    var inv      = emailMap[String(a.id)] || {};
+    var verified = over.verified != null ? over.verified : a.verified;
+    var name     = over.name || a.name;
+    var fee      = over.fee  || a.fee;
+    var statusBadge = verified
+      ? '<span style="font-size:11px;font-weight:800;padding:3px 10px;border-radius:100px;background:#ECFDF5;color:#16A34A;">✅ 인증 완료</span>'
+      : inv.email
+        ? '<span style="font-size:11px;font-weight:800;padding:3px 10px;border-radius:100px;background:#FFFBEB;color:#D97706;">⏳ 초대됨</span>'
+        : '<span style="font-size:11px;font-weight:800;padding:3px 10px;border-radius:100px;background:#F1F5F9;color:#94A3B8;">미초대</span>';
+    var approveBtn = (!verified && inv.email)
+      ? '<button onclick="adminApproveAcademy('+a.id+')" style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;border:1.5px solid #F97316;color:#F97316;background:transparent;cursor:pointer;font-family:inherit;">✅ 인증 승인</button>'
+      : verified
+        ? '<button onclick="adminRevokeAcademy('+a.id+')" style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;border:1.5px solid #E2E8F0;color:#94A3B8;background:transparent;cursor:pointer;font-family:inherit;">인증 취소</button>'
+        : '<span style="font-size:11px;color:#94A3B8;">원장 미초대</span>';
+    var principalInfo = inv.email
+      ? '<div style="font-size:11px;color:#94A3B8;margin-top:2px;">원장: ' + inv.email + '</div>'
+      : '';
+    var syncInfo = over.name || over.fee
+      ? '<div style="font-size:11px;color:#6366F1;margin-top:2px;">🔗 원장 수정 반영됨 · 수강료 ' + Math.round((fee||0)/10000) + '만원</div>'
+      : '';
+    return '<div style="background:white;border-radius:12px;padding:14px 18px;border:1px solid #E2E8F0;display:flex;align-items:center;gap:12px;justify-content:space-between;">'
+      + '<div style="display:flex;align-items:center;gap:10px;flex:1;">'
+      +   '<div style="width:10px;height:10px;border-radius:50%;background:' + a.color + ';flex-shrink:0;"></div>'
+      +   '<div>'
+      +     '<div style="font-size:13px;font-weight:700;color:#1E293B;">' + name + ' <span style="font-size:11px;font-weight:400;color:#94A3B8;">(' + a.label + ')</span></div>'
+      +     principalInfo + syncInfo
+      +   '</div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;">' + statusBadge + approveBtn + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function adminApproveAcademy(id) {
+  KR_SYNC.setVerified(id, true);
+  // invites 상태도 업데이트
+  var invites = (function(){ try { return JSON.parse(localStorage.getItem('kidsroute_invites')||'[]'); } catch(e){ return []; } })();
+  invites = invites.map(function(inv) {
+    if (String(inv.academyId) === String(id)) return Object.assign({}, inv, { status: 'accepted' });
+    return inv;
+  });
+  localStorage.setItem('kidsroute_invites', JSON.stringify(invites));
+  adminRenderAcademies();
+  showToast('인증이 승인됐어요. 학부모 페이지에 바로 반영됩니다 ✅');
+}
+
+function adminRevokeAcademy(id) {
+  KR_SYNC.setVerified(id, false);
+  adminRenderAcademies();
+  showToast('인증이 취소됐어요.');
 }
 
 // ── KPI 카드 ──
@@ -7087,6 +7161,86 @@ var UR_ACADEMIES = [
   { id:10, name:'윈윈 체육 센터',    subj:'sports',    label:'체육',   color:'#84CC16', addr:'강남구 역삼동',    lat:37.4990, lng:127.0345, dist:0.8, rating:4.3, reviews:47,  times:['월수금 오후4시','주말오전'],       fee:150000, shuttle:true,  badge:'',       verified:false }
 ];
 
+// ══════════════════════════════════════════════════════════
+// 🔗 공유 데이터 레이어 — 학부모·관리자·원장 세 페이지 싱크
+// localStorage key: 'kidsroute_sync_academies'
+// 구조: { [acadId]: { name, desc, fee, phone, address, capacity,
+//                     timetable, visibility, verified, verifiedAt } }
+// ══════════════════════════════════════════════════════════
+var KR_SYNC = {
+  _KEY: 'kidsroute_sync_academies',
+
+  // 전체 저장된 오버라이드 맵 반환
+  all: function() {
+    try { return JSON.parse(localStorage.getItem(this._KEY) || '{}'); }
+    catch(e) { return {}; }
+  },
+
+  // 특정 학원 오버라이드 반환
+  get: function(id) {
+    return this.all()[String(id)] || null;
+  },
+
+  // 특정 학원 필드 저장 (기존 필드 유지하며 merge)
+  set: function(id, data) {
+    var map = this.all();
+    map[String(id)] = Object.assign({}, map[String(id)] || {}, data);
+    localStorage.setItem(this._KEY, JSON.stringify(map));
+  },
+
+  // UR_ACADEMIES 기본 데이터 + localStorage 오버라이드 병합
+  getMergedAcademies: function() {
+    var map = this.all();
+    return UR_ACADEMIES.map(function(base) {
+      var over = map[String(base.id)];
+      if (!over) return base;
+      return Object.assign({}, base, {
+        name:     over.name     || base.name,
+        fee:      over.fee      != null ? Number(over.fee) : base.fee,
+        addr:     over.address  || base.addr,
+        verified: over.verified != null ? over.verified : base.verified,
+        // 시간표 오버라이드 → times 배열 재생성
+        times:    over.timetable ? KR_SYNC._ttToTimes(over.timetable) : base.times,
+        // 노출 설정: 검색 노출 꺼져 있으면 숨김
+        _hidden:  (over.visibility && over.visibility.search === false)
+      });
+    }).filter(function(a) { return !a._hidden; });
+  },
+
+  // 시간표 객체 → times 배열 (예: "0_16" → "월 오후4시")
+  _ttToTimes: function(timetable) {
+    var dayNames = ['월','화','수','목','금'];
+    var grouped = {};
+    Object.keys(timetable).forEach(function(key) {
+      if (!timetable[key]) return;
+      var parts = key.split('_');
+      var di = parseInt(parts[0]), h = parseInt(parts[1]);
+      var timeStr = h >= 12 ? '오후' + (h === 12 ? 12 : h-12) + '시' : '오전' + h + '시';
+      var dayKey = timeStr;
+      if (!grouped[dayKey]) grouped[dayKey] = [];
+      grouped[dayKey].push(dayNames[di]);
+    });
+    return Object.keys(grouped).slice(0, 3).map(function(t) {
+      return grouped[t].join('') + ' ' + t;
+    });
+  },
+
+  // 원장 인증 상태 변경 (관리자 → 학부모 페이지에 반영)
+  setVerified: function(id, verified) {
+    this.set(id, { verified: verified, verifiedAt: verified ? new Date().toISOString() : null });
+  },
+
+  // 학원 ID → invite email 매핑 반환
+  getAcadEmailMap: function() {
+    try {
+      var invites = JSON.parse(localStorage.getItem('kidsroute_invites') || '[]');
+      var map = {};
+      invites.forEach(function(inv) { if (inv.academyId) map[inv.academyId] = inv.email; });
+      return map;
+    } catch(e) { return {}; }
+  }
+};
+
 var _urUser = { name: '', email: '', color: '#F97316' };
 var _urFilter = 'all';
 var _urSort = 'dist';
@@ -7450,7 +7604,7 @@ function urSearchAddress() {
 
 // ── 필터 적용된 학원 목록 반환 ──
 function urGetFiltered() {
-  return UR_ACADEMIES.filter(function(a) {
+  return KR_SYNC.getMergedAcademies().filter(function(a) {
     if (_urFilter !== 'all' && a.subj !== _urFilter) return false;
     if (_urSearchText && a.name.toLowerCase().indexOf(_urSearchText) < 0 && a.label.indexOf(_urSearchText) < 0) return false;
     return true;
@@ -8255,6 +8409,9 @@ function urToggleNotif(btn) {
       <span class="adm-nav-icon">🔔</span> 공석 알림
       <span class="adm-nav-badge adm-badge-green" id="admBadgeAlerts">0</span>
     </div>
+    <div class="adm-nav-item" onclick="adminShowPage('academies')">
+      <span class="adm-nav-icon">🏫</span> 학원 관리
+    </div>
 
     <div class="adm-nav-group">Analytics</div>
     <div class="adm-nav-item" onclick="adminShowPage('stats')">
@@ -8409,6 +8566,16 @@ function urToggleNotif(btn) {
           <div id="admConversionStats"><!-- JS 렌더링 --></div>
         </div>
       </div>
+    </div>
+
+    <!-- 🏫 학원 관리 페이지 (KR_SYNC 연동) -->
+    <div id="admPageAcademies" class="adm-page">
+      <div class="adm-page-header">
+        <div class="adm-page-title">🏫 학원 관리</div>
+        <div class="adm-page-sub">원장 인증 승인 및 학원 정보 현황 — 학부모 페이지에 실시간 반영됩니다</div>
+      </div>
+      <!-- 학원 목록 (KR_SYNC 기반) -->
+      <div id="admAcadList" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
 
   </main>
@@ -8654,7 +8821,38 @@ textarea.krap-input { resize:vertical;min-height:72px; }
 
 <script>
 // ── 학원 관리 포털 JS ─────────────────────────────────
+// 현재 열린 포털의 학원 ID (UR_ACADEMIES id 숫자 또는 invite academyId)
+var _krapAcadId = null;
+
 function krapOpen() {
+  // 로그인된 원장 이메일로 학원 ID 찾기
+  var invites = (function() {
+    try { return JSON.parse(localStorage.getItem('kidsroute_invites') || '[]'); } catch(e) { return []; }
+  })();
+  // 현재 세션 이메일
+  var sessionEmail = (function() {
+    try { return localStorage.getItem('krap_session_email') || ''; } catch(e) { return ''; }
+  })();
+  var inv = invites.filter(function(i) { return i.email === sessionEmail; })[0];
+  if (inv) _krapAcadId = inv.academyId;
+
+  // 저장된 정보 불러오기
+  if (_krapAcadId) {
+    var saved = KR_SYNC.get(_krapAcadId) || {};
+    var nameEl = document.getElementById('krap-name');
+    var descEl = document.getElementById('krap-desc');
+    var feeEl  = document.getElementById('krap-fee');
+    if (nameEl && saved.name)    nameEl.value = saved.name;
+    if (descEl && saved.desc)    descEl.value = saved.desc;
+    if (feeEl  && saved.fee)     feeEl.value  = saved.fee;
+    var phoneEl = document.getElementById('krap-phone');
+    var addrEl  = document.getElementById('krap-addr');
+    var capEl   = document.getElementById('krap-cap');
+    if (phoneEl && saved.phone)   phoneEl.value = saved.phone;
+    if (addrEl  && saved.address) addrEl.value  = saved.address;
+    if (capEl   && saved.capacity)capEl.value   = saved.capacity;
+  }
+
   document.getElementById('krAcadPortal').classList.add('open');
   document.body.style.overflow = 'hidden';
   krapBuildTt();
@@ -8672,14 +8870,20 @@ function krapTab(id, el) {
 }
 function krapSaveInfo() {
   var d = {
-    name: document.getElementById('krap-name').value,
-    desc: document.getElementById('krap-desc').value,
-    fee:  document.getElementById('krap-fee').value,
-    phone:document.getElementById('krap-phone').value,
-    addr: document.getElementById('krap-addr').value,
-    cap:  document.getElementById('krap-cap').value
+    name:     document.getElementById('krap-name').value,
+    desc:     document.getElementById('krap-desc').value,
+    fee:      document.getElementById('krap-fee').value,
+    phone:    document.getElementById('krap-phone').value,
+    address:  document.getElementById('krap-addr').value,
+    capacity: document.getElementById('krap-cap').value
   };
-  localStorage.setItem('krap_info', JSON.stringify(d));
+  // 헤더 이름 실시간 반영
+  var hname = document.querySelector('.krap-hname');
+  if (hname && d.name) hname.textContent = d.name;
+  // 공유 스토리지에 저장 → 학부모·관리자 페이지에 반영
+  if (_krapAcadId) {
+    KR_SYNC.set(_krapAcadId, d);
+  }
   var t = document.getElementById('krapInfoToast');
   t.style.display = 'block'; setTimeout(function(){ t.style.display='none'; }, 2500);
 }
@@ -8714,7 +8918,9 @@ function krapSaveTt() {
     var m = c.getAttribute('onclick').match(/'([^']+)'/);
     if (m && c.classList.contains('filled')) slots[m[1]] = true;
   });
-  localStorage.setItem('krap_tt', JSON.stringify(slots));
+  if (_krapAcadId) {
+    KR_SYNC.set(_krapAcadId, { timetable: slots });
+  }
   var t = document.getElementById('krapTtToast');
   t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 2500);
 }
@@ -8762,6 +8968,15 @@ function krapSubmitBiz() {
 }
 
 function krapSaveVis() {
+  var keys = ['search', 'timetable', 'fee', 'inquiry'];
+  var settings = {};
+  keys.forEach(function(k) {
+    var el = document.getElementById('krap-vt-' + k) || document.querySelector('#krapVisibility [id="vt-'+k+'"]');
+    if (el) settings[k] = !el.classList.contains('off');
+  });
+  if (_krapAcadId) {
+    KR_SYNC.set(_krapAcadId, { visibility: settings });
+  }
   var t = document.getElementById('krapVisToast');
   t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 2500);
 }
