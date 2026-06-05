@@ -6280,10 +6280,11 @@ function handleAdminLoginOverlay(e) {
 }
 function doAdminLogin() {
   var input = document.getElementById('adminEmailInput');
-  var email = input ? input.value.trim() : '';
+  var val   = input ? input.value.trim() : '';
   var err   = document.getElementById('adminLoginError');
-  if (email === KR.ADMIN_EMAIL) {
-    localStorage.setItem('kr_admin_session', email);
+  // 이메일 또는 "master" 키워드로 입장 가능
+  if (val === KR.ADMIN_EMAIL || val.toLowerCase() === 'master') {
+    localStorage.setItem('kr_admin_session', KR.ADMIN_EMAIL);
     closeAdminLogin();
     showAdminDashboard();
   } else {
@@ -7663,11 +7664,11 @@ function urToggleNotif(btn) {
         <div class="admin-login-sub">키즈루트 어드민</div>
       </div>
     </div>
-    <label class="admin-login-label">이메일</label>
-    <input class="admin-login-input" id="adminEmailInput" type="email"
-           placeholder="관리자 이메일 입력"
+    <label class="admin-login-label">이메일 또는 접속 키</label>
+    <input class="admin-login-input" id="adminEmailInput" type="text"
+           placeholder="이메일 또는 master"
            onkeydown="if(event.key==='Enter') doAdminLogin()">
-    <div class="admin-login-error" id="adminLoginError">관리자 계정이 아닙니다</div>
+    <div class="admin-login-error" id="adminLoginError">접근 권한이 없습니다</div>
     <button class="admin-login-btn" onclick="doAdminLogin()">로그인</button>
     <button class="admin-login-cancel" onclick="closeAdminLogin()">닫기</button>
   </div>
