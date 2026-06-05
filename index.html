@@ -4792,6 +4792,14 @@ function closeDemoModal() {
   document.getElementById('demoOverlay').classList.remove('open');
   document.body.style.overflow = '';
   _stopTypewriter();
+  // 입력창 리셋
+  var input = document.getElementById('demoUserInput');
+  if (input) input.value = '';
+  // 응답 영역 숨김
+  var respWrap = document.getElementById('demoResponseWrap');
+  if (respWrap) respWrap.style.display = 'none';
+  // 애니메이션 오버레이 복귀
+  _demoResumeAnimation();
 }
 
 function handleDemoOverlayClick(e) {
@@ -4826,20 +4834,24 @@ function _typewriterTick() {
     if (_demoCharIdx > 0) {
       _demoCharIdx--;
       el.textContent = query.slice(0, _demoCharIdx);
-      _demoAutoTimer = setTimeout(_typewriterTick, 35);
+      _demoAutoTimer = setTimeout(_typewriterTick, 30);   // 35 → 30 (15% 빠름)
     } else {
-      _demoQueryIdx = (_demoQueryIdx + 1) % _demoQueries.length;
+      // 다음 문장 랜덤 선택 (현재와 다른 인덱스)
+      let nextIdx;
+      do { nextIdx = Math.floor(Math.random() * _demoQueries.length); }
+      while (nextIdx === _demoQueryIdx && _demoQueries.length > 1);
+      _demoQueryIdx = nextIdx;
       _demoErasing = false;
-      _demoAutoTimer = setTimeout(_typewriterTick, 450);
+      _demoAutoTimer = setTimeout(_typewriterTick, 383);  // 450 → 383 (15% 빠름)
     }
   } else {
     if (_demoCharIdx < query.length) {
       el.textContent = query.slice(0, _demoCharIdx + 1);
       _demoCharIdx++;
-      _demoAutoTimer = setTimeout(_typewriterTick, 75);
+      _demoAutoTimer = setTimeout(_typewriterTick, 64);   // 75 → 64 (15% 빠름)
     } else {
       _demoErasing = true;
-      _demoAutoTimer = setTimeout(_typewriterTick, 1800);
+      _demoAutoTimer = setTimeout(_typewriterTick, 1530); // 1800 → 1530 (15% 빠름)
     }
   }
 }
