@@ -266,6 +266,86 @@ body {
 .acad-action-btn.ghost:hover { border-color: var(--text-sub); color: var(--text-sub); background: transparent; }
 .acad-legend { display: flex; gap: 16px; padding: 12px 20px; background: #FAFAF9; border-top: 1px solid var(--border); }
 .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-sub); }
+
+/* ═══════════════════════════════
+   ACADEMY PORTAL VIEW
+═══════════════════════════════ */
+#view-academy { min-height: 100vh; flex-direction: column; }
+
+.academy-portal-header {
+  background: linear-gradient(135deg, #6366F1, #818CF8);
+  padding: 18px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.aph-left { display: flex; align-items: center; gap: 12px; }
+.aph-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.aph-name { font-size: 16px; font-weight: 800; color: white; }
+.aph-sub  { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 1px; }
+.aph-badge { font-size: 11px; font-weight: 800; background: rgba(255,255,255,0.2); color: white; padding: 4px 14px; border-radius: 20px; }
+.aph-signout { background: rgba(255,255,255,0.15); color: white; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.aph-signout:hover { background: rgba(255,255,255,0.25); }
+
+.academy-portal-tabs { display: flex; background: white; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.ap-tab { flex: 1; padding: 14px 8px; text-align: center; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+.ap-tab:hover { color: var(--indigo); }
+.ap-tab.active { color: var(--indigo); border-bottom-color: var(--indigo); background: white; }
+
+.academy-portal-body { flex: 1; overflow-y: auto; background: #F8FAFC; padding: 28px 32px; }
+.aptab-content { display: none; }
+.aptab-content.active { display: block; }
+.ap-section-title { font-size: 15px; font-weight: 800; color: var(--text-main); margin-bottom: 20px; }
+
+.verify-card { border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.verify-card.verified { background: #F0FDF4; border: 1.5px solid #86EFAC; }
+.verify-card.pending  { background: #FFFBEB; border: 1.5px solid #FDE68A; }
+.verify-icon  { font-size: 26px; }
+.verify-text  { flex: 1; }
+.verify-title-verified { font-size: 13px; font-weight: 800; color: #16A34A; }
+.verify-title-pending  { font-size: 13px; font-weight: 800; color: #92400E; }
+.verify-desc-verified  { font-size: 11px; color: #4ADE80; margin-top: 2px; }
+.verify-desc-pending   { font-size: 11px; color: #B45309; margin-top: 2px; }
+.verify-badge-v { background: var(--green); color: white; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; }
+.verify-badge-p { background: var(--yellow); color: white; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.info-field.full { grid-column: 1 / -1; }
+.field-label { font-size: 10px; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 5px; }
+.field-input { width: 100%; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--text-main); font-family: inherit; outline: none; transition: border-color .15s; }
+.field-input:focus { border-color: var(--indigo); }
+textarea.field-input { resize: vertical; min-height: 72px; }
+
+.save-btn { width: 100%; background: var(--indigo); color: white; border: none; border-radius: 12px; padding: 13px; font-size: 14px; font-weight: 800; cursor: pointer; font-family: inherit; margin-top: 20px; transition: background .15s; }
+.save-btn:hover { background: #4F46E5; }
+.save-toast { margin-top: 10px; font-size: 12px; color: var(--green); background: #ECFDF5; border-radius: 8px; padding: 8px 12px; text-align: center; display: none; }
+
+.timetable { display: grid; grid-template-columns: 44px repeat(5, 1fr); gap: 3px; margin-bottom: 20px; }
+.tt-head { text-align: center; font-size: 11px; font-weight: 800; color: var(--text-muted); padding: 6px 0; }
+.tt-time-label { font-size: 10px; color: var(--text-muted); text-align: right; padding-right: 6px; display: flex; align-items: center; justify-content: flex-end; }
+.tt-cell { height: 40px; border-radius: 6px; background: white; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #D6D3D1; cursor: pointer; transition: all .12s; }
+.tt-cell:hover  { border-color: var(--indigo); color: var(--indigo); }
+.tt-cell.filled { background: #EEF2FF; border-color: rgba(99,102,241,0.4); color: var(--indigo); font-size: 11px; font-weight: 800; }
+
+.inquiry-list { display: flex; flex-direction: column; gap: 10px; }
+.inquiry-item { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
+.inquiry-top  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.inquiry-from { font-size: 12px; font-weight: 700; color: var(--text-main); }
+.inquiry-time { font-size: 10px; color: var(--text-muted); }
+.inquiry-text { font-size: 12px; color: var(--text-sub); line-height: 1.6; }
+.new-badge    { font-size: 10px; font-weight: 800; background: var(--indigo-light); color: var(--indigo); padding: 2px 7px; border-radius: 20px; margin-left: 8px; }
+.reply-toggle-btn { margin-top: 10px; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--indigo); color: var(--indigo); background: transparent; cursor: pointer; font-family: inherit; }
+.reply-box { display: none; margin-top: 10px; }
+.reply-textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; font-family: inherit; outline: none; resize: vertical; min-height: 60px; }
+.reply-send-btn { margin-top: 6px; background: var(--indigo); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+
+.visibility-list { display: flex; flex-direction: column; gap: 10px; }
+.visibility-row { display: flex; align-items: center; justify-content: space-between; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
+.vis-title { font-size: 13px; font-weight: 700; color: var(--text-main); }
+.vis-desc  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.vis-toggle { width: 44px; height: 24px; border-radius: 12px; background: var(--green); position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s; }
+.vis-toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; right: 3px; transition: right .2s; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.vis-toggle.off { background: #E7E5E4; }
+.vis-toggle.off::after { right: auto; left: 3px; }
 </style>
 </head>
 <body>
@@ -465,6 +545,139 @@ body {
 
 <!-- ══ VIEW: ACADEMY PORTAL (Task 5에서 추가) ══ -->
 <div id="view-academy" class="view">
+
+<!-- 헤더 -->
+<div class="academy-portal-header">
+  <div class="aph-left">
+    <div class="aph-icon">🏫</div>
+    <div>
+      <div class="aph-name" id="portalAcadName">학원명</div>
+      <div class="aph-sub" id="portalAcadSub">원장 포털</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="aph-badge" id="portalVerifyBadge">인증 대기</div>
+    <button class="aph-signout" onclick="handleSignOut()">로그아웃</button>
+  </div>
+</div>
+
+<!-- 탭 바 -->
+<div class="academy-portal-tabs">
+  <div class="ap-tab active" onclick="switchAcadTab('info', this)">📋 학원 정보</div>
+  <div class="ap-tab" onclick="switchAcadTab('timetable', this)">🕐 시간표</div>
+  <div class="ap-tab" onclick="switchAcadTab('inquiry', this)">💬 문의 <span class="new-badge">2</span></div>
+  <div class="ap-tab" onclick="switchAcadTab('visibility', this)">👁 노출 설정</div>
+</div>
+
+<!-- 탭 본문 -->
+<div class="academy-portal-body">
+
+  <!-- 학원 정보 탭 -->
+  <div id="aptab-info" class="aptab-content active">
+    <div id="verifyCard"></div>
+    <div class="info-grid">
+      <div class="info-field full">
+        <div class="field-label">학원명</div>
+        <input class="field-input" id="f-name" type="text">
+      </div>
+      <div class="info-field full">
+        <div class="field-label">학원 소개</div>
+        <textarea class="field-input" id="f-desc" rows="3"></textarea>
+      </div>
+      <div class="info-field">
+        <div class="field-label">월 수강료 (원)</div>
+        <input class="field-input" id="f-fee" type="number">
+      </div>
+      <div class="info-field">
+        <div class="field-label">연락처</div>
+        <input class="field-input" id="f-phone" type="tel">
+      </div>
+      <div class="info-field">
+        <div class="field-label">주소</div>
+        <input class="field-input" id="f-address" type="text">
+      </div>
+      <div class="info-field">
+        <div class="field-label">정원 (명)</div>
+        <input class="field-input" id="f-capacity" type="number">
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveAcadInfo()">저장하기</button>
+    <div class="save-toast" id="infoSaveToast">✅ 학원 정보가 저장되었습니다.</div>
+  </div>
+
+  <!-- 시간표 탭 -->
+  <div id="aptab-timetable" class="aptab-content">
+    <div class="ap-section-title">🕐 수업 시간표</div>
+    <p style="font-size:12px;color:var(--text-sub);margin-bottom:16px;">셀을 클릭해 수업 시간을 추가하거나 제거하세요.</p>
+    <div class="timetable" id="timetableGrid"></div>
+    <button class="save-btn" onclick="saveTimetable()">시간표 저장</button>
+    <div class="save-toast" id="ttSaveToast">✅ 시간표가 저장되었습니다.</div>
+  </div>
+
+  <!-- 문의 탭 -->
+  <div id="aptab-inquiry" class="aptab-content">
+    <div class="ap-section-title">💬 학부모 문의</div>
+    <div class="inquiry-list">
+      <div class="inquiry-item">
+        <div class="inquiry-top">
+          <div class="inquiry-from">김**학부모<span class="new-badge">NEW</span></div>
+          <div class="inquiry-time">2시간 전</div>
+        </div>
+        <div class="inquiry-text">안녕하세요, 초등 4학년 아이인데 수학 기초반이 있나요? 월수금 수업 가능한지 궁금합니다.</div>
+        <button class="reply-toggle-btn" onclick="toggleReply(this)">답변하기</button>
+        <div class="reply-box">
+          <textarea class="reply-textarea" placeholder="답변을 입력하세요..."></textarea>
+          <button class="reply-send-btn" onclick="sendReply(this)">발송</button>
+        </div>
+      </div>
+      <div class="inquiry-item">
+        <div class="inquiry-top">
+          <div class="inquiry-from">이**학부모<span class="new-badge">NEW</span></div>
+          <div class="inquiry-time">1일 전</div>
+        </div>
+        <div class="inquiry-text">화목 수업 자리가 있는지 확인 부탁드립니다. 5학년 심화반 문의입니다.</div>
+        <button class="reply-toggle-btn" onclick="toggleReply(this)">답변하기</button>
+        <div class="reply-box">
+          <textarea class="reply-textarea" placeholder="답변을 입력하세요..."></textarea>
+          <button class="reply-send-btn" onclick="sendReply(this)">발송</button>
+        </div>
+      </div>
+      <div class="inquiry-item" style="opacity:0.5">
+        <div class="inquiry-top">
+          <div class="inquiry-from">박**학부모</div>
+          <div class="inquiry-time">3일 전 · 답변 완료</div>
+        </div>
+        <div class="inquiry-text">정원이 꽉 찬 경우 대기 등록 가능한가요?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 노출 설정 탭 -->
+  <div id="aptab-visibility" class="aptab-content">
+    <div class="ap-section-title">👁 노출 설정</div>
+    <div class="visibility-list">
+      <div class="visibility-row">
+        <div class="vis-info"><div class="vis-title">학원 검색 노출</div><div class="vis-desc">ON 시 학부모 앱 검색 결과에 표시됩니다</div></div>
+        <div class="vis-toggle" id="vt-search" onclick="toggleVis('search', this)"></div>
+      </div>
+      <div class="visibility-row">
+        <div class="vis-info"><div class="vis-title">시간표 공개</div><div class="vis-desc">수업 시간을 앱에서 확인할 수 있습니다</div></div>
+        <div class="vis-toggle" id="vt-timetable" onclick="toggleVis('timetable', this)"></div>
+      </div>
+      <div class="visibility-row">
+        <div class="vis-info"><div class="vis-title">수강료 공개</div><div class="vis-desc">월 수강료를 앱에서 표시합니다</div></div>
+        <div class="vis-toggle off" id="vt-fee" onclick="toggleVis('fee', this)"></div>
+      </div>
+      <div class="visibility-row">
+        <div class="vis-info"><div class="vis-title">문의 수신</div><div class="vis-desc">학부모의 문의를 받습니다</div></div>
+        <div class="vis-toggle" id="vt-inquiry" onclick="toggleVis('inquiry', this)"></div>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveVisibility()">설정 저장</button>
+    <div class="save-toast" id="visSaveToast">✅ 노출 설정이 저장되었습니다.</div>
+  </div>
+
+</div>
 </div>
 
 <script type="module">
@@ -685,9 +898,141 @@ window.approveInvite = function(email) {
   window.renderAcadList();
   alert(email + ' 원장 인증이 승인되었습니다.');
 };
+window.currentAcadId = null;
+
 window.renderAcademyPortal = function(user, invite) {
-  document.getElementById('view-academy').innerHTML =
-    '<div style="padding:40px;font-size:18px;font-weight:700;color:#6366F1;">🏫 원장 포털: ' + invite.academyName + '<br><br><button onclick="handleSignOut()" style="font-size:14px;padding:8px 16px;border:1px solid #E2E8F0;border-radius:8px;cursor:pointer;background:white;">로그아웃</button></div>';
+  window.currentAcadId = invite.academyId;
+  document.getElementById('portalAcadName').textContent = invite.academyName;
+  document.getElementById('portalAcadSub').textContent = user.email + ' · 원장 포털';
+  const isVerified = invite.status === 'accepted';
+  document.getElementById('portalVerifyBadge').textContent = isVerified ? '✅ 원장 인증' : '⏳ 인증 대기';
+  const verifyCardEl = document.getElementById('verifyCard');
+  if (isVerified) {
+    verifyCardEl.innerHTML = `<div class="verify-card verified"><div class="verify-icon">✅</div><div class="verify-text"><div class="verify-title-verified">원장 인증 완료</div><div class="verify-desc-verified">이 학원의 정보는 원장이 직접 관리합니다</div></div><div class="verify-badge-v">인증 배지 표시중</div></div>`;
+  } else {
+    verifyCardEl.innerHTML = `<div class="verify-card pending"><div class="verify-icon">⏳</div><div class="verify-text"><div class="verify-title-pending">원장 인증 대기</div><div class="verify-desc-pending">관리자가 인증을 승인하면 배지가 표시됩니다</div></div><div class="verify-badge-p">검토 중</div></div>`;
+  }
+  const saved = window.getAcademyData(invite.academyId) || {};
+  document.getElementById('f-name').value     = saved.name     || invite.academyName;
+  document.getElementById('f-desc').value     = saved.desc     || '';
+  document.getElementById('f-fee').value      = saved.fee      || '';
+  document.getElementById('f-phone').value    = saved.phone    || '';
+  document.getElementById('f-address').value  = saved.address  || '';
+  document.getElementById('f-capacity').value = saved.capacity || '';
+  switchAcadTab('info', document.querySelector('.ap-tab'));
+};
+
+window.switchAcadTab = function(tabId, el) {
+  document.querySelectorAll('.aptab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ap-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('aptab-' + tabId).classList.add('active');
+  el.classList.add('active');
+  if (tabId === 'timetable') window.renderTimetable();
+  if (tabId === 'visibility' && window.loadVisibilitySettings) window.loadVisibilitySettings();
+};
+
+window.saveAcadInfo = function() {
+  if (!window.currentAcadId) return;
+  const data = {
+    name:     document.getElementById('f-name').value,
+    desc:     document.getElementById('f-desc').value,
+    fee:      document.getElementById('f-fee').value,
+    phone:    document.getElementById('f-phone').value,
+    address:  document.getElementById('f-address').value,
+    capacity: document.getElementById('f-capacity').value,
+  };
+  window.saveAcademyData(window.currentAcadId, data);
+  const toast = document.getElementById('infoSaveToast');
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 3000);
+};
+
+// Timetable
+const TT_DAYS  = ['월', '화', '수', '목', '금'];
+const TT_HOURS = [14, 15, 16, 17, 18, 19, 20];
+
+window.renderTimetable = function() {
+  const grid = document.getElementById('timetableGrid');
+  if (!grid) return;
+  const saved = window.getAcademyData(window.currentAcadId) || {};
+  const slots = saved.timetable || {};
+  grid.innerHTML = '';
+  grid.insertAdjacentHTML('beforeend', '<div></div>');
+  TT_DAYS.forEach(d => grid.insertAdjacentHTML('beforeend', `<div class="tt-head">${d}</div>`));
+  TT_HOURS.forEach(h => {
+    grid.insertAdjacentHTML('beforeend', `<div class="tt-time-label">${h}시</div>`);
+    TT_DAYS.forEach((d, di) => {
+      const key = di + '_' + h;
+      const filled = slots[key] ? ' filled' : '';
+      const label  = slots[key] ? '수업' : '+';
+      grid.insertAdjacentHTML('beforeend',
+        `<div class="tt-cell${filled}" onclick="toggleSlot('${key}', this)">${label}</div>`
+      );
+    });
+  });
+};
+
+window.toggleSlot = function(key, el) {
+  el.classList.toggle('filled');
+  el.textContent = el.classList.contains('filled') ? '수업' : '+';
+};
+
+window.saveTimetable = function() {
+  if (!window.currentAcadId) return;
+  const cells = document.querySelectorAll('#timetableGrid .tt-cell');
+  const slots = {};
+  cells.forEach(cell => {
+    const m = cell.getAttribute('onclick').match(/'([^']+)'/);
+    if (m && cell.classList.contains('filled')) slots[m[1]] = true;
+  });
+  const data = window.getAcademyData(window.currentAcadId) || {};
+  data.timetable = slots;
+  window.saveAcademyData(window.currentAcadId, data);
+  const toast = document.getElementById('ttSaveToast');
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 3000);
+};
+
+// Inquiry
+window.toggleReply = function(btn) {
+  const box = btn.nextElementSibling;
+  const isOpen = box.style.display === 'block';
+  box.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen ? '답변하기' : '닫기';
+};
+
+window.sendReply = function(btn) {
+  const textarea = btn.previousElementSibling;
+  if (!textarea.value.trim()) { alert('답변 내용을 입력해 주세요.'); return; }
+  alert('답변이 저장되었습니다. (Phase 2에서 실제 발송 연동)');
+  textarea.value = '';
+  btn.closest('.inquiry-item').querySelector('.reply-toggle-btn').click();
+};
+
+// Visibility
+window.toggleVis = function(key, el) { el.classList.toggle('off'); };
+
+window.loadVisibilitySettings = function() {
+  if (!window.currentAcadId) return;
+  const d = window.getAcademyData(window.currentAcadId) || {};
+  const vis = d.visibility || { search: true, timetable: true, fee: false, inquiry: true };
+  ['search', 'timetable', 'fee', 'inquiry'].forEach(k => {
+    const el = document.getElementById('vt-' + k);
+    if (el) el.classList.toggle('off', !vis[k]);
+  });
+};
+
+window.saveVisibility = function() {
+  if (!window.currentAcadId) return;
+  const keys = ['search', 'timetable', 'fee', 'inquiry'];
+  const settings = {};
+  keys.forEach(k => { settings[k] = !document.getElementById('vt-' + k).classList.contains('off'); });
+  const data = window.getAcademyData(window.currentAcadId) || {};
+  data.visibility = settings;
+  window.saveAcademyData(window.currentAcadId, data);
+  const toast = document.getElementById('visSaveToast');
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 3000);
 };
 </script>
 </body>
