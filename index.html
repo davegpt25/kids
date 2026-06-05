@@ -3526,7 +3526,7 @@
 <section class="demo-section fade-up" id="demo">
   <div class="section-badge">무료 체험</div>
   <h2>30초 만에 스케줄 짜보기</h2>
-  <p>과목 고르고 시간대 선택하면 — AI가 겹치지 않는 학원 조합을 바로 추천해드려요.</p>
+  <p style="max-width:480px;margin:0 auto 32px;line-height:1.7;">과목을 고르고 시간대를 선택하면<br>AI가 겹치지 않는 학원 조합을 바로 추천해드려요.</p>
   <div class="demo-cta-card">
     <div class="demo-cta-steps">
       <div class="demo-cta-step">
@@ -3729,8 +3729,8 @@
 <section id="live-stops" style="background:var(--bg-base);">
   <div class="live-section">
     <div class="live-badge"><span class="live-dot"></span>LIVE &middot; 실시간 현황</div>
-    <h2>같은 방향 5명이 모이면,<br>학원이 셔틀을 직접 운영해요</h2>
-    <p class="live-subtitle">키즈루트가 방향별 탑승 수요를 모아드려요.<br>5명이 채워지면 <strong>학원이 직접 정류장을 만들고 운행을 시작해요.</strong></p>
+    <h2>학원에 정류장 추가를<br>요청해요</h2>
+    <p class="live-subtitle">같은 방향 학부모 5명이 모이면, 키즈루트가 학원에 직접 정류장 개설을 요청해요.<br><strong>학원이 수요를 확인하고 셔틀 운행을 시작합니다.</strong></p>
 
     <div class="live-tabs">
       <button class="live-tab active" onclick="switchLiveTab('parent')">👨‍👩‍👧 학부모 시각</button>
@@ -5650,10 +5650,10 @@ function _lsRenderStopGrid() {
       ? `<span class="live-near-pill">D-1명!</span>` : '';
     const action = r.complete
       ? `<div class="live-complete-badge">
-           ✅ <strong>${r.acName}</strong>이 정류장을 생성했어요! 셔틀 운행 시작
+           🚌 <strong>${r.acName}</strong>이 정류장 개설을 수락했어요! 셔틀 운행 중
          </div>`
       : `<div class="live-join-hint">
-           ${remain}명 더 모이면 <strong>${r.acName}</strong>이 직접 정류장을 만들어요
+           ${remain}명 더 모이면 키즈루트가 <strong>${r.acName}</strong>에 정류장 추가를 요청해요
          </div>
          <button class="live-join-btn">+ 탑승 신청하기</button>`;
     return `
@@ -5703,8 +5703,8 @@ function _lsRenderAcademy() {
           ? `<span class="live-kin-badge near">D-1명!</span>`
           : `<span class="live-kin-badge remaining">D-${remain}명</span>`;
       const hint = r.complete
-        ? `<div class="live-kin-hint ok">학원이 정류장을 생성했어요 — 셔틀 운행 시작 🚌</div>`
-        : `<div class="live-kin-hint">${remain}명 더 모이면 학원이 이 방향 정류장을 직접 운영해요</div>`;
+        ? `<div class="live-kin-hint ok">학원이 정류장 개설을 수락했어요 — 셔틀 운행 중 🚌</div>`
+        : `<div class="live-kin-hint">${remain}명 더 모이면 키즈루트가 학원에 정류장 추가를 요청해요</div>`;
       return `<div class="live-kin-row ${cls}" id="lsKin-${r.id}">
         <div class="live-kin-info">
           <div class="live-kin-name">🚌 ${r.dir}</div>
