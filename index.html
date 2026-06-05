@@ -8318,7 +8318,7 @@ textarea.krap-input { resize:vertical;min-height:72px; }
         <div class="krap-verify-badge ok">인증 배지 표시중</div>
       </div>
       <div class="krap-grid">
-        <div class="krap-field full"><div class="krap-label">학원명</div><input class="krap-input" id="krap-name" value="강남베스트수학학원"></div>
+        <div class="krap-field full"><div class="krap-label">학원명</div><input class="krap-input" id="krap-name" value="강남베스트수학학원" oninput="document.querySelector('.krap-hname').textContent=this.value||'학원명'"></div>
         <div class="krap-field full"><div class="krap-label">학원 소개</div><textarea class="krap-input" id="krap-desc" rows="3">10년 경력의 수학 전문 학원입니다. 소규모 그룹 수업으로 꼼꼼한 지도를 약속드립니다.</textarea></div>
         <div class="krap-field"><div class="krap-label">월 수강료 (원)</div><input class="krap-input" id="krap-fee" type="number" value="300000"></div>
         <div class="krap-field"><div class="krap-label">연락처</div><input class="krap-input" id="krap-phone" value="02-1234-5678"></div>
@@ -8327,6 +8327,41 @@ textarea.krap-input { resize:vertical;min-height:72px; }
       </div>
       <button class="krap-save-btn" onclick="krapSaveInfo()">저장하기</button>
       <div class="krap-toast" id="krapInfoToast">✅ 학원 정보가 저장되었습니다.</div>
+
+      <!-- 사업자 등록증 인증 섹션 -->
+      <div id="krapBizSection" style="margin-top:20px;">
+        <div style="font-size:13px;font-weight:800;color:#1E293B;margin-bottom:12px;">🏢 학원 원장 인증</div>
+
+        <!-- 미인증 상태 (기본) -->
+        <div id="krapBizPending" style="background:#FFFBEB;border:1.5px dashed #FDE68A;border-radius:12px;padding:16px 18px;">
+          <div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:4px;">⏳ 인증 대기 중</div>
+          <div style="font-size:12px;color:#B45309;margin-bottom:14px;line-height:1.6;">사업자 등록증을 첨부하면 관리자 검토 후 <strong>원장 인증 배지</strong>가 부여됩니다.</div>
+          <label style="display:block;font-size:10px;font-weight:800;color:#92400E;letter-spacing:.5px;margin-bottom:6px;">사업자 등록증 첨부</label>
+          <div id="krapBizDropzone"
+            onclick="document.getElementById('krapBizFile').click()"
+            ondragover="event.preventDefault();this.style.borderColor='#6366F1'"
+            ondragleave="this.style.borderColor=''"
+            ondrop="krapHandleBizDrop(event)"
+            style="border:2px dashed #E2E8F0;border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:white;transition:border-color .15s;">
+            <div style="font-size:28px;margin-bottom:6px;">📄</div>
+            <div style="font-size:13px;font-weight:600;color:#64748B;">클릭하거나 파일을 끌어다 놓으세요</div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:3px;">PDF, JPG, PNG · 최대 10MB</div>
+          </div>
+          <input type="file" id="krapBizFile" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="krapHandleBizFile(this)">
+          <div id="krapBizFileName" style="display:none;margin-top:8px;font-size:12px;color:#6366F1;font-weight:600;"></div>
+          <button id="krapBizSubmitBtn" onclick="krapSubmitBiz()" style="display:none;width:100%;margin-top:10px;background:#6366F1;color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">인증 신청하기</button>
+        </div>
+
+        <!-- 인증 완료 상태 (신청 후) -->
+        <div id="krapBizDone" style="display:none;background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:12px;padding:14px 18px;display:none;align-items:center;gap:12px;">
+          <div style="font-size:24px;">✅</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#16A34A;">인증 신청 완료</div>
+            <div style="font-size:11px;color:#4ADE80;margin-top:2px;">관리자 검토 후 1~2 영업일 내 배지가 부여됩니다.</div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- 시간표 탭 -->
@@ -8454,6 +8489,34 @@ function krapSendReply(btn) {
   btn.closest('.krap-inq-item').querySelector('.krap-reply-btn').click();
 }
 // 노출 설정
+// 사업자 등록증 업로드
+function krapHandleBizFile(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  krapShowBizFile(file.name);
+}
+function krapHandleBizDrop(e) {
+  e.preventDefault();
+  document.getElementById('krapBizDropzone').style.borderColor = '';
+  var file = e.dataTransfer.files[0];
+  if (file) krapShowBizFile(file.name);
+}
+function krapShowBizFile(name) {
+  var nameEl = document.getElementById('krapBizFileName');
+  nameEl.textContent = '📎 ' + name;
+  nameEl.style.display = 'block';
+  document.getElementById('krapBizSubmitBtn').style.display = 'block';
+}
+function krapSubmitBiz() {
+  var pendingEl = document.getElementById('krapBizPending');
+  var doneEl    = document.getElementById('krapBizDone');
+  pendingEl.style.display = 'none';
+  doneEl.style.display    = 'flex';
+  // 헤더 배지를 "인증 검토중"으로 변경
+  var badge = document.querySelector('.krap-hbadge');
+  if (badge) { badge.textContent = '🔍 검토중'; badge.style.background = 'rgba(245,158,11,0.25)'; }
+}
+
 function krapSaveVis() {
   var t = document.getElementById('krapVisToast');
   t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 2500);
