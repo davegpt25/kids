@@ -6282,8 +6282,12 @@ function doAdminLogin() {
   var input = document.getElementById('adminEmailInput');
   var val   = input ? input.value.trim() : '';
   var err   = document.getElementById('adminLoginError');
-  // 이메일 또는 "master" 키워드로 입장 가능
-  if (val === KR.ADMIN_EMAIL || val.toLowerCase() === 'master') {
+  // "master" 키워드 → 학원 관리 포털
+  if (val.toLowerCase() === 'master') {
+    closeAdminLogin();
+    krapOpen();
+  // 관리자 이메일 → 기존 KPI 대시보드
+  } else if (val === KR.ADMIN_EMAIL) {
     localStorage.setItem('kr_admin_session', KR.ADMIN_EMAIL);
     closeAdminLogin();
     showAdminDashboard();
@@ -8128,6 +8132,296 @@ function urToggleNotif(btn) {
 
   </main>
 </div>
+
+<!-- ════════════════════════════════════════════════
+     학원 관리 포털 오버레이 (로고 5번 클릭 → master 입력)
+════════════════════════════════════════════════ -->
+<style>
+#krAcadPortal {
+  display:none; position:fixed; inset:0; z-index:9600;
+  flex-direction:column; font-family:'Pretendard',-apple-system,sans-serif;
+  background:#F8FAFC; font-size:13px;
+}
+#krAcadPortal.open { display:flex; }
+
+/* 헤더 */
+.krap-header {
+  background:linear-gradient(135deg,#6366F1,#818CF8);
+  padding:16px 28px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.krap-header-left { display:flex; align-items:center; gap:12px; }
+.krap-hicon { width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px; }
+.krap-hname { font-size:16px;font-weight:800;color:#fff; }
+.krap-hsub  { font-size:11px;color:rgba(255,255,255,.7);margin-top:1px; }
+.krap-hbadge { font-size:11px;font-weight:800;background:rgba(255,255,255,.2);color:#fff;padding:4px 14px;border-radius:20px; }
+.krap-hlogout { background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit; }
+.krap-hlogout:hover { background:rgba(255,255,255,.25); }
+
+/* 탭 바 */
+.krap-tabs { display:flex;background:#fff;border-bottom:1px solid #E2E8F0;flex-shrink:0; }
+.krap-tab {
+  flex:1;padding:13px 8px;text-align:center;font-size:13px;font-weight:700;
+  color:#94A3B8;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;
+}
+.krap-tab:hover { color:#6366F1; }
+.krap-tab.active { color:#6366F1;border-bottom-color:#6366F1;background:#fff; }
+
+/* 본문 */
+.krap-body { flex:1;overflow-y:auto;padding:28px 32px;background:#F8FAFC; }
+.krap-tab-pane { display:none; }
+.krap-tab-pane.active { display:block; }
+.krap-sec-title { font-size:15px;font-weight:800;color:#1E293B;margin-bottom:20px; }
+
+/* 인증 카드 */
+.krap-verify { border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:20px; }
+.krap-verify.ok  { background:#F0FDF4;border:1.5px solid #86EFAC; }
+.krap-verify.pend{ background:#FFFBEB;border:1.5px solid #FDE68A; }
+.krap-verify-icon { font-size:26px; }
+.krap-verify-title-ok  { font-size:13px;font-weight:800;color:#16A34A; }
+.krap-verify-title-pend{ font-size:13px;font-weight:800;color:#92400E; }
+.krap-verify-desc  { font-size:11px;color:#94A3B8;margin-top:2px; }
+.krap-verify-badge { font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;white-space:nowrap; }
+.krap-verify-badge.ok   { background:#10B981;color:#fff; }
+.krap-verify-badge.pend { background:#F59E0B;color:#fff; }
+
+/* 정보 폼 */
+.krap-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.krap-field.full { grid-column:1/-1; }
+.krap-label { font-size:10px;font-weight:800;color:#94A3B8;letter-spacing:.5px;margin-bottom:5px; }
+.krap-input {
+  width:100%;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;
+  padding:10px 14px;font-size:13px;color:#1E293B;font-family:inherit;outline:none;transition:border-color .15s;
+}
+.krap-input:focus { border-color:#6366F1; }
+textarea.krap-input { resize:vertical;min-height:72px; }
+.krap-save-btn {
+  width:100%;background:#6366F1;color:#fff;border:none;border-radius:12px;
+  padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:20px;transition:background .15s;
+}
+.krap-save-btn:hover { background:#4F46E5; }
+.krap-toast { margin-top:10px;font-size:12px;color:#10B981;background:#ECFDF5;border-radius:8px;padding:8px 12px;text-align:center;display:none; }
+
+/* 시간표 */
+.krap-tt { display:grid;grid-template-columns:44px repeat(5,1fr);gap:3px;margin-bottom:20px; }
+.krap-tt-head { text-align:center;font-size:11px;font-weight:800;color:#94A3B8;padding:6px 0; }
+.krap-tt-time { font-size:10px;color:#94A3B8;text-align:right;padding-right:6px;display:flex;align-items:center;justify-content:flex-end; }
+.krap-tt-cell {
+  height:40px;border-radius:6px;background:#fff;border:1.5px solid #E2E8F0;
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:#D6D3D1;cursor:pointer;transition:all .12s;
+}
+.krap-tt-cell:hover  { border-color:#6366F1;color:#6366F1; }
+.krap-tt-cell.filled { background:#EEF2FF;border-color:rgba(99,102,241,.4);color:#6366F1;font-size:11px;font-weight:800; }
+
+/* 문의 */
+.krap-inq-item { background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px 18px;margin-bottom:10px; }
+.krap-inq-top  { display:flex;align-items:center;justify-content:space-between;margin-bottom:6px; }
+.krap-inq-from { font-size:12px;font-weight:700;color:#1E293B; }
+.krap-inq-time { font-size:10px;color:#94A3B8; }
+.krap-inq-text { font-size:12px;color:#64748B;line-height:1.6; }
+.krap-new-badge { font-size:10px;font-weight:800;background:#EEF2FF;color:#6366F1;padding:2px 7px;border-radius:20px;margin-left:8px; }
+.krap-reply-btn { margin-top:10px;font-size:11px;font-weight:700;padding:6px 14px;border-radius:8px;border:1.5px solid #6366F1;color:#6366F1;background:transparent;cursor:pointer;font-family:inherit; }
+.krap-reply-box { display:none;margin-top:10px; }
+.krap-reply-ta  { width:100%;border:1.5px solid #E2E8F0;border-radius:8px;padding:10px 12px;font-size:12px;font-family:inherit;outline:none;resize:vertical;min-height:60px; }
+.krap-reply-send { margin-top:6px;background:#6366F1;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit; }
+
+/* 노출 설정 */
+.krap-vis-row {
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px 18px;margin-bottom:10px;
+}
+.krap-vis-title { font-size:13px;font-weight:700;color:#1E293B; }
+.krap-vis-desc  { font-size:11px;color:#94A3B8;margin-top:2px; }
+.krap-vis-toggle {
+  width:44px;height:24px;border-radius:12px;background:#10B981;
+  position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;
+}
+.krap-vis-toggle::after {
+  content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;
+  top:3px;right:3px;transition:right .2s;box-shadow:0 1px 4px rgba(0,0,0,.15);
+}
+.krap-vis-toggle.off { background:#E2E8F0; }
+.krap-vis-toggle.off::after { right:auto;left:3px; }
+</style>
+
+<div id="krAcadPortal">
+  <!-- 헤더 -->
+  <div class="krap-header">
+    <div class="krap-header-left">
+      <div class="krap-hicon">🏫</div>
+      <div>
+        <div class="krap-hname">강남베스트수학</div>
+        <div class="krap-hsub">원장 포털 — 학원 관리</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="krap-hbadge">✅ 원장 인증</div>
+      <button class="krap-hlogout" onclick="krapClose()">로그아웃</button>
+    </div>
+  </div>
+
+  <!-- 탭 바 -->
+  <div class="krap-tabs">
+    <div class="krap-tab active" onclick="krapTab('info',this)">📋 학원 정보</div>
+    <div class="krap-tab" onclick="krapTab('timetable',this)">🕐 시간표</div>
+    <div class="krap-tab" onclick="krapTab('inquiry',this)">💬 문의 <span class="krap-new-badge">2</span></div>
+    <div class="krap-tab" onclick="krapTab('visibility',this)">👁 노출 설정</div>
+  </div>
+
+  <!-- 본문 -->
+  <div class="krap-body">
+
+    <!-- 학원 정보 탭 -->
+    <div id="krapInfo" class="krap-tab-pane active">
+      <div class="krap-verify ok">
+        <div class="krap-verify-icon">✅</div>
+        <div style="flex:1;">
+          <div class="krap-verify-title-ok">원장 인증 완료</div>
+          <div class="krap-verify-desc">이 학원의 정보는 원장이 직접 관리합니다</div>
+        </div>
+        <div class="krap-verify-badge ok">인증 배지 표시중</div>
+      </div>
+      <div class="krap-grid">
+        <div class="krap-field full"><div class="krap-label">학원명</div><input class="krap-input" id="krap-name" value="강남베스트수학학원"></div>
+        <div class="krap-field full"><div class="krap-label">학원 소개</div><textarea class="krap-input" id="krap-desc" rows="3">10년 경력의 수학 전문 학원입니다. 소규모 그룹 수업으로 꼼꼼한 지도를 약속드립니다.</textarea></div>
+        <div class="krap-field"><div class="krap-label">월 수강료 (원)</div><input class="krap-input" id="krap-fee" type="number" value="300000"></div>
+        <div class="krap-field"><div class="krap-label">연락처</div><input class="krap-input" id="krap-phone" value="02-1234-5678"></div>
+        <div class="krap-field"><div class="krap-label">주소</div><input class="krap-input" id="krap-addr" value="강남구 역삼동 123-4"></div>
+        <div class="krap-field"><div class="krap-label">정원 (명)</div><input class="krap-input" id="krap-cap" type="number" value="15"></div>
+      </div>
+      <button class="krap-save-btn" onclick="krapSaveInfo()">저장하기</button>
+      <div class="krap-toast" id="krapInfoToast">✅ 학원 정보가 저장되었습니다.</div>
+    </div>
+
+    <!-- 시간표 탭 -->
+    <div id="krapTimetable" class="krap-tab-pane">
+      <div class="krap-sec-title">🕐 수업 시간표</div>
+      <p style="font-size:12px;color:#64748B;margin-bottom:16px;">셀을 클릭해 수업 시간을 추가하거나 제거하세요.</p>
+      <div class="krap-tt" id="krapTtGrid"></div>
+      <button class="krap-save-btn" onclick="krapSaveTt()">시간표 저장</button>
+      <div class="krap-toast" id="krapTtToast">✅ 시간표가 저장되었습니다.</div>
+    </div>
+
+    <!-- 문의 탭 -->
+    <div id="krapInquiry" class="krap-tab-pane">
+      <div class="krap-sec-title">💬 학부모 문의</div>
+      <div class="krap-inq-item">
+        <div class="krap-inq-top"><div class="krap-inq-from">김**학부모<span class="krap-new-badge">NEW</span></div><div class="krap-inq-time">2시간 전</div></div>
+        <div class="krap-inq-text">초등 4학년 아이인데 수학 기초반이 있나요? 월수금 수업 가능한지 궁금합니다.</div>
+        <button class="krap-reply-btn" onclick="krapToggleReply(this)">답변하기</button>
+        <div class="krap-reply-box"><textarea class="krap-reply-ta" placeholder="답변을 입력하세요..."></textarea><button class="krap-reply-send" onclick="krapSendReply(this)">발송</button></div>
+      </div>
+      <div class="krap-inq-item">
+        <div class="krap-inq-top"><div class="krap-inq-from">이**학부모<span class="krap-new-badge">NEW</span></div><div class="krap-inq-time">1일 전</div></div>
+        <div class="krap-inq-text">화목 수업 자리가 있는지 확인 부탁드립니다. 5학년 심화반 문의입니다.</div>
+        <button class="krap-reply-btn" onclick="krapToggleReply(this)">답변하기</button>
+        <div class="krap-reply-box"><textarea class="krap-reply-ta" placeholder="답변을 입력하세요..."></textarea><button class="krap-reply-send" onclick="krapSendReply(this)">발송</button></div>
+      </div>
+      <div class="krap-inq-item" style="opacity:.5">
+        <div class="krap-inq-top"><div class="krap-inq-from">박**학부모</div><div class="krap-inq-time">3일 전 · 답변 완료</div></div>
+        <div class="krap-inq-text">정원이 꽉 찬 경우 대기 등록 가능한가요?</div>
+      </div>
+    </div>
+
+    <!-- 노출 설정 탭 -->
+    <div id="krapVisibility" class="krap-tab-pane">
+      <div class="krap-sec-title">👁 노출 설정</div>
+      <div class="krap-vis-row"><div><div class="krap-vis-title">학원 검색 노출</div><div class="krap-vis-desc">ON 시 학부모 앱 검색 결과에 표시됩니다</div></div><div class="krap-vis-toggle" onclick="this.classList.toggle('off')"></div></div>
+      <div class="krap-vis-row"><div><div class="krap-vis-title">시간표 공개</div><div class="krap-vis-desc">수업 시간을 앱에서 확인할 수 있습니다</div></div><div class="krap-vis-toggle" onclick="this.classList.toggle('off')"></div></div>
+      <div class="krap-vis-row"><div><div class="krap-vis-title">수강료 공개</div><div class="krap-vis-desc">월 수강료를 앱에서 표시합니다</div></div><div class="krap-vis-toggle off" onclick="this.classList.toggle('off')"></div></div>
+      <div class="krap-vis-row"><div><div class="krap-vis-title">문의 수신</div><div class="krap-vis-desc">학부모의 문의를 받습니다</div></div><div class="krap-vis-toggle" onclick="this.classList.toggle('off')"></div></div>
+      <button class="krap-save-btn" onclick="krapSaveVis()">설정 저장</button>
+      <div class="krap-toast" id="krapVisToast">✅ 노출 설정이 저장되었습니다.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── 학원 관리 포털 JS ─────────────────────────────────
+function krapOpen() {
+  document.getElementById('krAcadPortal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  krapBuildTt();
+}
+function krapClose() {
+  document.getElementById('krAcadPortal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function krapTab(id, el) {
+  document.querySelectorAll('.krap-tab-pane').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.krap-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('krap' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active');
+  el.classList.add('active');
+  if (id === 'timetable') krapBuildTt();
+}
+function krapSaveInfo() {
+  var d = {
+    name: document.getElementById('krap-name').value,
+    desc: document.getElementById('krap-desc').value,
+    fee:  document.getElementById('krap-fee').value,
+    phone:document.getElementById('krap-phone').value,
+    addr: document.getElementById('krap-addr').value,
+    cap:  document.getElementById('krap-cap').value
+  };
+  localStorage.setItem('krap_info', JSON.stringify(d));
+  var t = document.getElementById('krapInfoToast');
+  t.style.display = 'block'; setTimeout(function(){ t.style.display='none'; }, 2500);
+}
+// 시간표
+var _krapSlots = {};
+function krapBuildTt() {
+  var grid = document.getElementById('krapTtGrid');
+  if (!grid || grid.childElementCount > 0) return;
+  var days = ['월','화','수','목','금'];
+  var hours = [14,15,16,17,18,19,20];
+  try { _krapSlots = JSON.parse(localStorage.getItem('krap_tt') || '{}'); } catch(e){}
+  grid.innerHTML = '<div></div>';
+  days.forEach(function(d){ grid.innerHTML += '<div class="krap-tt-head">'+d+'</div>'; });
+  hours.forEach(function(h) {
+    grid.innerHTML += '<div class="krap-tt-time">'+h+'시</div>';
+    days.forEach(function(d, di) {
+      var key = di+'_'+h;
+      var filled = _krapSlots[key] ? ' filled' : '';
+      var lbl = _krapSlots[key] ? '수업' : '+';
+      grid.innerHTML += '<div class="krap-tt-cell'+filled+'" onclick="krapToggleTt(\''+key+'\',this)">'+lbl+'</div>';
+    });
+  });
+}
+function krapToggleTt(key, el) {
+  el.classList.toggle('filled');
+  el.textContent = el.classList.contains('filled') ? '수업' : '+';
+}
+function krapSaveTt() {
+  var cells = document.querySelectorAll('#krapTtGrid .krap-tt-cell');
+  var slots = {};
+  cells.forEach(function(c) {
+    var m = c.getAttribute('onclick').match(/'([^']+)'/);
+    if (m && c.classList.contains('filled')) slots[m[1]] = true;
+  });
+  localStorage.setItem('krap_tt', JSON.stringify(slots));
+  var t = document.getElementById('krapTtToast');
+  t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 2500);
+}
+// 문의
+function krapToggleReply(btn) {
+  var box = btn.nextElementSibling;
+  var open = box.style.display === 'block';
+  box.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '답변하기' : '닫기';
+}
+function krapSendReply(btn) {
+  var ta = btn.previousElementSibling;
+  if (!ta.value.trim()) { alert('답변 내용을 입력해 주세요.'); return; }
+  alert('답변이 저장되었습니다.');
+  ta.value = '';
+  btn.closest('.krap-inq-item').querySelector('.krap-reply-btn').click();
+}
+// 노출 설정
+function krapSaveVis() {
+  var t = document.getElementById('krapVisToast');
+  t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 2500);
+}
+</script>
 
 </body>
 </html>
