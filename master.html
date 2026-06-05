@@ -91,6 +91,181 @@ body {
   background: #FEF2F2; border-radius: 8px; padding: 10px 14px;
   display: none;
 }
+
+/* ═══════════════════════════════
+   MASTER DASHBOARD VIEW
+═══════════════════════════════ */
+#view-master { min-height: 100vh; flex-direction: row; }
+
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: #fff; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 20px 12px;
+  position: sticky; top: 0; height: 100vh;
+}
+.sidebar-logo {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 8px 20px;
+  border-bottom: 1px solid #F1F5F9; margin-bottom: 16px;
+}
+.sidebar-logo-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.sidebar-logo-text { font-weight: 800; font-size: 14px; color: #1E293B; }
+.sidebar-logo-badge {
+  font-size: 9px; font-weight: 700; background: var(--primary-light);
+  color: var(--primary); padding: 1px 6px; border-radius: 100px;
+  border: 1px solid #FED7AA;
+}
+.nav-group-label {
+  font-size: 10px; font-weight: 700; color: #94A3B8;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0 8px; margin-bottom: 4px; margin-top: 12px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 10px;
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  color: #64748B; transition: all 0.15s; margin-bottom: 2px;
+}
+.nav-item:hover { background: #F8FAFC; color: var(--text-main); }
+.nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+.nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-badge {
+  margin-left: auto; background: var(--primary); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 100px;
+}
+.nav-badge.green { background: var(--green); }
+.sidebar-footer {
+  margin-top: auto; padding-top: 16px; border-top: 1px solid #F1F5F9;
+}
+.admin-profile {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 10px; background: #F8FAFC;
+}
+.admin-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: #fff; font-weight: 700;
+}
+.admin-name { font-size: 11px; font-weight: 700; color: #1E293B; }
+.admin-role { font-size: 10px; color: #94A3B8; }
+.signout-btn {
+  width: 100%; margin-top: 8px; background: none; border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px; font-size: 11px; font-weight: 600;
+  color: var(--text-sub); cursor: pointer; font-family: inherit;
+}
+.signout-btn:hover { border-color: var(--red); color: var(--red); }
+
+.master-main { flex: 1; padding: 28px 32px; overflow-y: auto; }
+.page-header { margin-bottom: 24px; }
+.page-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
+.page-sub { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.kpi-card { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 16px 18px; }
+.kpi-icon { float: right; font-size: 22px; margin-top: -2px; opacity: 0.7; }
+.kpi-label { font-size: 11px; font-weight: 600; color: #94A3B8; margin-bottom: 6px; }
+.kpi-value { font-size: 26px; font-weight: 800; color: var(--text-main); line-height: 1; }
+.kpi-delta { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; margin-top: 6px; padding: 2px 7px; border-radius: 100px; }
+.kpi-delta.up   { background: #ECFDF5; color: #16A34A; }
+.kpi-delta.down { background: #FEF2F2; color: #DC2626; }
+
+.section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.section-grid.wide { grid-template-columns: 1.6fr 1fr; }
+.card { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 18px 20px; }
+.card-title { font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.card-title .badge { font-size: 10px; font-weight: 700; background: var(--primary-light); color: var(--primary); padding: 1px 7px; border-radius: 100px; }
+.card-title .action-link { margin-left: auto; font-size: 11px; color: var(--primary); font-weight: 600; cursor: pointer; }
+
+.member-list { display: flex; flex-direction: column; gap: 8px; }
+.member-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #F8FAFC; border: 1px solid #F1F5F9; }
+.member-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #6366F1, #8B5CF6); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; font-weight: 700; flex-shrink: 0; }
+.member-avatar.orange { background: linear-gradient(135deg, #FF9A3C, #F97316); }
+.member-avatar.green  { background: linear-gradient(135deg, #34D399, #10B981); }
+.member-email { font-size: 12px; font-weight: 600; color: var(--text-main); }
+.member-date  { font-size: 10px; color: #94A3B8; }
+.member-status { margin-left: auto; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px; flex-shrink: 0; }
+.status-active  { background: #ECFDF5; color: #16A34A; }
+.status-trial   { background: var(--primary-light); color: var(--primary); }
+.status-expired { background: #F1F5F9; color: #94A3B8; }
+.toggle-btn { width: 36px; height: 20px; border-radius: 100px; background: #E2E8F0; flex-shrink: 0; cursor: pointer; position: relative; transition: background 0.2s; }
+.toggle-btn.on { background: var(--primary); }
+.toggle-btn::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+.toggle-btn.on::after { left: 19px; }
+
+.feature-list { display: flex; flex-direction: column; gap: 10px; }
+.feature-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #F8FAFC; border: 1px solid #F1F5F9; }
+.feature-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.feature-icon.time       { background: var(--primary-light); }
+.feature-icon.confidence { background: #EFF6FF; }
+.feature-icon.alert      { background: #F0FDF4; }
+.feature-name { font-size: 12px; font-weight: 700; color: var(--text-main); }
+.feature-desc { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+.feature-toggle { margin-left: auto; width: 40px; height: 22px; border-radius: 100px; background: #E2E8F0; flex-shrink: 0; cursor: pointer; position: relative; transition: background 0.2s; }
+.feature-toggle.on { background: var(--primary); }
+.feature-toggle::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+.feature-toggle.on::after { left: 21px; }
+
+.mini-chart { display: flex; align-items: flex-end; gap: 6px; height: 60px; margin-top: 4px; }
+.chart-bar { flex: 1; border-radius: 4px 4px 0 0; background: linear-gradient(to top, #FF9A3C, #FBBF24); opacity: 0.8; cursor: pointer; }
+.chart-bar:hover { opacity: 1; }
+.chart-labels { display: flex; gap: 6px; margin-top: 6px; }
+.chart-label { flex: 1; text-align: center; font-size: 9px; color: #94A3B8; }
+
+.alert-list { display: flex; flex-direction: column; gap: 8px; }
+.alert-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #F8FAFC; border: 1px solid #F1F5F9; }
+.alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-pending { background: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+.dot-sent    { background: var(--green); }
+.alert-text  { font-size: 12px; color: var(--text-main); font-weight: 600; }
+.alert-sub   { font-size: 10px; color: #94A3B8; }
+.alert-action { margin-left: auto; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 8px; cursor: pointer; border: 1.5px solid var(--primary); color: var(--primary); background: var(--primary-light); }
+
+.stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; font-size: 12px; }
+.stat-row:last-child { border-bottom: none; }
+.stat-label { color: #64748B; }
+.stat-value { font-weight: 700; color: var(--text-main); }
+.stat-value.orange { color: var(--primary); }
+
+/* 학원 관리 탭 */
+.acad-manage-grid { display: flex; flex-direction: column; gap: 16px; }
+.invite-card { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 18px 20px; }
+.invite-form-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.invite-input { flex: 1; min-width: 180px; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 13px; font-family: inherit; color: var(--text-main); outline: none; transition: border-color .15s; }
+.invite-input:focus { border-color: var(--primary); }
+.invite-submit-btn { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.invite-submit-btn:hover { background: var(--primary-dark); }
+.invite-toast { margin-top: 10px; font-size: 12px; color: var(--green); background: #ECFDF5; border-radius: 8px; padding: 8px 12px; display: none; }
+
+.acad-table { background: #fff; border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+.acad-table-header { display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.acad-table-title { font-size: 13px; font-weight: 700; color: var(--text-main); }
+.acad-count { font-size: 10px; font-weight: 700; background: var(--primary-light); color: var(--primary); padding: 2px 9px; border-radius: 100px; }
+.acad-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); transition: background .12s; cursor: pointer; }
+.acad-row:last-child { border-bottom: none; }
+.acad-row:hover { background: #FAFAF9; }
+.acad-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-verified { background: var(--green); }
+.dot-pending  { background: var(--yellow); }
+.dot-none     { background: #D6D3D1; }
+.acad-info { flex: 1; }
+.acad-name-text { font-size: 13px; font-weight: 700; color: var(--text-main); }
+.acad-email-text { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.acad-tag { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px; }
+.tag-verified { background: #ECFDF5; color: var(--green); }
+.tag-pending  { background: #FFFBEB; color: var(--yellow); }
+.tag-none     { background: #F5F5F4; color: var(--text-muted); }
+.acad-action-btn { font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 8px; border: 1.5px solid var(--primary); color: var(--primary); background: transparent; cursor: pointer; font-family: inherit; }
+.acad-action-btn:hover { background: var(--primary); color: white; }
+.acad-action-btn.ghost { border-color: var(--border); color: var(--text-muted); }
+.acad-action-btn.ghost:hover { border-color: var(--text-sub); color: var(--text-sub); background: transparent; }
+.acad-legend { display: flex; gap: 16px; padding: 12px 20px; background: #FAFAF9; border-top: 1px solid var(--border); }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-sub); }
 </style>
 </head>
 <body>
@@ -114,6 +289,178 @@ body {
 
 <!-- ══ VIEW: MASTER (Task 3에서 추가) ══ -->
 <div id="view-master" class="view">
+<!-- 사이드바 -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">🗺️</div>
+    <div>
+      <div class="sidebar-logo-text">키즈루트</div>
+      <div class="sidebar-logo-badge">ADMIN</div>
+    </div>
+  </div>
+  <div class="nav-group-label">Overview</div>
+  <div class="nav-item active" onclick="switchMasterTab('dashboard', this)">
+    <span class="nav-icon">📊</span> 대시보드
+  </div>
+  <div class="nav-group-label">Management</div>
+  <div class="nav-item" onclick="switchMasterTab('members', this)">
+    <span class="nav-icon">👥</span> 멤버십 관리
+    <span class="nav-badge">247</span>
+  </div>
+  <div class="nav-item" onclick="switchMasterTab('features', this)">
+    <span class="nav-icon">⚙️</span> 기능 설정
+  </div>
+  <div class="nav-item" onclick="switchMasterTab('alerts', this)">
+    <span class="nav-icon">🔔</span> 공석 알림
+    <span class="nav-badge green">3</span>
+  </div>
+  <div class="nav-item" onclick="switchMasterTab('academies', this)">
+    <span class="nav-icon">🏫</span> 학원 관리
+  </div>
+  <div class="nav-group-label">Analytics</div>
+  <div class="nav-item" onclick="switchMasterTab('stats', this)">
+    <span class="nav-icon">📈</span> 가입 통계
+  </div>
+  <div class="nav-item" onclick="switchMasterTab('conversion', this)">
+    <span class="nav-icon">💳</span> 전환율
+  </div>
+  <div class="sidebar-footer">
+    <div class="admin-profile">
+      <div class="admin-avatar" id="masterAvatar">D</div>
+      <div>
+        <div class="admin-name" id="masterName">davegpt25</div>
+        <div class="admin-role">관리자</div>
+      </div>
+    </div>
+    <button class="signout-btn" onclick="handleSignOut()">로그아웃</button>
+  </div>
+</aside>
+
+<!-- 메인 콘텐츠 -->
+<main class="master-main">
+  <!-- 대시보드 탭 -->
+  <div id="mtab-dashboard" class="master-tab-content">
+    <div class="page-header">
+      <div class="page-title">대시보드 👋</div>
+      <div class="page-sub">오늘도 학부모들이 최적 스케줄을 찾고 있어요.</div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon">📋</div><div class="kpi-label">총 사전예약</div><div class="kpi-value">247</div><div class="kpi-delta up">↑ 12 오늘</div></div>
+      <div class="kpi-card"><div class="kpi-icon">💳</div><div class="kpi-label">멤버십 활성</div><div class="kpi-value">18</div><div class="kpi-delta up">↑ 3 이번 주</div></div>
+      <div class="kpi-card"><div class="kpi-icon">⏳</div><div class="kpi-label">체험 중</div><div class="kpi-value">41</div><div class="kpi-delta down">만료 임박 7명</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🔄</div><div class="kpi-label">전환율</div><div class="kpi-value">3.2%</div><div class="kpi-delta up">↑ 0.4%p</div></div>
+    </div>
+    <div class="section-grid wide">
+      <div class="card">
+        <div class="card-title">📈 일별 사전예약 추이 <span class="badge">최근 7일</span></div>
+        <div class="mini-chart">
+          <div class="chart-bar" style="height:35%"></div>
+          <div class="chart-bar" style="height:55%"></div>
+          <div class="chart-bar" style="height:40%"></div>
+          <div class="chart-bar" style="height:70%"></div>
+          <div class="chart-bar" style="height:50%"></div>
+          <div class="chart-bar" style="height:85%"></div>
+          <div class="chart-bar" style="height:100%;background:linear-gradient(to top,#F97316,#FF9A3C)"></div>
+        </div>
+        <div class="chart-labels">
+          <div class="chart-label">월</div><div class="chart-label">화</div><div class="chart-label">수</div>
+          <div class="chart-label">목</div><div class="chart-label">금</div><div class="chart-label">토</div>
+          <div class="chart-label" style="color:var(--primary);font-weight:700">오늘</div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="stat-row"><span class="stat-label">이번 주 총 가입</span><span class="stat-value orange">+63명</span></div>
+          <div class="stat-row"><span class="stat-label">전주 대비</span><span class="stat-value orange">+24%</span></div>
+          <div class="stat-row"><span class="stat-label">체험→멤버십 전환</span><span class="stat-value">3명</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">👥 최근 가입자 <a class="action-link">전체 보기 →</a></div>
+        <div class="member-list">
+          <div class="member-row">
+            <div class="member-avatar orange">K</div>
+            <div><div class="member-email">kim**@naver.com</div><div class="member-date">오늘 09:14</div></div>
+            <div class="member-status status-trial">체험 D-7</div>
+            <div class="toggle-btn on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="member-row">
+            <div class="member-avatar green">P</div>
+            <div><div class="member-email">park**@kakao.com</div><div class="member-date">어제 22:31</div></div>
+            <div class="member-status status-active">멤버십</div>
+            <div class="toggle-btn on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="member-row">
+            <div class="member-avatar">L</div>
+            <div><div class="member-email">lee**@gmail.com</div><div class="member-date">2일 전</div></div>
+            <div class="member-status status-trial">체험 D-5</div>
+            <div class="toggle-btn on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="member-row" style="opacity:0.5">
+            <div class="member-avatar">C</div>
+            <div><div class="member-email">choi**@naver.com</div><div class="member-date">5일 전</div></div>
+            <div class="member-status status-expired">만료</div>
+            <div class="toggle-btn" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-grid">
+      <div class="card">
+        <div class="card-title">⚙️ 멤버십 기능 ON / OFF <span class="badge">WTP 3가지</span></div>
+        <div class="feature-list">
+          <div class="feature-row"><div class="feature-icon time">⏱️</div><div><div class="feature-name">스케줄 저장 &amp; 히스토리</div><div class="feature-desc">시간절약 — 최대 5개 스케줄 저장</div></div><div class="feature-toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="feature-row"><div class="feature-icon confidence">✨</div><div><div class="feature-name">최적 조합 신뢰도 점수</div><div class="feature-desc">결정불안 해소 — AI 추천 근거 표시</div></div><div class="feature-toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="feature-row"><div class="feature-icon alert">🔔</div><div><div class="feature-name">학원 공석 실시간 알림</div><div class="feature-desc">기회손실 방지 — 카카오 알림톡 연동</div></div><div class="feature-toggle" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔔 공석 알림 대기열 <span class="badge" style="background:#ECFDF5;color:#16A34A">3건 대기</span></div>
+        <div class="alert-list">
+          <div class="alert-row"><div class="alert-dot dot-pending"></div><div><div class="alert-text">강남 베스트 수학 — 1자리</div><div class="alert-sub">대기 8명 · 방금</div></div><div class="alert-action">알림 발송</div></div>
+          <div class="alert-row"><div class="alert-dot dot-pending"></div><div><div class="alert-text">YBM 영어 서초점 — 2자리</div><div class="alert-sub">대기 5명 · 12분 전</div></div><div class="alert-action">알림 발송</div></div>
+          <div class="alert-row" style="opacity:0.5"><div class="alert-dot dot-sent"></div><div><div class="alert-text">예원 피아노 — 1자리</div><div class="alert-sub">발송 완료 · 3명 클릭</div></div><div style="margin-left:auto;font-size:10px;color:var(--green);font-weight:600">✅ 발송됨</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 학원 관리 탭 -->
+  <div id="mtab-academies" class="master-tab-content" style="display:none;">
+    <div class="page-header">
+      <div class="page-title">🏫 학원 관리</div>
+      <div class="page-sub">학원 원장 초대 및 인증 상태를 관리합니다.</div>
+    </div>
+    <div class="acad-manage-grid">
+      <div class="invite-card">
+        <div class="card-title">✉️ 원장 초대</div>
+        <div class="invite-form-row">
+          <input class="invite-input" id="inviteEmail" type="email" placeholder="원장 이메일 주소">
+          <input class="invite-input" id="inviteAcadName" type="text" placeholder="학원명">
+          <button class="invite-submit-btn" onclick="sendInvite()">초대 발송</button>
+        </div>
+        <div class="invite-toast" id="inviteToast">✅ 초대 정보가 저장되었습니다. 원장에게 master.html URL을 공유하세요.</div>
+      </div>
+      <div class="acad-table">
+        <div class="acad-table-header">
+          <div class="acad-table-title">등록 학원</div>
+          <div class="acad-count" id="acadCount">0개</div>
+        </div>
+        <div id="acadListBody"></div>
+        <div class="acad-legend">
+          <div class="legend-item"><div class="acad-status-dot dot-verified"></div>인증 완료</div>
+          <div class="legend-item"><div class="acad-status-dot dot-pending"></div>초대 대기</div>
+          <div class="legend-item"><div class="acad-status-dot dot-none"></div>미초대</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기타 탭 -->
+  <div id="mtab-members"    class="master-tab-content" style="display:none;"><div class="page-header"><div class="page-title">👥 멤버십 관리</div></div></div>
+  <div id="mtab-features"   class="master-tab-content" style="display:none;"><div class="page-header"><div class="page-title">⚙️ 기능 설정</div></div></div>
+  <div id="mtab-alerts"     class="master-tab-content" style="display:none;"><div class="page-header"><div class="page-title">🔔 공석 알림</div></div></div>
+  <div id="mtab-stats"      class="master-tab-content" style="display:none;"><div class="page-header"><div class="page-title">📈 가입 통계</div></div></div>
+  <div id="mtab-conversion" class="master-tab-content" style="display:none;"><div class="page-header"><div class="page-title">💳 전환율</div></div></div>
+</main>
 </div>
 
 <!-- ══ VIEW: ACADEMY PORTAL (Task 5에서 추가) ══ -->
@@ -238,8 +585,105 @@ function routeUser(user) {
 
 // ── stubs (Task 3, 5에서 교체됨) ──────────────────────────
 window.renderMasterDashboard = function(user) {
-  document.getElementById('view-master').innerHTML =
-    '<div style="padding:40px;font-size:18px;font-weight:700;color:#1E293B;">✅ Master 대시보드: ' + user.email + '<br><br><button onclick="handleSignOut()" style="font-size:14px;padding:8px 16px;border:1px solid #E2E8F0;border-radius:8px;cursor:pointer;background:white;">로그아웃</button></div>';
+  const initial = (user.displayName || user.email)[0].toUpperCase();
+  document.getElementById('masterAvatar').textContent = initial;
+  document.getElementById('masterName').textContent = user.displayName || user.email.split('@')[0];
+};
+
+window.switchMasterTab = function(tabId, navEl) {
+  document.querySelectorAll('.master-tab-content').forEach(el => el.style.display = 'none');
+  document.getElementById('mtab-' + tabId).style.display = 'block';
+  document.querySelectorAll('#view-master .nav-item').forEach(el => el.classList.remove('active'));
+  navEl.classList.add('active');
+  if (tabId === 'academies') renderAcadList();
+};
+
+window.renderAcadList = function() {
+  const invites = window.getInvites();
+  const body = document.getElementById('acadListBody');
+  const countEl = document.getElementById('acadCount');
+  if (!body) return;
+
+  const defaultAcads = [
+    { id: 'acad-001', name: '강남베스트수학', address: '강남구 역삼동' },
+    { id: 'acad-002', name: '국어나라학원',   address: '강남구 대치동' },
+    { id: 'acad-003', name: '스피드수학학원', address: '강남구 개포동' },
+    { id: 'acad-004', name: '탑영어학원',     address: '강남구 삼성동' },
+  ];
+
+  countEl.textContent = defaultAcads.length + '개';
+  body.innerHTML = '';
+
+  defaultAcads.forEach(acad => {
+    const invite = invites.find(i => i.academyId === acad.id);
+    let statusDot, statusTag, actionBtn;
+
+    if (invite && invite.status === 'accepted') {
+      statusDot = 'dot-verified';
+      statusTag = '<span class="acad-tag tag-verified">✅ 인증 완료</span>';
+      actionBtn = `<button class="acad-action-btn" onclick="approveInvite('${invite.email}')">관리 →</button>`;
+    } else if (invite && invite.status === 'pending') {
+      statusDot = 'dot-pending';
+      statusTag = '<span class="acad-tag tag-pending">⏳ 초대 대기</span>';
+      actionBtn = `<button class="acad-action-btn" onclick="approveInvite('${invite.email}')">✅ 인증 승인</button>
+                   <button class="acad-action-btn ghost" onclick="resendInvite('${acad.id}')" style="margin-left:4px">재발송</button>`;
+    } else {
+      statusDot = 'dot-none';
+      statusTag = '<span class="acad-tag tag-none">미초대</span>';
+      actionBtn = `<button class="acad-action-btn" onclick="quickInvite('${acad.id}', '${acad.name}')">초대하기</button>`;
+    }
+
+    body.insertAdjacentHTML('beforeend', `
+      <div class="acad-row">
+        <div class="acad-status-dot ${statusDot}"></div>
+        <div class="acad-info">
+          <div class="acad-name-text">${acad.name}</div>
+          <div class="acad-email-text">${invite ? invite.email : acad.address}</div>
+        </div>
+        ${statusTag}
+        ${actionBtn}
+      </div>
+    `);
+  });
+};
+
+window.sendInvite = function() {
+  const email = document.getElementById('inviteEmail').value.trim();
+  const name  = document.getElementById('inviteAcadName').value.trim();
+  if (!email || !name) { alert('이메일과 학원명을 입력해 주세요.'); return; }
+  const invites = window.getInvites();
+  const id = 'acad-' + Date.now();
+  invites.push({ email, academyId: id, academyName: name, status: 'pending' });
+  window.saveInvites(invites);
+  document.getElementById('inviteEmail').value = '';
+  document.getElementById('inviteAcadName').value = '';
+  const toast = document.getElementById('inviteToast');
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 3000);
+  window.renderAcadList();
+};
+
+window.quickInvite = function(acadId, acadName) {
+  const email = prompt(acadName + ' 원장 이메일을 입력하세요:');
+  if (!email) return;
+  const invites = window.getInvites();
+  invites.push({ email: email.trim(), academyId: acadId, academyName: acadName, status: 'pending' });
+  window.saveInvites(invites);
+  window.renderAcadList();
+};
+
+window.resendInvite = function(acadId) {
+  alert('초대 정보가 갱신됐습니다. master.html URL을 원장에게 다시 공유해 주세요.');
+};
+
+window.approveInvite = function(email) {
+  const invites = window.getInvites();
+  const idx = invites.findIndex(i => i.email === email);
+  if (idx === -1) return;
+  invites[idx].status = 'accepted';
+  window.saveInvites(invites);
+  window.renderAcadList();
+  alert(email + ' 원장 인증이 승인되었습니다.');
 };
 window.renderAcademyPortal = function(user, invite) {
   document.getElementById('view-academy').innerHTML =
