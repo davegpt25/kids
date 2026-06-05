@@ -909,6 +909,52 @@
 
 .demo-hint { font-size: 12px; color: var(--text-muted); text-align: right; margin-top: 8px; }
 
+/* 직접 입력창 */
+.demo-user-input-wrap {
+  display: flex; gap: 8px; align-items: flex-end; margin-bottom: 14px;
+}
+.demo-user-input {
+  flex: 1; border: 1.5px solid var(--gray-300); border-radius: 12px;
+  padding: 11px 14px; font-size: 14px; font-family: inherit;
+  color: var(--gray-900); outline: none; resize: none; line-height: 1.5;
+  transition: border-color .15s;
+}
+.demo-user-input:focus { border-color: var(--primary); }
+.demo-user-input::placeholder { color: var(--text-muted); }
+.demo-ask-btn {
+  width: 42px; height: 42px; background: var(--primary); color: white;
+  border: none; border-radius: 12px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.demo-ask-btn:hover { background: var(--primary-dark); }
+
+/* 응답 버블 */
+.demo-response-wrap { margin-bottom: 14px; }
+.demo-response-bubble {
+  background: #fff; border: 1.5px solid var(--gray-200);
+  border-radius: 14px; padding: 14px 16px;
+  font-size: 13px; color: var(--gray-900); line-height: 1.7;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  animation: fadeSlideIn .25s ease;
+}
+.demo-response-bubble .resp-header {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; color: var(--primary);
+  margin-bottom: 8px;
+}
+.demo-response-bubble .resp-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 0; border-bottom: 1px solid var(--gray-100);
+  font-size: 13px;
+}
+.demo-response-bubble .resp-item:last-child { border-bottom: none; }
+.demo-response-bubble .resp-badge {
+  background: var(--primary-light); color: var(--primary);
+  border-radius: 100px; padding: 1px 8px; font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+@keyframes fadeSlideIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
 .demo-query-pills {
   display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
 }
@@ -3794,18 +3840,29 @@
     <div class="demo-step active" id="demoStep1">
       <div class="demo-title">키즈루트에게 물어보세요 🗺️</div>
       <div class="demo-sub">아이 학원 스케줄, 이렇게 고민하고 계신가요?<br>예시를 클릭하거나 출시 알림을 신청해보세요.</div>
+      <!-- 타이핑 애니메이션 (자동 순환) -->
       <div class="demo-input-wrap" id="demoInputWrap">
         <div class="demo-typewriter" id="demoTypewriter"></div>
-        <span class="demo-cursor"></span>
-        <div class="demo-hint">예시 클릭 또는 직접 입력</div>
+        <span class="demo-cursor" id="demoCursorEl"></span>
+        <div class="demo-hint">위 예시처럼 아래에 직접 입력해보세요</div>
       </div>
-      <div class="demo-query-pills" id="demoPills">
-        <div class="demo-pill" onclick="selectPill(this, '강남 수학 학원 1km 반경 추천해줘')">📍 강남 수학 학원 추천</div>
-        <div class="demo-pill" onclick="selectPill(this, '월수금 저녁 6시 이후 영어+피아노 조합')">📅 시간대별 조합 추천</div>
-        <div class="demo-pill" onclick="selectPill(this, '초등 3학년 시간 안 겹치는 학원 3개')">🎯 겹침 없는 스케줄</div>
-        <div class="demo-pill" onclick="selectPill(this, '우리 동네 태권도 최적 시간대')">🥋 반경 내 탐색</div>
-        <div class="demo-pill" onclick="selectPill(this, '수학·영어·미술 최적 조합 만들어줘')">✨ 과목 조합 최적화</div>
+
+      <!-- 직접 입력창 -->
+      <div class="demo-user-input-wrap">
+        <textarea class="demo-user-input" id="demoUserInput"
+          placeholder="궁금한 내용을 입력하세요..."
+          rows="2"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();demoAskQuestion();}"></textarea>
+        <button class="demo-ask-btn" onclick="demoAskQuestion()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
       </div>
+
+      <!-- 응답 영역 -->
+      <div class="demo-response-wrap" id="demoResponseWrap" style="display:none;">
+        <div class="demo-response-bubble" id="demoResponseBubble"></div>
+      </div>
+
       <button class="demo-start-btn" id="demoStartBtn" onclick="openMapStep()">지도로 위치 설정하기 🗺️</button>
     </div>
 
@@ -4765,6 +4822,103 @@ function selectPill(el, text) {
   document.querySelectorAll('.demo-pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   _showQueryInTypewriter(text);
+}
+
+// ─── 직접 질문 응답 ───
+const _demoAnswers = [
+  {
+    keywords: ['수학','math'],
+    answer: [
+      { badge: '추천 1위', text: '강남 베스트 수학 — 📍 0.4km · ⭐4.8 · 월수금 오후 4시' },
+      { badge: '추천 2위', text: '스피드 수학 — 📍 1.3km · ⭐4.3 · 월수금 오후 5시' },
+      { badge: '포인트', text: '두 학원 모두 시간 겹침 없이 조합 가능해요 ✅' }
+    ]
+  },
+  {
+    keywords: ['영어','english'],
+    answer: [
+      { badge: '추천 1위', text: 'YBM 영어 서초점 — 📍 0.7km · ⭐4.6 · 월화수목금 오후 4시' },
+      { badge: '추천 2위', text: 'ABC 영어 마을 — 📍 1.5km · ⭐4.7 · 월수금 오후 4시 (원장 인증 ✓)' },
+      { badge: '포인트', text: 'ABC 영어 마을은 원장 인증 학원으로 정보가 더 정확해요' }
+    ]
+  },
+  {
+    keywords: ['조합','추천','최적'],
+    answer: [
+      { badge: '조합 추천', text: '강남 베스트 수학 (월수금) + YBM 영어 (화목) — 겹침 없음 ✅' },
+      { badge: '월 비용', text: '30만원 + 28만원 = 약 58만원/월' },
+      { badge: '이동', text: '두 학원 간 도보 약 8분 · 무리 없는 동선이에요' }
+    ]
+  },
+  {
+    keywords: ['시간','겹침','스케줄'],
+    answer: [
+      { badge: '충돌 없음', text: '수학 (월·수·금) + 영어 (화·목) 조합은 요일이 완전히 분리돼요' },
+      { badge: '팁', text: '하교 후 30분 이동 버퍼를 포함해도 시간이 맞아요 🎯' },
+      { badge: '출시 후', text: '정확한 시간표 충돌 검사는 앱 출시 후 자동으로 제공됩니다' }
+    ]
+  },
+  {
+    keywords: ['반경','거리','근처','동네'],
+    answer: [
+      { badge: '반경 1km', text: '강남구 역삼동 기준 수학·영어·피아노 학원 10개 확인됨' },
+      { badge: '가장 가까운', text: '강남 베스트 수학 — 도보 5분 (320m)' },
+      { badge: '출시 후', text: 'GPS 기반 실시간 반경 탐색 기능이 제공됩니다' }
+    ]
+  },
+  {
+    keywords: ['피아노','미술','태권도','코딩','체육'],
+    answer: [
+      { badge: '예체능', text: '예원 피아노 (⭐4.9) · 하늘 미술 (⭐4.5) · 챔피언 태권도 (⭐4.4)' },
+      { badge: '조합 팁', text: '학습 2개 + 예체능 1개 조합이 주간 균형에 좋아요' },
+      { badge: '포인트', text: '예체능은 주 2~3회로 수학·영어와 요일 분리가 쉬워요' }
+    ]
+  }
+];
+
+function demoAskQuestion() {
+  var input = document.getElementById('demoUserInput');
+  var q = (input.value || '').trim();
+  if (!q) return;
+
+  var responseWrap  = document.getElementById('demoResponseWrap');
+  var responseBubble = document.getElementById('demoResponseBubble');
+
+  // 키워드 매칭
+  var matched = null;
+  var ql = q.toLowerCase();
+  for (var i = 0; i < _demoAnswers.length; i++) {
+    var item = _demoAnswers[i];
+    for (var j = 0; j < item.keywords.length; j++) {
+      if (ql.indexOf(item.keywords[j]) >= 0) { matched = item; break; }
+    }
+    if (matched) break;
+  }
+
+  var items;
+  if (matched) {
+    items = matched.answer;
+  } else {
+    items = [
+      { badge: '안내', text: '정확한 결과는 출시 후 앱에서 GPS 기반으로 제공돼요 🗺️' },
+      { badge: '사전예약', text: '지금 예약하시면 출시 즉시 맞춤 분석 결과를 받을 수 있어요 🎯' },
+      { badge: '예시 질문', text: '"수학 영어 조합 추천해줘" 처럼 과목이나 조합 키워드를 포함해보세요' }
+    ];
+  }
+
+  var html = '<div class="resp-header">🗺️ 키즈루트 답변</div>';
+  items.forEach(function(it) {
+    html += '<div class="resp-item"><span class="resp-badge">' + it.badge + '</span><span>' + it.text + '</span></div>';
+  });
+
+  responseBubble.innerHTML = html;
+  responseWrap.style.display = 'block';
+
+  // 입력창 초기화 + 커서 숨기기
+  input.value = '';
+  var cursor = document.getElementById('demoCursorEl');
+  if (cursor) cursor.style.display = 'none';
+  setTimeout(function() { if (cursor) cursor.style.display = ''; }, 3000);
 }
 
 // ─── Map Step ───
