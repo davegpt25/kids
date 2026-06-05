@@ -2019,19 +2019,23 @@ setInterval(() => {
 // ── Admin overlay logic ──────────────────────────────────────
 const ADM_MASTER_EMAIL = 'davegpt25@gmail.com';
 
-// 로고 5번 클릭 트리거
-(function() {
+// 트리거: 1) URL hash #admin  2) 로고 5번 클릭
+document.addEventListener('DOMContentLoaded', function() {
+  // URL hash 감지 — /kids/#admin 접속 시 바로 모달 오픈
+  if (location.hash === '#admin') admOpenModal();
+
+  // 로고 5번 클릭
   let clicks = 0, timer = null;
   const logo = document.querySelector('.nav-logo');
-  if (!logo) return;
-  logo.style.cursor = 'pointer';
-  logo.addEventListener('click', function(e) {
-    clicks++;
-    clearTimeout(timer);
-    if (clicks >= 5) { clicks = 0; admOpenModal(); return; }
-    timer = setTimeout(() => { clicks = 0; }, 2000);
-  });
-})();
+  if (logo) {
+    logo.addEventListener('click', function() {
+      clicks++;
+      clearTimeout(timer);
+      if (clicks >= 5) { clicks = 0; admOpenModal(); return; }
+      timer = setTimeout(() => { clicks = 0; }, 2500);
+    });
+  }
+});
 
 function admOpenModal() {
   document.getElementById('adm-modal-backdrop').classList.add('open');
