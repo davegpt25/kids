@@ -1540,5 +1540,625 @@ setInterval(() => {
 })();
 </script>
 
+<!-- ════════════════════════════════════════════════════════
+     ADMIN OVERLAY — 로고 5번 클릭으로 진입
+════════════════════════════════════════════════════════ -->
+<style>
+/* ── 로그인 모달 ── */
+#adm-modal-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 9998;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+#adm-modal-backdrop.open { display: flex; }
+#adm-modal {
+  background: #fff; border-radius: 24px; padding: 44px 36px;
+  width: 360px; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  animation: adm-pop .18s ease;
+}
+@keyframes adm-pop { from { transform: scale(.94); opacity:0; } to { transform: scale(1); opacity:1; } }
+#adm-modal .adm-logo-row {
+  display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 28px;
+}
+#adm-modal .adm-logo-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg,#FF9A3C,#F97316);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+#adm-modal .adm-logo-text { font-size: 20px; font-weight: 900; color: #1E293B; }
+#adm-modal .adm-logo-text span { color: #F97316; }
+#adm-modal .adm-sub { font-size: 13px; color: #64748B; margin-bottom: 24px; line-height: 1.6; }
+#adm-email-input {
+  width: 100%; border: 1.5px solid #E2E8F0; border-radius: 11px;
+  padding: 12px 14px; font-size: 14px; font-family: inherit; color: #1E293B;
+  outline: none; margin-bottom: 10px; transition: border-color .15s;
+}
+#adm-email-input:focus { border-color: #F97316; }
+#adm-login-btn {
+  width: 100%; background: #F97316; color: #fff; border: none;
+  border-radius: 11px; padding: 13px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+#adm-login-btn:hover { background: #EA6C0A; }
+#adm-modal-error {
+  margin-top: 12px; font-size: 12px; color: #EF4444;
+  background: #FEF2F2; border-radius: 8px; padding: 8px 12px; display: none;
+}
+#adm-modal-close {
+  position: absolute; top: 14px; right: 18px;
+  background: none; border: none; font-size: 20px;
+  color: #94A3B8; cursor: pointer; line-height: 1;
+}
+
+/* ── 대시보드 전체 오버레이 ── */
+#adm-dashboard {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: #F8FAFC; overflow: hidden;
+  flex-direction: row;
+}
+#adm-dashboard.open { display: flex; }
+
+/* 사이드바 */
+#adm-dashboard .adm-sidebar {
+  width: 220px; flex-shrink: 0; background: #fff;
+  border-right: 1px solid #E2E8F0;
+  display: flex; flex-direction: column;
+  padding: 20px 12px; height: 100vh; overflow-y: auto;
+}
+#adm-dashboard .adm-sidebar-logo {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 8px 20px; border-bottom: 1px solid #F1F5F9; margin-bottom: 16px;
+}
+#adm-dashboard .adm-sidebar-logo-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: linear-gradient(135deg,#FF9A3C,#F97316);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+#adm-dashboard .adm-sidebar-logo-text { font-weight: 800; font-size: 14px; color: #1E293B; }
+#adm-dashboard .adm-sidebar-logo-badge {
+  font-size: 9px; font-weight: 700; background: #FFF7ED;
+  color: #F97316; padding: 1px 6px; border-radius: 100px; border: 1px solid #FED7AA;
+}
+#adm-dashboard .adm-nav-group {
+  font-size: 10px; font-weight: 700; color: #94A3B8;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 0 8px; margin: 12px 0 4px;
+}
+#adm-dashboard .adm-nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 10px;
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  color: #64748B; transition: all .15s; margin-bottom: 2px;
+  font-family: 'Pretendard', sans-serif;
+}
+#adm-dashboard .adm-nav-item:hover { background: #F8FAFC; color: #1E293B; }
+#adm-dashboard .adm-nav-item.active { background: #FFF7ED; color: #F97316; font-weight: 700; }
+#adm-dashboard .adm-nav-icon { font-size: 15px; width: 20px; text-align: center; }
+#adm-dashboard .adm-nav-badge {
+  margin-left: auto; background: #F97316; color: #fff;
+  font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 100px;
+}
+#adm-dashboard .adm-nav-badge.green { background: #10B981; }
+#adm-dashboard .adm-sidebar-footer {
+  margin-top: auto; padding-top: 16px; border-top: 1px solid #F1F5F9;
+}
+#adm-dashboard .adm-profile {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 10px; background: #F8FAFC;
+}
+#adm-dashboard .adm-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg,#FF9A3C,#F97316);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: #fff; font-weight: 700;
+}
+#adm-dashboard .adm-uname { font-size: 11px; font-weight: 700; color: #1E293B; }
+#adm-dashboard .adm-urole { font-size: 10px; color: #94A3B8; }
+#adm-dashboard .adm-signout-btn {
+  width: 100%; margin-top: 8px; background: none; border: 1px solid #E2E8F0;
+  border-radius: 8px; padding: 7px; font-size: 11px; font-weight: 600;
+  color: #64748B; cursor: pointer; font-family: inherit; transition: all .15s;
+}
+#adm-dashboard .adm-signout-btn:hover { border-color: #EF4444; color: #EF4444; }
+
+/* 메인 */
+#adm-dashboard .adm-main {
+  flex: 1; padding: 28px 32px; overflow-y: auto;
+}
+#adm-dashboard .adm-page-title { font-size: 20px; font-weight: 800; color: #1E293B; }
+#adm-dashboard .adm-page-sub   { font-size: 13px; color: #64748B; margin-top: 2px; margin-bottom: 24px; }
+
+/* KPI */
+#adm-dashboard .adm-kpi-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px;
+}
+#adm-dashboard .adm-kpi-card {
+  background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; padding: 16px 18px;
+}
+#adm-dashboard .adm-kpi-icon  { float: right; font-size: 22px; margin-top: -2px; opacity: .7; }
+#adm-dashboard .adm-kpi-label { font-size: 11px; font-weight: 600; color: #94A3B8; margin-bottom: 6px; }
+#adm-dashboard .adm-kpi-value { font-size: 26px; font-weight: 800; color: #1E293B; line-height: 1; }
+#adm-dashboard .adm-kpi-delta {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; font-weight: 600; margin-top: 6px; padding: 2px 7px; border-radius: 100px;
+}
+#adm-dashboard .adm-kpi-delta.up   { background: #ECFDF5; color: #16A34A; }
+#adm-dashboard .adm-kpi-delta.down { background: #FEF2F2; color: #DC2626; }
+
+/* 그리드 + 카드 */
+#adm-dashboard .adm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+#adm-dashboard .adm-grid.wide { grid-template-columns: 1.6fr 1fr; }
+#adm-dashboard .adm-card { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; padding: 18px 20px; }
+#adm-dashboard .adm-card-title {
+  font-size: 13px; font-weight: 700; color: #1E293B;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+#adm-dashboard .adm-badge {
+  font-size: 10px; font-weight: 700; background: #FFF7ED;
+  color: #F97316; padding: 1px 7px; border-radius: 100px;
+}
+
+/* 차트 */
+#adm-dashboard .adm-chart { display: flex; align-items: flex-end; gap: 6px; height: 60px; margin-top: 4px; }
+#adm-dashboard .adm-bar {
+  flex: 1; border-radius: 4px 4px 0 0;
+  background: linear-gradient(to top,#FF9A3C,#FBBF24); opacity: .8; cursor: pointer;
+}
+#adm-dashboard .adm-bar:hover { opacity: 1; }
+#adm-dashboard .adm-chart-labels { display: flex; gap: 6px; margin-top: 6px; }
+#adm-dashboard .adm-chart-label { flex: 1; text-align: center; font-size: 9px; color: #94A3B8; }
+
+/* 멤버 */
+#adm-dashboard .adm-member-list { display: flex; flex-direction: column; gap: 8px; }
+#adm-dashboard .adm-member-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; background: #F8FAFC; border: 1px solid #F1F5F9;
+}
+#adm-dashboard .adm-m-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg,#6366F1,#8B5CF6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #fff; font-weight: 700; flex-shrink: 0;
+}
+#adm-dashboard .adm-m-avatar.or { background: linear-gradient(135deg,#FF9A3C,#F97316); }
+#adm-dashboard .adm-m-avatar.gr { background: linear-gradient(135deg,#34D399,#10B981); }
+#adm-dashboard .adm-m-email { font-size: 12px; font-weight: 600; color: #1E293B; }
+#adm-dashboard .adm-m-date  { font-size: 10px; color: #94A3B8; }
+#adm-dashboard .adm-m-status {
+  margin-left: auto; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px; flex-shrink: 0;
+}
+#adm-dashboard .s-active  { background: #ECFDF5; color: #16A34A; }
+#adm-dashboard .s-trial   { background: #FFF7ED; color: #F97316; }
+#adm-dashboard .s-expired { background: #F1F5F9; color: #94A3B8; }
+#adm-dashboard .adm-toggle {
+  width: 36px; height: 20px; border-radius: 100px; background: #E2E8F0;
+  flex-shrink: 0; cursor: pointer; position: relative; transition: background .2s;
+}
+#adm-dashboard .adm-toggle.on { background: #F97316; }
+#adm-dashboard .adm-toggle::after {
+  content:''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; top: 3px; left: 3px; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+#adm-dashboard .adm-toggle.on::after { left: 19px; }
+
+/* 기능 토글 */
+#adm-dashboard .adm-feat-list { display: flex; flex-direction: column; gap: 10px; }
+#adm-dashboard .adm-feat-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 12px; background: #F8FAFC; border: 1px solid #F1F5F9;
+}
+#adm-dashboard .adm-feat-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+#adm-dashboard .adm-feat-icon.ti { background: #FFF7ED; }
+#adm-dashboard .adm-feat-icon.co { background: #EFF6FF; }
+#adm-dashboard .adm-feat-icon.al { background: #F0FDF4; }
+#adm-dashboard .adm-feat-name { font-size: 12px; font-weight: 700; color: #1E293B; }
+#adm-dashboard .adm-feat-desc { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+#adm-dashboard .adm-feat-toggle {
+  margin-left: auto; width: 40px; height: 22px; border-radius: 100px;
+  background: #E2E8F0; flex-shrink: 0; cursor: pointer; position: relative; transition: background .2s;
+}
+#adm-dashboard .adm-feat-toggle.on { background: #F97316; }
+#adm-dashboard .adm-feat-toggle::after {
+  content:''; position: absolute; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; top: 3px; left: 3px; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+#adm-dashboard .adm-feat-toggle.on::after { left: 21px; }
+
+/* 알림 */
+#adm-dashboard .adm-alert-list { display: flex; flex-direction: column; gap: 8px; }
+#adm-dashboard .adm-alert-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; background: #F8FAFC; border: 1px solid #F1F5F9;
+}
+#adm-dashboard .adm-a-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+#adm-dashboard .adm-a-dot.pend { background: #F97316; box-shadow: 0 0 0 3px #FFF7ED; }
+#adm-dashboard .adm-a-dot.sent { background: #10B981; }
+#adm-dashboard .adm-a-text { font-size: 12px; color: #1E293B; font-weight: 600; }
+#adm-dashboard .adm-a-sub  { font-size: 10px; color: #94A3B8; }
+#adm-dashboard .adm-a-btn {
+  margin-left: auto; font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: 8px; cursor: pointer;
+  border: 1.5px solid #F97316; color: #F97316; background: #FFF7ED;
+}
+
+/* 통계 */
+#adm-dashboard .adm-stat-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid #F1F5F9; font-size: 12px;
+}
+#adm-dashboard .adm-stat-row:last-child { border-bottom: none; }
+#adm-dashboard .adm-stat-lbl { color: #64748B; }
+#adm-dashboard .adm-stat-val { font-weight: 700; color: #1E293B; }
+#adm-dashboard .adm-stat-val.or { color: #F97316; }
+
+/* 학원 관리 탭 */
+#adm-dashboard .adm-acad-grid { display: flex; flex-direction: column; gap: 16px; }
+#adm-dashboard .adm-invite-card { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; padding: 18px 20px; }
+#adm-dashboard .adm-invite-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+#adm-dashboard .adm-inv-input {
+  flex: 1; min-width: 160px; border: 1.5px solid #E2E8F0; border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; font-family: inherit; color: #1E293B;
+  outline: none; transition: border-color .15s;
+}
+#adm-dashboard .adm-inv-input:focus { border-color: #F97316; }
+#adm-dashboard .adm-inv-btn {
+  background: #F97316; color: #fff; border: none; border-radius: 10px;
+  padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+#adm-dashboard .adm-inv-btn:hover { background: #EA6C0A; }
+#adm-dashboard .adm-inv-toast {
+  margin-top: 10px; font-size: 12px; color: #10B981;
+  background: #ECFDF5; border-radius: 8px; padding: 8px 12px; display: none;
+}
+#adm-dashboard .adm-acad-table { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; overflow: hidden; }
+#adm-dashboard .adm-acad-thead {
+  display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-bottom: 1px solid #E2E8F0;
+}
+#adm-dashboard .adm-acad-ttl { font-size: 13px; font-weight: 700; color: #1E293B; }
+#adm-dashboard .adm-acad-cnt {
+  font-size: 10px; font-weight: 700; background: #FFF7ED; color: #F97316; padding: 2px 9px; border-radius: 100px;
+}
+#adm-dashboard .adm-acad-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 20px; border-bottom: 1px solid #E2E8F0; cursor: pointer; transition: background .12s;
+}
+#adm-dashboard .adm-acad-row:last-child { border-bottom: none; }
+#adm-dashboard .adm-acad-row:hover { background: #FAFAF9; }
+#adm-dashboard .adm-sdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+#adm-dashboard .adm-sdot.ver { background: #10B981; }
+#adm-dashboard .adm-sdot.pen { background: #F59E0B; }
+#adm-dashboard .adm-sdot.non { background: #D6D3D1; }
+#adm-dashboard .adm-acad-info { flex: 1; }
+#adm-dashboard .adm-acad-name { font-size: 13px; font-weight: 700; color: #1E293B; }
+#adm-dashboard .adm-acad-meta { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+#adm-dashboard .adm-atag { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px; }
+#adm-dashboard .adm-atag.v { background: #ECFDF5; color: #10B981; }
+#adm-dashboard .adm-atag.p { background: #FFFBEB; color: #F59E0B; }
+#adm-dashboard .adm-atag.n { background: #F5F5F4; color: #94A3B8; }
+#adm-dashboard .adm-abtn {
+  font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 8px;
+  border: 1.5px solid #F97316; color: #F97316; background: transparent; cursor: pointer; font-family: inherit;
+}
+#adm-dashboard .adm-abtn:hover { background: #F97316; color: #fff; }
+#adm-dashboard .adm-abtn.gh { border-color: #E2E8F0; color: #94A3B8; }
+#adm-dashboard .adm-abtn.gh:hover { border-color: #64748B; color: #64748B; background: transparent; }
+#adm-dashboard .adm-legend {
+  display: flex; gap: 14px; padding: 12px 20px; background: #FAFAF9; border-top: 1px solid #E2E8F0;
+}
+#adm-dashboard .adm-leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #64748B; }
+
+/* 탭 콘텐츠 */
+#adm-dashboard .adm-tab-content { display: none; }
+#adm-dashboard .adm-tab-content.active { display: block; }
+
+@media (max-width: 768px) {
+  #adm-dashboard { flex-direction: column; }
+  #adm-dashboard .adm-sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; }
+  #adm-dashboard .adm-kpi-grid { grid-template-columns: repeat(2,1fr); }
+  #adm-dashboard .adm-grid, #adm-dashboard .adm-grid.wide { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- 로그인 모달 -->
+<div id="adm-modal-backdrop">
+  <div id="adm-modal" style="position:relative;">
+    <button id="adm-modal-close" onclick="admCloseModal()">×</button>
+    <div class="adm-logo-row">
+      <div class="adm-logo-icon">🗺️</div>
+      <div class="adm-logo-text">키즈<span>루트</span></div>
+    </div>
+    <p class="adm-sub">관리자 포털 로그인</p>
+    <input id="adm-email-input" type="email" placeholder="이메일 주소 입력"
+           onkeydown="if(event.key==='Enter') admDoLogin()">
+    <button id="adm-login-btn" onclick="admDoLogin()">로그인</button>
+    <div id="adm-modal-error"></div>
+  </div>
+</div>
+
+<!-- 대시보드 전체 오버레이 -->
+<div id="adm-dashboard">
+
+  <!-- 사이드바 -->
+  <aside class="adm-sidebar">
+    <div class="adm-sidebar-logo">
+      <div class="adm-sidebar-logo-icon">🗺️</div>
+      <div>
+        <div class="adm-sidebar-logo-text">키즈루트</div>
+        <div class="adm-sidebar-logo-badge">ADMIN</div>
+      </div>
+    </div>
+    <div class="adm-nav-group">Overview</div>
+    <div class="adm-nav-item active" onclick="admSwitchTab('dashboard',this)"><span class="adm-nav-icon">📊</span> 대시보드</div>
+    <div class="adm-nav-group">Management</div>
+    <div class="adm-nav-item" onclick="admSwitchTab('members',this)"><span class="adm-nav-icon">👥</span> 멤버십 관리<span class="adm-nav-badge">247</span></div>
+    <div class="adm-nav-item" onclick="admSwitchTab('features',this)"><span class="adm-nav-icon">⚙️</span> 기능 설정</div>
+    <div class="adm-nav-item" onclick="admSwitchTab('alerts',this)"><span class="adm-nav-icon">🔔</span> 공석 알림<span class="adm-nav-badge green">3</span></div>
+    <div class="adm-nav-item" onclick="admSwitchTab('academies',this)"><span class="adm-nav-icon">🏫</span> 학원 관리</div>
+    <div class="adm-nav-group">Analytics</div>
+    <div class="adm-nav-item" onclick="admSwitchTab('stats',this)"><span class="adm-nav-icon">📈</span> 가입 통계</div>
+    <div class="adm-nav-item" onclick="admSwitchTab('conversion',this)"><span class="adm-nav-icon">💳</span> 전환율</div>
+    <div class="adm-sidebar-footer">
+      <div class="adm-profile">
+        <div class="adm-avatar" id="adm-avatar-char">D</div>
+        <div>
+          <div class="adm-uname" id="adm-display-name">davegpt25</div>
+          <div class="adm-urole">관리자</div>
+        </div>
+      </div>
+      <button class="adm-signout-btn" onclick="admSignOut()">로그아웃</button>
+    </div>
+  </aside>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="adm-main">
+
+    <!-- 대시보드 탭 -->
+    <div id="adm-tab-dashboard" class="adm-tab-content active">
+      <div class="adm-page-title">대시보드 👋</div>
+      <div class="adm-page-sub">오늘도 학부모들이 최적 스케줄을 찾고 있어요.</div>
+      <div class="adm-kpi-grid">
+        <div class="adm-kpi-card"><div class="adm-kpi-icon">📋</div><div class="adm-kpi-label">총 사전예약</div><div class="adm-kpi-value">247</div><div class="adm-kpi-delta up">↑ 12 오늘</div></div>
+        <div class="adm-kpi-card"><div class="adm-kpi-icon">💳</div><div class="adm-kpi-label">멤버십 활성</div><div class="adm-kpi-value">18</div><div class="adm-kpi-delta up">↑ 3 이번 주</div></div>
+        <div class="adm-kpi-card"><div class="adm-kpi-icon">⏳</div><div class="adm-kpi-label">체험 중</div><div class="adm-kpi-value">41</div><div class="adm-kpi-delta down">만료 임박 7명</div></div>
+        <div class="adm-kpi-card"><div class="adm-kpi-icon">🔄</div><div class="adm-kpi-label">전환율</div><div class="adm-kpi-value">3.2%</div><div class="adm-kpi-delta up">↑ 0.4%p</div></div>
+      </div>
+      <div class="adm-grid wide">
+        <div class="adm-card">
+          <div class="adm-card-title">📈 일별 사전예약 추이 <span class="adm-badge">최근 7일</span></div>
+          <div class="adm-chart">
+            <div class="adm-bar" style="height:35%"></div><div class="adm-bar" style="height:55%"></div>
+            <div class="adm-bar" style="height:40%"></div><div class="adm-bar" style="height:70%"></div>
+            <div class="adm-bar" style="height:50%"></div><div class="adm-bar" style="height:85%"></div>
+            <div class="adm-bar" style="height:100%;background:linear-gradient(to top,#F97316,#FF9A3C)"></div>
+          </div>
+          <div class="adm-chart-labels">
+            <div class="adm-chart-label">월</div><div class="adm-chart-label">화</div><div class="adm-chart-label">수</div>
+            <div class="adm-chart-label">목</div><div class="adm-chart-label">금</div><div class="adm-chart-label">토</div>
+            <div class="adm-chart-label" style="color:#F97316;font-weight:700">오늘</div>
+          </div>
+          <div style="margin-top:16px">
+            <div class="adm-stat-row"><span class="adm-stat-lbl">이번 주 총 가입</span><span class="adm-stat-val or">+63명</span></div>
+            <div class="adm-stat-row"><span class="adm-stat-lbl">전주 대비</span><span class="adm-stat-val or">+24%</span></div>
+            <div class="adm-stat-row"><span class="adm-stat-lbl">체험→멤버십 전환</span><span class="adm-stat-val">3명</span></div>
+          </div>
+        </div>
+        <div class="adm-card">
+          <div class="adm-card-title">👥 최근 가입자</div>
+          <div class="adm-member-list">
+            <div class="adm-member-row"><div class="adm-m-avatar or">K</div><div><div class="adm-m-email">kim**@naver.com</div><div class="adm-m-date">오늘 09:14</div></div><div class="adm-m-status s-trial">체험 D-7</div><div class="adm-toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="adm-member-row"><div class="adm-m-avatar gr">P</div><div><div class="adm-m-email">park**@kakao.com</div><div class="adm-m-date">어제 22:31</div></div><div class="adm-m-status s-active">멤버십</div><div class="adm-toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="adm-member-row"><div class="adm-m-avatar">L</div><div><div class="adm-m-email">lee**@gmail.com</div><div class="adm-m-date">2일 전</div></div><div class="adm-m-status s-trial">체험 D-5</div><div class="adm-toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="adm-member-row" style="opacity:.5"><div class="adm-m-avatar">C</div><div><div class="adm-m-email">choi**@naver.com</div><div class="adm-m-date">5일 전</div></div><div class="adm-m-status s-expired">만료</div><div class="adm-toggle" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="adm-grid">
+        <div class="adm-card">
+          <div class="adm-card-title">⚙️ 멤버십 기능 ON/OFF <span class="adm-badge">WTP 3가지</span></div>
+          <div class="adm-feat-list">
+            <div class="adm-feat-row"><div class="adm-feat-icon ti">⏱️</div><div><div class="adm-feat-name">스케줄 저장 &amp; 히스토리</div><div class="adm-feat-desc">시간절약 — 최대 5개 스케줄 저장</div></div><div class="adm-feat-toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="adm-feat-row"><div class="adm-feat-icon co">✨</div><div><div class="adm-feat-name">최적 조합 신뢰도 점수</div><div class="adm-feat-desc">결정불안 해소 — AI 추천 근거 표시</div></div><div class="adm-feat-toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="adm-feat-row"><div class="adm-feat-icon al">🔔</div><div><div class="adm-feat-name">학원 공석 실시간 알림</div><div class="adm-feat-desc">기회손실 방지 — 카카오 알림톡 연동</div></div><div class="adm-feat-toggle" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+        <div class="adm-card">
+          <div class="adm-card-title">🔔 공석 알림 대기열 <span class="adm-badge" style="background:#ECFDF5;color:#16A34A">3건 대기</span></div>
+          <div class="adm-alert-list">
+            <div class="adm-alert-row"><div class="adm-a-dot pend"></div><div><div class="adm-a-text">강남 베스트 수학 — 1자리</div><div class="adm-a-sub">대기 8명 · 방금</div></div><div class="adm-a-btn">알림 발송</div></div>
+            <div class="adm-alert-row"><div class="adm-a-dot pend"></div><div><div class="adm-a-text">YBM 영어 서초점 — 2자리</div><div class="adm-a-sub">대기 5명 · 12분 전</div></div><div class="adm-a-btn">알림 발송</div></div>
+            <div class="adm-alert-row" style="opacity:.5"><div class="adm-a-dot sent"></div><div><div class="adm-a-text">예원 피아노 — 1자리</div><div class="adm-a-sub">발송 완료 · 3명 클릭</div></div><div style="margin-left:auto;font-size:10px;color:#10B981;font-weight:600">✅ 발송됨</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 학원 관리 탭 -->
+    <div id="adm-tab-academies" class="adm-tab-content">
+      <div class="adm-page-title">🏫 학원 관리</div>
+      <div class="adm-page-sub">학원 원장 초대 및 인증 상태를 관리합니다.</div>
+      <div class="adm-acad-grid">
+        <div class="adm-invite-card">
+          <div class="adm-card-title">✉️ 원장 초대</div>
+          <div class="adm-invite-row">
+            <input class="adm-inv-input" id="adm-inv-email" type="email" placeholder="원장 이메일">
+            <input class="adm-inv-input" id="adm-inv-name" type="text" placeholder="학원명">
+            <button class="adm-inv-btn" onclick="admSendInvite()">초대 발송</button>
+          </div>
+          <div class="adm-inv-toast" id="adm-inv-toast">✅ 저장됨. master.html URL을 원장에게 공유하세요.</div>
+        </div>
+        <div class="adm-acad-table">
+          <div class="adm-acad-thead">
+            <div class="adm-acad-ttl">등록 학원</div>
+            <div class="adm-acad-cnt" id="adm-acad-cnt">0개</div>
+          </div>
+          <div id="adm-acad-list"></div>
+          <div class="adm-legend">
+            <div class="adm-leg-item"><div class="adm-sdot ver"></div>인증 완료</div>
+            <div class="adm-leg-item"><div class="adm-sdot pen"></div>초대 대기</div>
+            <div class="adm-leg-item"><div class="adm-sdot non"></div>미초대</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 기타 탭 플레이스홀더 -->
+    <div id="adm-tab-members"    class="adm-tab-content"><div class="adm-page-title">👥 멤버십 관리</div><div class="adm-page-sub" style="margin-top:8px">준비 중입니다.</div></div>
+    <div id="adm-tab-features"   class="adm-tab-content"><div class="adm-page-title">⚙️ 기능 설정</div><div class="adm-page-sub" style="margin-top:8px">준비 중입니다.</div></div>
+    <div id="adm-tab-alerts"     class="adm-tab-content"><div class="adm-page-title">🔔 공석 알림</div><div class="adm-page-sub" style="margin-top:8px">준비 중입니다.</div></div>
+    <div id="adm-tab-stats"      class="adm-tab-content"><div class="adm-page-title">📈 가입 통계</div><div class="adm-page-sub" style="margin-top:8px">준비 중입니다.</div></div>
+    <div id="adm-tab-conversion" class="adm-tab-content"><div class="adm-page-title">💳 전환율</div><div class="adm-page-sub" style="margin-top:8px">준비 중입니다.</div></div>
+
+  </main>
+</div>
+
+<script>
+// ── Admin overlay logic ──────────────────────────────────────
+const ADM_MASTER_EMAIL = 'davegpt25@gmail.com';
+
+// 로고 5번 클릭 트리거
+(function() {
+  let clicks = 0, timer = null;
+  const logo = document.querySelector('.nav-logo');
+  if (!logo) return;
+  logo.style.cursor = 'pointer';
+  logo.addEventListener('click', function(e) {
+    clicks++;
+    clearTimeout(timer);
+    if (clicks >= 5) { clicks = 0; admOpenModal(); return; }
+    timer = setTimeout(() => { clicks = 0; }, 2000);
+  });
+})();
+
+function admOpenModal() {
+  document.getElementById('adm-modal-backdrop').classList.add('open');
+  setTimeout(() => document.getElementById('adm-email-input').focus(), 100);
+}
+function admCloseModal() {
+  document.getElementById('adm-modal-backdrop').classList.remove('open');
+  document.getElementById('adm-modal-error').style.display = 'none';
+  document.getElementById('adm-email-input').value = '';
+}
+
+function admDoLogin() {
+  const email = document.getElementById('adm-email-input').value.trim().toLowerCase();
+  const errEl = document.getElementById('adm-modal-error');
+  errEl.style.display = 'none';
+
+  if (!email) { errEl.textContent = '이메일을 입력해 주세요.'; errEl.style.display = 'block'; return; }
+
+  if (email === ADM_MASTER_EMAIL) {
+    admCloseModal();
+    const initial = email[0].toUpperCase();
+    document.getElementById('adm-avatar-char').textContent = initial;
+    document.getElementById('adm-display-name').textContent = email.split('@')[0];
+    document.getElementById('adm-dashboard').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    admSwitchTab('dashboard', document.querySelector('.adm-nav-item'));
+    admRenderAcadList();
+  } else {
+    errEl.textContent = '접근 권한이 없습니다.';
+    errEl.style.display = 'block';
+  }
+}
+
+function admSignOut() {
+  document.getElementById('adm-dashboard').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function admSwitchTab(tabId, navEl) {
+  document.querySelectorAll('#adm-dashboard .adm-tab-content').forEach(el => el.classList.remove('active'));
+  document.getElementById('adm-tab-' + tabId).classList.add('active');
+  document.querySelectorAll('#adm-dashboard .adm-nav-item').forEach(el => el.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  if (tabId === 'academies') admRenderAcadList();
+}
+
+// localStorage helpers
+function admGetInvites() { try { return JSON.parse(localStorage.getItem('kidsroute_invites') || '[]'); } catch { return []; } }
+function admSaveInvites(list) { localStorage.setItem('kidsroute_invites', JSON.stringify(list)); }
+
+function admRenderAcadList() {
+  const invites = admGetInvites();
+  const body = document.getElementById('adm-acad-list');
+  const cnt  = document.getElementById('adm-acad-cnt');
+  if (!body) return;
+  const defaults = [
+    { id:'acad-001', name:'강남베스트수학', addr:'강남구 역삼동' },
+    { id:'acad-002', name:'국어나라학원',   addr:'강남구 대치동' },
+    { id:'acad-003', name:'스피드수학학원', addr:'강남구 개포동' },
+    { id:'acad-004', name:'탑영어학원',     addr:'강남구 삼성동' },
+  ];
+  cnt.textContent = defaults.length + '개';
+  body.innerHTML = '';
+  defaults.forEach(a => {
+    const inv = invites.find(i => i.academyId === a.id);
+    let dot, tag, btn;
+    if (inv && inv.status === 'accepted') {
+      dot='ver'; tag='<span class="adm-atag v">✅ 인증 완료</span>';
+      btn=`<button class="adm-abtn" onclick="alert('Phase 2 예정')">관리 →</button>`;
+    } else if (inv && inv.status === 'pending') {
+      dot='pen'; tag='<span class="adm-atag p">⏳ 초대 대기</span>';
+      btn=`<button class="adm-abtn" onclick="admApprove('${inv.email}')">✅ 승인</button>
+           <button class="adm-abtn gh" onclick="alert('재발송됨')" style="margin-left:4px">재발송</button>`;
+    } else {
+      dot='non'; tag='<span class="adm-atag n">미초대</span>';
+      btn=`<button class="adm-abtn" onclick="admQuickInvite('${a.id}','${a.name}')">초대하기</button>`;
+    }
+    body.insertAdjacentHTML('beforeend', `
+      <div class="adm-acad-row">
+        <div class="adm-sdot ${dot}"></div>
+        <div class="adm-acad-info">
+          <div class="adm-acad-name">${a.name}</div>
+          <div class="adm-acad-meta">${inv ? inv.email : a.addr}</div>
+        </div>
+        ${tag} ${btn}
+      </div>`);
+  });
+}
+
+function admSendInvite() {
+  const email = document.getElementById('adm-inv-email').value.trim();
+  const name  = document.getElementById('adm-inv-name').value.trim();
+  if (!email || !name) { alert('이메일과 학원명을 입력해 주세요.'); return; }
+  const list = admGetInvites();
+  list.push({ email, academyId: 'acad-' + Date.now(), academyName: name, status: 'pending' });
+  admSaveInvites(list);
+  document.getElementById('adm-inv-email').value = '';
+  document.getElementById('adm-inv-name').value  = '';
+  const t = document.getElementById('adm-inv-toast');
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+  admRenderAcadList();
+}
+
+function admQuickInvite(id, name) {
+  const email = prompt(name + ' 원장 이메일:');
+  if (!email) return;
+  const list = admGetInvites();
+  list.push({ email: email.trim(), academyId: id, academyName: name, status: 'pending' });
+  admSaveInvites(list);
+  admRenderAcadList();
+}
+
+function admApprove(email) {
+  const list = admGetInvites();
+  const i = list.findIndex(x => x.email === email);
+  if (i > -1) { list[i].status = 'accepted'; admSaveInvites(list); admRenderAcadList(); }
+}
+
+// Esc 키로 모달 닫기
+document.addEventListener('keydown', e => { if (e.key === 'Escape') admCloseModal(); });
+
+// 모달 바깥 클릭으로 닫기
+document.getElementById('adm-modal-backdrop').addEventListener('click', function(e) {
+  if (e.target === this) admCloseModal();
+});
+</script>
+
 </body>
 </html>
