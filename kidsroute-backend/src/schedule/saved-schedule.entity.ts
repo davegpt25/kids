@@ -16,6 +16,9 @@ export class SavedSchedule {
   @Column({ type: 'simple-json' })
   academyIds: string[];
 
+  @Column({ type: 'simple-json', nullable: true })
+  pushSettings: { academyId: string; enabled: boolean; minutesBefore?: number }[] | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }

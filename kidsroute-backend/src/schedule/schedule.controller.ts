@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param, UseGuards } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { SchedulingEngineService } from './engine/scheduling-engine.service';
 import { RecommendScheduleDto } from './dto/recommend-schedule.dto';
+import { PushSettingsDto } from './dto/push-settings.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -24,6 +25,15 @@ export class ScheduleController {
     @Body() body: { childId: string; academyIds: string[] },
   ) {
     return this.scheduleService.saveSchedule(user.id, body.childId, body.academyIds);
+  }
+
+  @Post(':id/push-settings')
+  savePushSettings(
+    @CurrentUser() user: { id: string },
+    @Param('id') scheduleId: string,
+    @Body() dto: PushSettingsDto,
+  ) {
+    return this.scheduleService.savePushSettings(user.id, scheduleId, dto.notifications);
   }
 
   @Get()

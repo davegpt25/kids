@@ -5,6 +5,13 @@ export interface AcademyWithSlots {
   name: string;
   subjects: string[];
   timeSlots: TimeSlot[];
+  latitude: number;
+  longitude: number;
+  address: string;
+  monthlyFee: number;
+  phone: string | null;
+  hasTimetable: boolean;
+  distance_m: number;
 }
 
 export class Combinator {
@@ -35,6 +42,43 @@ export class Combinator {
       if (subjects.includes(priority[i])) return i;
     }
     return priority.length;
+  }
+
+  buildTopCombinations(
+    academies: AcademyWithSlots[],
+    subjectPriority: string[],
+    maxCount: number,
+  ): AcademyWithSlots[][] {
+    const results: AcademyWithSlots[][] = [];
+
+    const bySubject = new Map<string, AcademyWithSlots[]>();
+    for (const subject of subjectPriority) {
+      bySubject.set(
+        subject,
+        academies.filter((a) => a.subjects.includes(subject)),
+      );
+    }
+
+    const subjects = subjectPriority.filter((s) => (bySubject.get(s)?.length ?? 0) > 0);
+    if (subjects.length === 0) return results;
+
+    const recurse = (idx: number, current: AcademyWithSlots[]) => {
+      if (results.length >= maxCount) return;
+      if (idx === subjects.length) {
+        results.push([...current]);
+        return;
+      }
+      for (const academy of bySubject.get(subjects[idx]) ?? []) {
+        if (!this.hasConflictWithSelected(academy, current)) {
+          current.push(academy);
+          recurse(idx + 1, current);
+          current.pop();
+        }
+      }
+    };
+
+    recurse(0, []);
+    return results;
   }
 
   private hasConflictWithSelected(

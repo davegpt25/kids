@@ -1,0 +1,55 @@
+<h2>관리자 패널을 어디에 붙일까요?</h2>
+<p class="subtitle">davegpt25@gmail.com 로그인 시 진입하는 어드민의 위치와 구조</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>📄 별도 페이지 — <code style="font-size:12px">/admin.html</code></h3>
+      <p>랜딩페이지와 완전히 분리된 독립 파일.<br>
+      Footer에 숨겨진 링크 또는 직접 URL 접근.</p>
+      <div style="background:#F9FAFB;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:#374151">
+        <strong>흐름:</strong> footer 링크 클릭 → admin.html 로 이동 → 로그인 모달 → 대시보드<br><br>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+          <span style="background:#ECFDF5;color:#16A34A;padding:2px 8px;border-radius:100px;font-size:11px">✅ 랜딩 성능 영향 없음</span>
+          <span style="background:#ECFDF5;color:#16A34A;padding:2px 8px;border-radius:100px;font-size:11px">✅ 구조 깔끔</span>
+          <span style="background:#FEF9C3;color:#CA8A04;padding:2px 8px;border-radius:100px;font-size:11px">⚠️ 파일 분리 관리 필요</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>🖥️ 슬라이드 오버레이 — 랜딩 위에 전체화면 패널</h3>
+      <p>랜딩페이지 안에 숨겨진 어드민 섹션.<br>
+      URL에 <code style="font-size:12px">?admin=1</code> 추가하거나 단축키로 진입, 로그인 후 전체화면 대시보드 오버레이.</p>
+      <div style="background:#F9FAFB;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:#374151">
+        <strong>흐름:</strong> URL <code>index.html?admin</code> 접근 → 로그인 모달 → 대시보드가 랜딩 위에 전체화면으로 펼쳐짐<br><br>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+          <span style="background:#ECFDF5;color:#16A34A;padding:2px 8px;border-radius:100px;font-size:11px">✅ 파일 1개 유지</span>
+          <span style="background:#ECFDF5;color:#16A34A;padding:2px 8px;border-radius:100px;font-size:11px">✅ 배포 단순</span>
+          <span style="background:#FEF9C3;color:#CA8A04;padding:2px 8px;border-radius:100px;font-size:11px">⚠️ index.html 더 커짐</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>🔑 로그인 모달 → 인라인 전환 — 같은 페이지에서 뷰 전환</h3>
+      <p>Footer의 작은 "관리자" 링크 클릭 → 로그인 모달 → 인증 성공 시 페이지가 대시보드 뷰로 완전히 전환.<br>
+      뒤로가기 누르면 랜딩으로 복귀.</p>
+      <div style="background:#F9FAFB;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:#374151">
+        <strong>흐름:</strong> footer "관리자" 클릭 → 로그인 → 랜딩 숨김 + 대시보드 표시 (같은 URL)<br><br>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+          <span style="background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:100px;font-size:11px">✅ UX 가장 자연스러움</span>
+          <span style="background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:100px;font-size:11px">✅ 파일 1개</span>
+          <span style="background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:100px;font-size:11px">✅ 배포 단순</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

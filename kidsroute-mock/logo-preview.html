@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>키즈루트 로고 제안</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: #FFFBF7;
+    min-height: 100vh;
+    padding: 48px 32px;
+  }
+  h1 {
+    font-size: 22px; font-weight: 800; color: #1C1C1C;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 14px; color: #78716C; margin-bottom: 48px;
+  }
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    max-width: 960px;
+  }
+  .logo-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 36px 24px 28px;
+    border: 1.5px solid #F5F0EB;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+  }
+  .logo-label {
+    font-size: 11px; font-weight: 700; color: #F97316;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .logo-name {
+    font-size: 17px; font-weight: 800; color: #1C1C1C;
+    text-align: center;
+  }
+  .logo-desc {
+    font-size: 12.5px; color: #78716C; text-align: center; line-height: 1.7;
+  }
+  .logo-tag {
+    display: inline-block;
+    background: #FFF7ED; color: #F97316;
+    border-radius: 100px; padding: 3px 10px;
+    font-size: 11px; font-weight: 700;
+  }
+  /* Size variants row */
+  .sizes-row {
+    display: flex; align-items: center; gap: 12px; margin-top: 4px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .sizes-row svg { display: block; }
+  .size-label { font-size: 10px; color: #A8A29E; text-align: center; margin-top: 4px; }
+  .size-wrap { display: flex; flex-direction: column; align-items: center; }
+  hr.divider {
+    border: none; border-top: 1px solid #F5F0EB;
+    width: 100%; margin: 4px 0;
+  }
+  .dark-bg {
+    background: #1C1C1C; border-radius: 12px; padding: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .dark-bg span {
+    font-size: 15px; font-weight: 800; color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .context-label {
+    font-size: 11px; color: #A8A29E; font-weight: 600; margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<h1>키즈루트 로고 제안 3종</h1>
+<p class="subtitle">서비스 기획 기반 — 아이 경로 · 시간 최적화 · 학부모 신뢰</p>
+
+<div class="logo-grid">
+
+  <!-- ─────────────────── LOGO A ─────────────────── -->
+  <div class="logo-card">
+    <div class="logo-label">Concept A</div>
+    <div class="logo-name">아이 핀<br><span style="font-size:13px;font-weight:600;color:#78716C;">Kid Pin</span></div>
+
+    <!-- Main logo -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="100" height="120">
+      <defs>
+        <radialGradient id="pinGrad" cx="40%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#FF9240"/>
+          <stop offset="100%" stop-color="#EA6C0A"/>
+        </radialGradient>
+      </defs>
+      <!-- Pin body -->
+      <path d="M40 4 C21 4 5 20 5 39 C5 58 40 92 40 92 C40 92 75 58 75 39 C75 20 59 4 40 4Z"
+            fill="url(#pinGrad)"/>
+      <!-- Inner circle highlight -->
+      <circle cx="40" cy="37" r="22" fill="rgba(255,255,255,0.12)"/>
+      <!-- Child head -->
+      <circle cx="40" cy="29" r="10" fill="white"/>
+      <!-- Child shoulders/body arc -->
+      <path d="M26 48 Q33 41 40 40 Q47 41 54 48"
+            fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+
+    <hr class="divider"/>
+
+    <!-- Size variants -->
+    <div>
+      <div class="context-label" style="text-align:center;margin-bottom:8px;">크기별 미리보기</div>
+      <div class="sizes-row">
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="64" height="76">
+            <defs><radialGradient id="pg1" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#FF9240"/><stop offset="100%" stop-color="#EA6C0A"/></radialGradient></defs>
+            <path d="M40 4 C21 4 5 20 5 39 C5 58 40 92 40 92 C40 92 75 58 75 39 C75 20 59 4 40 4Z" fill="url(#pg1)"/>
+            <circle cx="40" cy="29" r="10" fill="white"/>
+            <path d="M26 48 Q40 40 54 48" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <div class="size-label">64px</div>
+        </div>
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="40" height="48">
+            <defs><radialGradient id="pg2" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#FF9240"/><stop offset="100%" stop-color="#EA6C0A"/></radialGradient></defs>
+            <path d="M40 4 C21 4 5 20 5 39 C5 58 40 92 40 92 C40 92 75 58 75 39 C75 20 59 4 40 4Z" fill="url(#pg2)"/>
+            <circle cx="40" cy="29" r="10" fill="white"/>
+            <path d="M26 48 Q40 40 54 48" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <div class="size-label">40px</div>
+        </div>
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="24" height="29">
+            <defs><radialGradient id="pg3" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#FF9240"/><stop offset="100%" stop-color="#EA6C0A"/></radialGradient></defs>
+            <path d="M40 4 C21 4 5 20 5 39 C5 58 40 92 40 92 C40 92 75 58 75 39 C75 20 59 4 40 4Z" fill="url(#pg3)"/>
+            <circle cx="40" cy="29" r="10" fill="white"/>
+            <path d="M26 48 Q40 40 54 48" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <div class="size-label">24px</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Nav context -->
+    <div>
+      <div class="context-label" style="text-align:center;margin-bottom:8px;">네비게이션 로고</div>
+      <div style="display:flex;align-items:center;gap:8px;background:#FFFBF7;border-radius:10px;padding:10px 16px;border:1px solid #F5F0EB;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="20" height="24">
+          <path d="M40 4 C21 4 5 20 5 39 C5 58 40 92 40 92 C40 92 75 58 75 39 C75 20 59 4 40 4Z" fill="#F97316"/>
+          <circle cx="40" cy="29" r="10" fill="white"/>
+          <path d="M26 48 Q40 40 54 48" fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <span style="font-size:16px;font-weight:800;color:#F97316;letter-spacing:-0.3px;">키즈루트</span>
+      </div>
+    </div>
+
+    <div class="logo-desc">위치 핀 = 경로 탐색<br>아이 실루엣 = 서비스 대상<br>직관적·감성적</div>
+    <span class="logo-tag">앱 아이콘 적합</span>
+  </div>
+
+  <!-- ─────────────────── LOGO B ─────────────────── -->
+  <div class="logo-card">
+    <div class="logo-label">Concept B</div>
+    <div class="logo-name">경로 아이<br><span style="font-size:13px;font-weight:600;color:#78716C;">Route Kid</span></div>
+
+    <!-- Main logo -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="110" height="110">
+      <defs>
+        <linearGradient id="appGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#FF9A3C"/>
+          <stop offset="100%" stop-color="#F97316"/>
+        </linearGradient>
+      </defs>
+      <!-- Rounded square bg -->
+      <rect width="96" height="96" rx="24" fill="url(#appGrad)"/>
+      <!-- Child head -->
+      <circle cx="48" cy="24" r="12" fill="white"/>
+      <!-- Child body -->
+      <line x1="48" y1="36" x2="48" y2="52" stroke="white" stroke-width="5" stroke-linecap="round"/>
+      <!-- Child arms -->
+      <line x1="34" y1="43" x2="62" y2="43" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+      <!-- Child legs -->
+      <line x1="48" y1="52" x2="38" y2="64" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="48" y1="52" x2="58" y2="64" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+      <!-- Route path -->
+      <path d="M16 80 Q32 72 48 74 Q64 76 80 68"
+            fill="none" stroke="white" stroke-width="3"
+            stroke-dasharray="5,4" stroke-linecap="round" opacity="0.9"/>
+      <!-- Start dot -->
+      <circle cx="16" cy="80" r="4" fill="white"/>
+      <!-- End arrowhead -->
+      <path d="M76 65 L81 68 L76 72" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <hr class="divider"/>
+
+    <!-- Size variants -->
+    <div>
+      <div class="context-label" style="text-align:center;margin-bottom:8px;">크기별 미리보기</div>
+      <div class="sizes-row">
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="64" height="64">
+            <rect width="96" height="96" rx="24" fill="#F97316"/>
+            <circle cx="48" cy="24" r="12" fill="white"/>
+            <line x1="48" y1="36" x2="48" y2="52" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            <line x1="34" y1="43" x2="62" y2="43" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="48" y1="52" x2="38" y2="64" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="48" y1="52" x2="58" y2="64" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+            <path d="M16 80 Q32 72 48 74 Q64 76 80 68" fill="none" stroke="white" stroke-width="3" stroke-dasharray="5,4" stroke-linecap="round"/>
+            <circle cx="16" cy="80" r="4" fill="white"/>
+          </svg>
+          <div class="size-label">64px</div>
+        </div>
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="40" height="40">
+            <rect width="96" height="96" rx="24" fill="#F97316"/>
+            <circle cx="48" cy="24" r="12" fill="white"/>
+            <line x1="48" y1="36" x2="48" y2="52" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            <line x1="34" y1="43" x2="62" y2="43" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+            <path d="M16 80 Q48 70 80 68" fill="none" stroke="white" stroke-width="3" stroke-dasharray="5,4" stroke-linecap="round"/>
+            <circle cx="16" cy="80" r="4" fill="white"/>
+          </svg>
+          <div class="size-label">40px</div>
+        </div>
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="24" height="24">
+            <rect width="96" height="96" rx="24" fill="#F97316"/>
+            <circle cx="48" cy="24" r="12" fill="white"/>
+            <line x1="48" y1="36" x2="48" y2="52" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            <line x1="34" y1="43" x2="62" y2="43" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+          </svg>
+          <div class="size-label">24px</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Nav context -->
+    <div>
+      <div class="context-label" style="text-align:center;margin-bottom:8px;">네비게이션 로고</div>
+      <div style="display:flex;align-items:center;gap:8px;background:#FFFBF7;border-radius:10px;padding:10px 16px;border:1px solid #F5F0EB;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="24" height="24">
+          <rect width="96" height="96" rx="24" fill="#F97316"/>
+          <circle cx="48" cy="24" r="12" fill="white"/>
+          <line x1="48" y1="36" x2="48" y2="52" stroke="white" stroke-width="5" stroke-linecap="round"/>
+          <line x1="34" y1="43" x2="62" y2="43" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+          <line x1="48" y1="52" x2="38" y2="64" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+          <line x1="48" y1="52" x2="58" y2="64" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+        </svg>
+        <span style="font-size:16px;font-weight:800;color:#F97316;letter-spacing:-0.3px;">키즈루트</span>
+      </div>
+    </div>
+
+    <div class="logo-desc">픽토그램 아이 = 아이 중심 서비스<br>점선 경로 = 루트 최적화<br>모던·앱 친화적</div>
+    <span class="logo-tag">⭐ 추천 — 앱 아이콘 최적</span>
+  </div>
+
+  <!-- ─────────────────── LOGO C ─────────────────── -->
+  <div class="logo-card">
+    <div class="logo-label">Concept C</div>
+    <div class="logo-name">집→학원 경로<br><span style="font-size:13px;font-weight:600;color:#78716C;">Home to Academy</span></div>
+
+    <!-- Main logo -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="110" height="110">
+      <defs>
+        <linearGradient id="appGrad2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#FF9A3C"/>
+          <stop offset="100%" stop-color="#F97316"/>
+        </linearGradient>
+      </defs>
+      <rect width="96" height="96" rx="24" fill="url(#appGrad2)"/>
+
+      <!-- House icon (left) -->
+      <g transform="translate(10, 30)">
+        <!-- Roof -->
+        <polygon points="18,0 0,14 36,14" fill="white" opacity="0.95"/>
+        <!-- Body -->
+        <rect x="4" y="14" width="28" height="20" rx="2" fill="white" opacity="0.95"/>
+        <!-- Door -->
+        <rect x="13" y="22" width="10" height="12" rx="2" fill="#F97316"/>
+        <!-- Window -->
+        <rect x="5" y="17" width="8" height="7" rx="1.5" fill="#FFF7ED"/>
+        <rect x="23" y="17" width="8" height="7" rx="1.5" fill="#FFF7ED"/>
+      </g>
+
+      <!-- Dotted path with child icon -->
+      <!-- dots -->
+      <circle cx="50" cy="56" r="3" fill="white" opacity="0.6"/>
+      <circle cx="58" cy="53" r="3" fill="white" opacity="0.7"/>
+      <circle cx="66" cy="51" r="3" fill="white" opacity="0.8"/>
+
+      <!-- Arrow -->
+      <path d="M64 47 L72 51 L64 55" fill="none" stroke="white" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- School/academy icon (right) -->
+      <g transform="translate(56, 22)">
+        <!-- Building -->
+        <rect x="0" y="10" width="30" height="26" rx="2" fill="white" opacity="0.95"/>
+        <!-- Roof / pediment -->
+        <rect x="-2" y="8" width="34" height="5" rx="2" fill="white"/>
+        <!-- Flag pole top -->
+        <line x1="15" y1="0" x2="15" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Flag -->
+        <polygon points="15,1 23,4 15,7" fill="#FFF7ED" opacity="0.9"/>
+        <!-- Windows -->
+        <rect x="3" y="13" width="7" height="7" rx="1.5" fill="#FFF7ED"/>
+        <rect x="20" y="13" width="7" height="7" rx="1.5" fill="#FFF7ED"/>
+        <!-- Door -->
+        <rect x="11" y="25" width="8" height="11" rx="1.5" fill="#F97316"/>
+      </g>
+    </svg>
+
+    <hr class="divider"/>
+
+    <!-- Size variants -->
+    <div>
+      <div class="context-label" style="text-align:center;margin-bottom:8px;">크기별 미리보기</div>
+      <div class="sizes-row">
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="64" height="64">
+            <rect width="96" height="96" rx="24" fill="#F97316"/>
+            <g transform="translate(10,30)"><polygon points="18,0 0,14 36,14" fill="white"/><rect x="4" y="14" width="28" height="20" rx="2" fill="white"/><rect x="13" y="22" width="10" height="12" rx="2" fill="#F97316"/></g>
+            <circle cx="50" cy="56" r="3" fill="white" opacity="0.7"/>
+            <circle cx="58" cy="53" r="3" fill="white" opacity="0.8"/>
+            <circle cx="66" cy="51" r="3" fill="white" opacity="0.9"/>
+            <g transform="translate(56,22)"><rect x="0" y="10" width="30" height="26" rx="2" fill="white"/><rect x="-2" y="8" width="34" height="5" rx="2" fill="white"/><rect x="11" y="25" width="8" height="11" rx="1.5" fill="#F97316"/></g>
+          </svg>
+          <div class="size-label">64px</div>
+        </div>
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="40" height="40">
+            <rect width="96" height="96" rx="24" fill="#F97316"/>
+            <g transform="translate(10,30)"><polygon points="18,0 0,14 36,14" fill="white"/><rect x="4" y="14" width="28" height="20" rx="2" fill="white"/></g>
+            <circle cx="50" cy="56" r="3" fill="white" opacity="0.8"/>
+            <circle cx="58" cy="53" r="3" fill="white"/>
+            <g transform="translate(56,22)"><rect x="0" y="10" width="30" height="26" rx="2" fill="white"/><rect x="-2" y="8" width="34" height="5" rx="2" fill="white"/></g>
+          </svg>
+          <div class="size-label">40px</div>
+        </div>
+        <div class="size-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="24" height="24">
+            <rect width="96" height="96" rx="24" fill="#F97316"/>
+            <g transform="translate(10,30)"><polygon points="18,0 0,14 36,14" fill="white"/><rect x="4" y="14" width="28" height="20" rx="2" fill="white"/></g>
+            <g transform="translate(56,22)"><rect x="0" y="10" width="30" height="26" rx="2" fill="white"/><rect x="-2" y="8" width="34" height="5" rx="2" fill="white"/></g>
+          </svg>
+          <div class="size-label">24px</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Nav context -->
+    <div>
+      <div class="context-label" style="text-align:center;margin-bottom:8px;">네비게이션 로고</div>
+      <div style="display:flex;align-items:center;gap:8px;background:#FFFBF7;border-radius:10px;padding:10px 16px;border:1px solid #F5F0EB;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="24" height="24">
+          <rect width="96" height="96" rx="24" fill="#F97316"/>
+          <g transform="translate(10,30)"><polygon points="18,0 0,14 36,14" fill="white"/><rect x="4" y="14" width="28" height="20" rx="2" fill="white"/></g>
+          <g transform="translate(56,22)"><rect x="0" y="10" width="30" height="26" rx="2" fill="white"/><rect x="-2" y="8" width="34" height="5" rx="2" fill="white"/></g>
+        </svg>
+        <span style="font-size:16px;font-weight:800;color:#F97316;letter-spacing:-0.3px;">키즈루트</span>
+      </div>
+    </div>
+
+    <div class="logo-desc">집 → 점선 → 학원 = 서비스 설명<br>가장 직관적·설명적<br>브랜드 스토리 전달력 ↑</div>
+    <span class="logo-tag">스토리텔링 최강</span>
+  </div>
+
+</div>
+
+<!-- Dark background test -->
+<div style="margin-top:48px;max-width:960px;">
+  <p style="font-size:12px;color:#A8A29E;font-weight:600;margin-bottom:16px;">DARK BACKGROUND TEST</p>
+  <div style="background:#1C1C1C;border-radius:16px;padding:24px 32px;display:flex;gap:48px;align-items:center;flex-wrap:wrap;">
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="48" height="58">
+        <path d="M40 4 C21 4 5 20 5 39 C5 58 40 92 40 92 C40 92 75 58 75 39 C75 20 59 4 40 4Z" fill="#F97316"/>
+        <circle cx="40" cy="29" r="10" fill="white"/>
+        <path d="M26 48 Q40 40 54 48" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <span style="font-size:11px;color:#666;">A</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="48" height="48">
+        <rect width="96" height="96" rx="24" fill="#F97316"/>
+        <circle cx="48" cy="24" r="12" fill="white"/>
+        <line x1="48" y1="36" x2="48" y2="52" stroke="white" stroke-width="5" stroke-linecap="round"/>
+        <line x1="34" y1="43" x2="62" y2="43" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="48" y1="52" x2="38" y2="64" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="48" y1="52" x2="58" y2="64" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M16 80 Q48 70 80 68" fill="none" stroke="white" stroke-width="3" stroke-dasharray="5,4" stroke-linecap="round"/>
+        <circle cx="16" cy="80" r="4" fill="white"/>
+      </svg>
+      <span style="font-size:11px;color:#666;">B</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="48" height="48">
+        <rect width="96" height="96" rx="24" fill="#F97316"/>
+        <g transform="translate(10,30)"><polygon points="18,0 0,14 36,14" fill="white"/><rect x="4" y="14" width="28" height="20" rx="2" fill="white"/><rect x="13" y="22" width="10" height="12" rx="2" fill="#F97316"/></g>
+        <circle cx="50" cy="56" r="3" fill="white"/>
+        <circle cx="58" cy="53" r="3" fill="white"/>
+        <circle cx="66" cy="51" r="3" fill="white"/>
+        <g transform="translate(56,22)"><rect x="0" y="10" width="30" height="26" rx="2" fill="white"/><rect x="-2" y="8" width="34" height="5" rx="2" fill="white"/><rect x="11" y="25" width="8" height="11" rx="1.5" fill="#F97316"/></g>
+      </svg>
+      <span style="font-size:11px;color:#666;">C</span>
+    </div>
+
+    <div style="color:white;font-size:13px;line-height:1.8;margin-left:auto;opacity:0.6;">
+      어두운 배경에서도<br>오렌지 아이콘은<br>선명하게 유지됩니다
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Academy } from './academy.entity';
 import { SearchAcademyDto } from './dto/search-academy.dto';
 
@@ -59,5 +59,46 @@ export class AcademyService {
       `,
       params,
     );
+  }
+
+  async checkConflicts(academyIds: string[]): Promise<{
+    hasConflict: boolean;
+    conflicts: { dayOfWeek: string; startTime: string; endTime: string; academyIds: string[] }[];
+  }> {
+    const academies = await this.academyRepo.find({
+      where: { id: In(academyIds) },
+      relations: ['timeSlots'],
+    });
+
+    const conflicts: { dayOfWeek: string; startTime: string; endTime: string; academyIds: string[] }[] = [];
+
+    for (let i = 0; i < academies.length; i++) {
+      for (let j = i + 1; j < academies.length; j++) {
+        for (const slotA of academies[i].timeSlots) {
+          for (const slotB of academies[j].timeSlots) {
+            if (slotA.dayOfWeek !== slotB.dayOfWeek) continue;
+            const aStart = this.toMinutes(slotA.startTime);
+            const aEnd = this.toMinutes(slotA.endTime);
+            const bStart = this.toMinutes(slotB.startTime);
+            const bEnd = this.toMinutes(slotB.endTime);
+            if (aStart < bEnd && aEnd > bStart) {
+              conflicts.push({
+                dayOfWeek: slotA.dayOfWeek,
+                startTime: slotA.startTime,
+                endTime: slotA.endTime,
+                academyIds: [academies[i].id, academies[j].id],
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return { hasConflict: conflicts.length > 0, conflicts };
+  }
+
+  private toMinutes(time: string): number {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
   }
 }

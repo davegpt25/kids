@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SavedSchedule } from './saved-schedule.entity';
@@ -20,6 +20,19 @@ export class ScheduleService {
       child: { id: childId },
       academyIds,
     });
+  }
+
+  async savePushSettings(
+    userId: string,
+    scheduleId: string,
+    notifications: { academyId: string; enabled: boolean; minutesBefore?: number }[],
+  ): Promise<void> {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { id: scheduleId, user: { id: userId } },
+    });
+    if (!schedule) throw new NotFoundException('스케줄을 찾을 수 없습니다.');
+    schedule.pushSettings = notifications;
+    await this.scheduleRepo.save(schedule);
   }
 
   async getSchedules(userId: string): Promise<SavedSchedule[]> {

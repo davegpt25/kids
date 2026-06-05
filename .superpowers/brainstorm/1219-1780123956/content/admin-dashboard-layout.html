@@ -1,0 +1,136 @@
+<h2>관리자 대시보드 레이아웃 — 어떤 구조가 맞나요?</h2>
+<p class="subtitle">풀 대시보드 기준, 섹션 배치 방식 선택</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>📊 상단 KPI 카드 + 하단 탭 구조</h3>
+      <p>상단에 핵심 숫자(가입자 수·전환율·오늘 신규)를 한눈에, 하단은 탭으로 섹션 전환.</p>
+      <div class="mockup" style="margin-top:10px;background:#F9FAFB;border-radius:10px;overflow:hidden">
+        <div class="mockup-header" style="font-size:11px;background:#E5E7EB;color:#374151;padding:6px 12px">관리자 대시보드</div>
+        <div class="mockup-body" style="padding:12px">
+          <!-- KPI 카드 행 -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+            <div style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:8px;text-align:center">
+              <div style="font-size:18px;font-weight:800;color:#F97316">247</div>
+              <div style="font-size:10px;color:#6B7280">총 사전예약</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:8px;text-align:center">
+              <div style="font-size:18px;font-weight:800;color:#10B981">12</div>
+              <div style="font-size:10px;color:#6B7280">오늘 신규</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:8px;text-align:center">
+              <div style="font-size:18px;font-weight:800;color:#6366F1">3.2%</div>
+              <div style="font-size:10px;color:#6B7280">전환율</div>
+            </div>
+          </div>
+          <!-- 탭 바 -->
+          <div style="display:flex;gap:4px;border-bottom:2px solid #E5E7EB;margin-bottom:10px">
+            <div style="padding:4px 10px;font-size:11px;font-weight:700;color:#F97316;border-bottom:2px solid #F97316;margin-bottom:-2px">멤버십 관리</div>
+            <div style="padding:4px 10px;font-size:11px;color:#9CA3AF">기능 설정</div>
+            <div style="padding:4px 10px;font-size:11px;color:#9CA3AF">통계</div>
+          </div>
+          <!-- 탭 컨텐츠 -->
+          <div style="font-size:11px;color:#6B7280">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #F3F4F6">
+              <span>user@naver.com</span>
+              <span style="background:#ECFDF5;color:#16A34A;padding:2px 8px;border-radius:100px;font-size:10px">멤버십 활성</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0">
+              <span>mom@kakao.com</span>
+              <span style="background:#F3F4F6;color:#6B7280;padding:2px 8px;border-radius:100px;font-size:10px">체험 중 D-5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>🗂️ 좌측 사이드바 + 우측 콘텐츠</h3>
+      <p>좌측에 네비게이션, 우측에 각 섹션 내용. 데스크탑 SaaS 대시보드 느낌.</p>
+      <div class="mockup" style="margin-top:10px;background:#F9FAFB;border-radius:10px;overflow:hidden">
+        <div class="mockup-header" style="font-size:11px;background:#E5E7EB;color:#374151;padding:6px 12px">관리자 대시보드</div>
+        <div class="mockup-body" style="padding:0;display:flex;min-height:120px">
+          <!-- 사이드바 -->
+          <div style="width:90px;background:#1F2937;padding:10px 8px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;color:#F97316;font-weight:700;padding:4px 6px;background:#374151;border-radius:6px">📊 개요</div>
+            <div style="font-size:9px;color:#9CA3AF;padding:4px 6px">👥 멤버십</div>
+            <div style="font-size:9px;color:#9CA3AF;padding:4px 6px">⚙️ 기능설정</div>
+            <div style="font-size:9px;color:#9CA3AF;padding:4px 6px">📈 통계</div>
+          </div>
+          <!-- 메인 콘텐츠 -->
+          <div style="flex:1;padding:10px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+              <div style="background:#fff;border:1px solid #E5E7EB;border-radius:6px;padding:8px;text-align:center">
+                <div style="font-size:16px;font-weight:800;color:#F97316">247</div>
+                <div style="font-size:9px;color:#9CA3AF">총 사전예약</div>
+              </div>
+              <div style="background:#fff;border:1px solid #E5E7EB;border-radius:6px;padding:8px;text-align:center">
+                <div style="font-size:16px;font-weight:800;color:#10B981">12</div>
+                <div style="font-size:9px;color:#9CA3AF">오늘 신규</div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E7EB;border-radius:6px;padding:8px;font-size:10px;color:#6B7280">
+              최근 가입자 그래프 영역
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>📱 단일 스크롤 페이지 — 섹션별 카드 나열</h3>
+      <p>탭/사이드바 없이 위에서 아래로 스크롤. KPI → 멤버십 목록 → 기능 스위치 → 차트 순.</p>
+      <div class="mockup" style="margin-top:10px;background:#F9FAFB;border-radius:10px;overflow:hidden">
+        <div class="mockup-header" style="font-size:11px;background:#E5E7EB;color:#374151;padding:6px 12px">관리자 대시보드</div>
+        <div class="mockup-body" style="padding:12px;display:flex;flex-direction:column;gap:8px">
+          <!-- KPI -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:6px;text-align:center">
+              <div style="font-size:14px;font-weight:800;color:#F97316">247</div>
+              <div style="font-size:9px;color:#9CA3AF">사전예약</div>
+            </div>
+            <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:6px;text-align:center">
+              <div style="font-size:14px;font-weight:800;color:#16A34A">12</div>
+              <div style="font-size:9px;color:#9CA3AF">오늘 신규</div>
+            </div>
+            <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:6px;text-align:center">
+              <div style="font-size:14px;font-weight:800;color:#2563EB">3.2%</div>
+              <div style="font-size:9px;color:#9CA3AF">전환율</div>
+            </div>
+          </div>
+          <!-- 기능 스위치 -->
+          <div style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:8px">
+            <div style="font-size:10px;font-weight:700;color:#374151;margin-bottom:6px">⚙️ 멤버십 기능 ON/OFF</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#6B7280;margin-bottom:4px">
+              <span>⏱ 스케줄 저장 (시간절약)</span>
+              <div style="width:28px;height:14px;background:#F97316;border-radius:100px"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#6B7280;margin-bottom:4px">
+              <span>✨ 최적 조합 신뢰도 (결정불안)</span>
+              <div style="width:28px;height:14px;background:#F97316;border-radius:100px"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#6B7280">
+              <span>🔔 공석 알림 (기회손실)</span>
+              <div style="width:28px;height:14px;background:#E5E7EB;border-radius:100px"></div>
+            </div>
+          </div>
+          <!-- 멤버 목록 미리보기 -->
+          <div style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:8px">
+            <div style="font-size:10px;font-weight:700;color:#374151;margin-bottom:4px">👥 최근 가입자</div>
+            <div style="font-size:10px;color:#6B7280">user@naver.com · 멤버십 D-5 ···</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

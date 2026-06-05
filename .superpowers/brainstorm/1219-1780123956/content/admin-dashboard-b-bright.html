@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KidsRoute 관리자 대시보드 — 밝은 톤 B형</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', sans-serif; background: #F8FAFC; color: #1E293B; font-size: 13px; }
+
+  /* ── 전체 레이아웃 ── */
+  .admin-wrap { display: flex; min-height: 100vh; }
+
+  /* ── 사이드바 ── */
+  .sidebar {
+    width: 220px; flex-shrink: 0;
+    background: #fff;
+    border-right: 1px solid #E2E8F0;
+    display: flex; flex-direction: column;
+    padding: 20px 12px;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 8px 20px;
+    border-bottom: 1px solid #F1F5F9;
+    margin-bottom: 16px;
+  }
+  .sidebar-logo-icon {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: linear-gradient(135deg, #FF9A3C, #F97316);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .sidebar-logo-text { font-weight: 800; font-size: 14px; color: #1E293B; }
+  .sidebar-logo-badge {
+    font-size: 9px; font-weight: 700; background: #FFF7ED;
+    color: #F97316; padding: 1px 6px; border-radius: 100px;
+    border: 1px solid #FED7AA;
+  }
+  .nav-group-label {
+    font-size: 10px; font-weight: 700; color: #94A3B8;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0 8px; margin-bottom: 4px; margin-top: 12px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 10px;
+    cursor: pointer; font-size: 13px; font-weight: 500;
+    color: #64748B; transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: #F8FAFC; color: #1E293B; }
+  .nav-item.active {
+    background: #FFF7ED; color: #F97316; font-weight: 700;
+  }
+  .nav-item .icon { font-size: 15px; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto; background: #F97316; color: #fff;
+    font-size: 10px; font-weight: 700; padding: 1px 7px;
+    border-radius: 100px;
+  }
+  .nav-badge.green { background: #10B981; }
+  .sidebar-footer {
+    margin-top: auto; padding-top: 16px;
+    border-top: 1px solid #F1F5F9;
+  }
+  .admin-profile {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 10px;
+    background: #F8FAFC;
+  }
+  .admin-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #FF9A3C, #F97316);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #fff; font-weight: 700;
+  }
+  .admin-name { font-size: 11px; font-weight: 700; color: #1E293B; }
+  .admin-role { font-size: 10px; color: #94A3B8; }
+
+  /* ── 메인 콘텐츠 ── */
+  .main { flex: 1; padding: 28px 32px; overflow-y: auto; }
+  .page-header { margin-bottom: 24px; }
+  .page-title { font-size: 20px; font-weight: 800; color: #1E293B; }
+  .page-sub { font-size: 13px; color: #64748B; margin-top: 2px; }
+
+  /* ── KPI 카드 ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi-card {
+    background: #fff; border-radius: 14px;
+    border: 1px solid #E2E8F0; padding: 16px 18px;
+  }
+  .kpi-label { font-size: 11px; font-weight: 600; color: #94A3B8; margin-bottom: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 800; color: #1E293B; line-height: 1; }
+  .kpi-delta {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 600; margin-top: 6px;
+    padding: 2px 7px; border-radius: 100px;
+  }
+  .kpi-delta.up { background: #ECFDF5; color: #16A34A; }
+  .kpi-delta.down { background: #FEF2F2; color: #DC2626; }
+  .kpi-icon {
+    float: right; font-size: 22px; margin-top: -2px;
+    opacity: 0.7;
+  }
+
+  /* ── 섹션 그리드 ── */
+  .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .section-grid.wide { grid-template-columns: 1.6fr 1fr; }
+  .card {
+    background: #fff; border-radius: 14px;
+    border: 1px solid #E2E8F0; padding: 18px 20px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 700; color: #1E293B;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+  }
+  .card-title .badge {
+    font-size: 10px; font-weight: 700; background: #FFF7ED;
+    color: #F97316; padding: 1px 7px; border-radius: 100px;
+  }
+  .card-title .action-link {
+    margin-left: auto; font-size: 11px; color: #F97316;
+    font-weight: 600; cursor: pointer; text-decoration: none;
+  }
+
+  /* ── 멤버십 리스트 ── */
+  .member-list { display: flex; flex-direction: column; gap: 8px; }
+  .member-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    background: #F8FAFC; border: 1px solid #F1F5F9;
+  }
+  .member-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #fff; font-weight: 700; flex-shrink: 0;
+  }
+  .member-avatar.orange { background: linear-gradient(135deg, #FF9A3C, #F97316); }
+  .member-avatar.green { background: linear-gradient(135deg, #34D399, #10B981); }
+  .member-email { font-size: 12px; font-weight: 600; color: #1E293B; }
+  .member-date { font-size: 10px; color: #94A3B8; }
+  .member-status {
+    margin-left: auto; font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 100px; flex-shrink: 0;
+  }
+  .status-active { background: #ECFDF5; color: #16A34A; }
+  .status-trial { background: #FFF7ED; color: #F97316; }
+  .status-expired { background: #F1F5F9; color: #94A3B8; }
+  .member-toggle {
+    width: 36px; height: 20px; border-radius: 100px;
+    background: #E2E8F0; flex-shrink: 0; cursor: pointer;
+    position: relative; transition: background 0.2s;
+  }
+  .member-toggle.on { background: #F97316; }
+  .member-toggle::after {
+    content: ''; position: absolute;
+    width: 14px; height: 14px; border-radius: 50%; background: #fff;
+    top: 3px; left: 3px; transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .member-toggle.on::after { left: 19px; }
+
+  /* ── 기능 스위치 ── */
+  .feature-list { display: flex; flex-direction: column; gap: 10px; }
+  .feature-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    background: #F8FAFC; border: 1px solid #F1F5F9;
+  }
+  .feature-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .feature-icon.time { background: #FFF7ED; }
+  .feature-icon.confidence { background: #EFF6FF; }
+  .feature-icon.alert { background: #F0FDF4; }
+  .feature-name { font-size: 12px; font-weight: 700; color: #1E293B; }
+  .feature-desc { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+  .feature-toggle {
+    margin-left: auto; width: 40px; height: 22px; border-radius: 100px;
+    background: #E2E8F0; flex-shrink: 0; cursor: pointer;
+    position: relative; transition: background 0.2s;
+  }
+  .feature-toggle.on { background: #F97316; }
+  .feature-toggle::after {
+    content: ''; position: absolute;
+    width: 16px; height: 16px; border-radius: 50%; background: #fff;
+    top: 3px; left: 3px; transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .feature-toggle.on::after { left: 21px; }
+
+  /* ── 차트 바 (간이) ── */
+  .mini-chart { display: flex; align-items: flex-end; gap: 6px; height: 60px; margin-top: 4px; }
+  .chart-bar {
+    flex: 1; border-radius: 4px 4px 0 0;
+    background: linear-gradient(to top, #FF9A3C, #FBBF24);
+    opacity: 0.8; transition: opacity 0.2s; cursor: pointer;
+  }
+  .chart-bar:hover { opacity: 1; }
+  .chart-labels {
+    display: flex; gap: 6px; margin-top: 6px;
+  }
+  .chart-label { flex: 1; text-align: center; font-size: 9px; color: #94A3B8; }
+
+  /* ── 공석 알림 관리 ── */
+  .alert-list { display: flex; flex-direction: column; gap: 8px; }
+  .alert-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    background: #F8FAFC; border: 1px solid #F1F5F9;
+  }
+  .alert-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-pending { background: #F97316; box-shadow: 0 0 0 3px #FFF7ED; }
+  .dot-sent { background: #10B981; }
+  .alert-text { font-size: 12px; color: #1E293B; font-weight: 600; }
+  .alert-sub { font-size: 10px; color: #94A3B8; }
+  .alert-action {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid #F97316; color: #F97316; background: #FFF7ED;
+  }
+
+  /* ── 요약 통계 ── */
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid #F1F5F9;
+    font-size: 12px;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { color: #64748B; }
+  .stat-value { font-weight: 700; color: #1E293B; }
+  .stat-value.orange { color: #F97316; }
+</style>
+</head>
+<body>
+<div class="admin-wrap">
+
+  <!-- ── 사이드바 ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🗺️</div>
+      <div>
+        <div class="sidebar-logo-text">키즈루트</div>
+        <div class="sidebar-logo-badge">ADMIN</div>
+      </div>
+    </div>
+
+    <div class="nav-group-label">Overview</div>
+    <div class="nav-item active">
+      <span class="icon">📊</span> 대시보드
+    </div>
+
+    <div class="nav-group-label">Management</div>
+    <div class="nav-item">
+      <span class="icon">👥</span> 멤버십 관리
+      <span class="nav-badge">247</span>
+    </div>
+    <div class="nav-item">
+      <span class="icon">⚙️</span> 기능 설정
+    </div>
+    <div class="nav-item">
+      <span class="icon">🔔</span> 공석 알림
+      <span class="nav-badge green">3</span>
+    </div>
+
+    <div class="nav-group-label">Analytics</div>
+    <div class="nav-item">
+      <span class="icon">📈</span> 가입 통계
+    </div>
+    <div class="nav-item">
+      <span class="icon">💳</span> 전환율
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="admin-profile">
+        <div class="admin-avatar">D</div>
+        <div>
+          <div class="admin-name">davegpt25</div>
+          <div class="admin-role">관리자</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── 메인 콘텐츠 ── -->
+  <main class="main">
+    <div class="page-header">
+      <div class="page-title">대시보드 👋</div>
+      <div class="page-sub">오늘도 학부모들이 최적 스케줄을 찾고 있어요.</div>
+    </div>
+
+    <!-- KPI 카드 -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-label">총 사전예약</div>
+        <div class="kpi-value">247</div>
+        <div class="kpi-delta up">↑ 12 오늘</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">💳</div>
+        <div class="kpi-label">멤버십 활성</div>
+        <div class="kpi-value">18</div>
+        <div class="kpi-delta up">↑ 3 이번 주</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⏳</div>
+        <div class="kpi-label">체험 중</div>
+        <div class="kpi-value">41</div>
+        <div class="kpi-delta down">만료 임박 7명</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🔄</div>
+        <div class="kpi-label">전환율</div>
+        <div class="kpi-value">3.2%</div>
+        <div class="kpi-delta up">↑ 0.4%p</div>
+      </div>
+    </div>
+
+    <!-- 섹션 1: 최근 가입 차트 + 멤버십 목록 -->
+    <div class="section-grid wide" style="margin-bottom:16px">
+
+      <div class="card">
+        <div class="card-title">
+          📈 일별 사전예약 추이
+          <span class="badge">최근 7일</span>
+        </div>
+        <div class="mini-chart">
+          <div class="chart-bar" style="height:35%"></div>
+          <div class="chart-bar" style="height:55%"></div>
+          <div class="chart-bar" style="height:40%"></div>
+          <div class="chart-bar" style="height:70%"></div>
+          <div class="chart-bar" style="height:50%"></div>
+          <div class="chart-bar" style="height:85%"></div>
+          <div class="chart-bar" style="height:100%;background:linear-gradient(to top,#F97316,#FF9A3C)"></div>
+        </div>
+        <div class="chart-labels">
+          <div class="chart-label">월</div>
+          <div class="chart-label">화</div>
+          <div class="chart-label">수</div>
+          <div class="chart-label">목</div>
+          <div class="chart-label">금</div>
+          <div class="chart-label">토</div>
+          <div class="chart-label" style="color:#F97316;font-weight:700">오늘</div>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-direction:column">
+          <div class="stat-row">
+            <span class="stat-label">이번 주 총 가입</span>
+            <span class="stat-value orange">+63명</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">전주 대비</span>
+            <span class="stat-value orange">+24%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">체험→멤버십 전환</span>
+            <span class="stat-value">3명 (이번 주)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          👥 최근 가입자
+          <a class="action-link">전체 보기 →</a>
+        </div>
+        <div class="member-list">
+          <div class="member-row">
+            <div class="member-avatar orange">K</div>
+            <div>
+              <div class="member-email">kim**@naver.com</div>
+              <div class="member-date">오늘 09:14</div>
+            </div>
+            <div class="member-status status-trial">체험 D-7</div>
+            <div class="member-toggle on"></div>
+          </div>
+          <div class="member-row">
+            <div class="member-avatar green">P</div>
+            <div>
+              <div class="member-email">park**@kakao.com</div>
+              <div class="member-date">어제 22:31</div>
+            </div>
+            <div class="member-status status-active">멤버십</div>
+            <div class="member-toggle on"></div>
+          </div>
+          <div class="member-row">
+            <div class="member-avatar">L</div>
+            <div>
+              <div class="member-email">lee**@gmail.com</div>
+              <div class="member-date">2일 전</div>
+            </div>
+            <div class="member-status status-trial">체험 D-5</div>
+            <div class="member-toggle on"></div>
+          </div>
+          <div class="member-row" style="opacity:0.5">
+            <div class="member-avatar">C</div>
+            <div>
+              <div class="member-email">choi**@naver.com</div>
+              <div class="member-date">5일 전</div>
+            </div>
+            <div class="member-status status-expired">만료</div>
+            <div class="member-toggle"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 섹션 2: 기능 설정 + 공석 알림 -->
+    <div class="section-grid">
+
+      <div class="card">
+        <div class="card-title">
+          ⚙️ 멤버십 기능 ON / OFF
+          <span class="badge">WTP 3가지</span>
+        </div>
+        <div class="feature-list">
+          <div class="feature-row">
+            <div class="feature-icon time">⏱️</div>
+            <div>
+              <div class="feature-name">스케줄 저장 & 히스토리</div>
+              <div class="feature-desc">시간절약 — 최대 5개 스케줄 저장</div>
+            </div>
+            <div class="feature-toggle on"></div>
+          </div>
+          <div class="feature-row">
+            <div class="feature-icon confidence">✨</div>
+            <div>
+              <div class="feature-name">최적 조합 신뢰도 점수</div>
+              <div class="feature-desc">결정불안 해소 — AI 추천 근거 표시</div>
+            </div>
+            <div class="feature-toggle on"></div>
+          </div>
+          <div class="feature-row">
+            <div class="feature-icon alert">🔔</div>
+            <div>
+              <div class="feature-name">학원 공석 실시간 알림</div>
+              <div class="feature-desc">기회손실 방지 — 카카오 알림톡 연동</div>
+            </div>
+            <div class="feature-toggle"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          🔔 공석 알림 대기열
+          <span class="badge" style="background:#ECFDF5;color:#16A34A">3건 대기</span>
+        </div>
+        <div class="alert-list">
+          <div class="alert-row">
+            <div class="alert-dot dot-pending"></div>
+            <div>
+              <div class="alert-text">강남 베스트 수학 — 1자리</div>
+              <div class="alert-sub">대기 학부모 8명 · 방금 발생</div>
+            </div>
+            <div class="alert-action">알림 발송</div>
+          </div>
+          <div class="alert-row">
+            <div class="alert-dot dot-pending"></div>
+            <div>
+              <div class="alert-text">YBM 영어 서초점 — 2자리</div>
+              <div class="alert-sub">대기 학부모 5명 · 12분 전</div>
+            </div>
+            <div class="alert-action">알림 발송</div>
+          </div>
+          <div class="alert-row" style="opacity:0.5">
+            <div class="alert-dot dot-sent"></div>
+            <div>
+              <div class="alert-text">예원 피아노 — 1자리</div>
+              <div class="alert-sub">발송 완료 · 3명 클릭</div>
+            </div>
+            <div style="margin-left:auto;font-size:10px;color:#10B981;font-weight:600">✅ 발송됨</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

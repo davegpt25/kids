@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { AcademyService } from './academy.service';
 import { SearchAcademyDto } from './dto/search-academy.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -11,5 +11,10 @@ export class AcademyController {
   @Get('nearby')
   findNearby(@Query() dto: SearchAcademyDto) {
     return this.academyService.findNearby(dto);
+  }
+
+  @Post('check-conflicts')
+  checkConflicts(@Body() body: { academyIds: string[] }) {
+    return this.academyService.checkConflicts(body.academyIds);
   }
 }
