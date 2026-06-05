@@ -2414,9 +2414,27 @@
 .ur-academy-card {
   background: #fff; border-radius: 16px; padding: 16px;
   box-shadow: 0 1px 6px rgba(0,0,0,0.07); cursor: pointer;
-  transition: box-shadow .15s;
+  transition: box-shadow .15s; position: relative; overflow: hidden;
 }
 .ur-academy-card:active { box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+
+/* 인증 학원 — 왼쪽 인디고 보더 */
+.ur-academy-card.verified {
+  box-shadow: 0 2px 12px rgba(99,102,241,0.12);
+}
+.ur-verified-bar {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: linear-gradient(180deg, #6366F1, #818CF8);
+  border-radius: 4px 0 0 4px;
+}
+
+/* 인증 배지 */
+.ur-verified-badge {
+  font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 100px;
+  background: #EEF2FF; color: #6366F1; flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 2px;
+}
+
 .ur-academy-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
 .ur-academy-name { font-size: 15px; font-weight: 800; color: var(--text-main); }
 .ur-badge {
@@ -6813,16 +6831,16 @@ function heroRotate() {
 
 // ── 학원 목업 데이터 (좌표 포함) ──
 var UR_ACADEMIES = [
-  { id:1,  name:'강남 베스트 수학',  subj:'math',      label:'수학',   color:'#F97316', addr:'서초구 서초동',    lat:37.4953, lng:127.0277, dist:0.4, rating:4.8, reviews:127, times:['월수금 오후4시','화목 오후5시'],   fee:300000, shuttle:true,  badge:'인기'  },
-  { id:2,  name:'YBM 영어 서초점',   subj:'english',   label:'영어',   color:'#3B82F6', addr:'서초구 반포동',    lat:37.5034, lng:127.0107, dist:0.7, rating:4.6, reviews:89,  times:['월화수목금 오후4시'],              fee:280000, shuttle:false, badge:''      },
-  { id:3,  name:'예원 피아노',       subj:'piano',     label:'피아노', color:'#8B5CF6', addr:'강남구 대치동',    lat:37.4931, lng:127.0583, dist:0.9, rating:4.9, reviews:54,  times:['월수금 오후5시','화목 오후4시'],   fee:200000, shuttle:false, badge:'신규'  },
-  { id:4,  name:'하늘 미술학원',     subj:'art',       label:'미술',   color:'#EC4899', addr:'서초구 방배동',    lat:37.4869, lng:127.0048, dist:1.1, rating:4.5, reviews:43,  times:['화목 오후4시','주말반'],           fee:250000, shuttle:true,  badge:''      },
-  { id:5,  name:'스피드 수학',       subj:'math',      label:'수학',   color:'#F97316', addr:'강남구 논현동',    lat:37.5161, lng:127.0235, dist:1.3, rating:4.3, reviews:31,  times:['월수금 오후5시'],                  fee:260000, shuttle:false, badge:''      },
-  { id:6,  name:'ABC 영어 마을',     subj:'english',   label:'영어',   color:'#3B82F6', addr:'강남구 압구정동',  lat:37.5270, lng:127.0300, dist:1.5, rating:4.7, reviews:72,  times:['월수금 오후4시','화목 오후5시'],   fee:320000, shuttle:true,  badge:'인기'  },
-  { id:7,  name:'챔피언 태권도',     subj:'taekwondo', label:'태권도', color:'#EF4444', addr:'서초구 양재동',    lat:37.4812, lng:127.0344, dist:0.6, rating:4.4, reviews:38,  times:['월화수목금 오후4시'],              fee:120000, shuttle:false, badge:''      },
-  { id:8,  name:'코딩 두뇌 lab',     subj:'coding',    label:'코딩',   color:'#10B981', addr:'강남구 삼성동',    lat:37.5145, lng:127.0583, dist:1.8, rating:4.6, reviews:29,  times:['화목 오후5시','주말반'],           fee:350000, shuttle:false, badge:'신규'  },
-  { id:9,  name:'반포 과학 탐구',    subj:'science',   label:'과학',   color:'#06B6D4', addr:'서초구 반포동',    lat:37.5039, lng:127.0174, dist:1.0, rating:4.5, reviews:22,  times:['화목 오후4시','주말반'],           fee:220000, shuttle:false, badge:''      },
-  { id:10, name:'윈윈 체육 센터',    subj:'sports',    label:'체육',   color:'#84CC16', addr:'강남구 역삼동',    lat:37.4990, lng:127.0345, dist:0.8, rating:4.3, reviews:47,  times:['월수금 오후4시','주말오전'],       fee:150000, shuttle:true,  badge:''      }
+  { id:1,  name:'강남 베스트 수학',  subj:'math',      label:'수학',   color:'#F97316', addr:'서초구 서초동',    lat:37.4953, lng:127.0277, dist:0.4, rating:4.8, reviews:127, times:['월수금 오후4시','화목 오후5시'],   fee:300000, shuttle:true,  badge:'인기',  verified:true  },
+  { id:2,  name:'YBM 영어 서초점',   subj:'english',   label:'영어',   color:'#3B82F6', addr:'서초구 반포동',    lat:37.5034, lng:127.0107, dist:0.7, rating:4.6, reviews:89,  times:['월화수목금 오후4시'],              fee:280000, shuttle:false, badge:'',       verified:false },
+  { id:3,  name:'예원 피아노',       subj:'piano',     label:'피아노', color:'#8B5CF6', addr:'강남구 대치동',    lat:37.4931, lng:127.0583, dist:0.9, rating:4.9, reviews:54,  times:['월수금 오후5시','화목 오후4시'],   fee:200000, shuttle:false, badge:'신규',   verified:false },
+  { id:4,  name:'하늘 미술학원',     subj:'art',       label:'미술',   color:'#EC4899', addr:'서초구 방배동',    lat:37.4869, lng:127.0048, dist:1.1, rating:4.5, reviews:43,  times:['화목 오후4시','주말반'],           fee:250000, shuttle:true,  badge:'',       verified:false },
+  { id:5,  name:'스피드 수학',       subj:'math',      label:'수학',   color:'#F97316', addr:'강남구 논현동',    lat:37.5161, lng:127.0235, dist:1.3, rating:4.3, reviews:31,  times:['월수금 오후5시'],                  fee:260000, shuttle:false, badge:'',       verified:false },
+  { id:6,  name:'ABC 영어 마을',     subj:'english',   label:'영어',   color:'#3B82F6', addr:'강남구 압구정동',  lat:37.5270, lng:127.0300, dist:1.5, rating:4.7, reviews:72,  times:['월수금 오후4시','화목 오후5시'],   fee:320000, shuttle:true,  badge:'인기',   verified:true  },
+  { id:7,  name:'챔피언 태권도',     subj:'taekwondo', label:'태권도', color:'#EF4444', addr:'서초구 양재동',    lat:37.4812, lng:127.0344, dist:0.6, rating:4.4, reviews:38,  times:['월화수목금 오후4시'],              fee:120000, shuttle:false, badge:'',       verified:false },
+  { id:8,  name:'코딩 두뇌 lab',     subj:'coding',    label:'코딩',   color:'#10B981', addr:'강남구 삼성동',    lat:37.5145, lng:127.0583, dist:1.8, rating:4.6, reviews:29,  times:['화목 오후5시','주말반'],           fee:350000, shuttle:false, badge:'신규',   verified:false },
+  { id:9,  name:'반포 과학 탐구',    subj:'science',   label:'과학',   color:'#06B6D4', addr:'서초구 반포동',    lat:37.5039, lng:127.0174, dist:1.0, rating:4.5, reviews:22,  times:['화목 오후4시','주말반'],           fee:220000, shuttle:false, badge:'',       verified:false },
+  { id:10, name:'윈윈 체육 센터',    subj:'sports',    label:'체육',   color:'#84CC16', addr:'강남구 역삼동',    lat:37.4990, lng:127.0345, dist:0.8, rating:4.3, reviews:47,  times:['월수금 오후4시','주말오전'],       fee:150000, shuttle:true,  badge:'',       verified:false }
 ];
 
 var _urUser = { name: '', email: '', color: '#F97316' };
@@ -7213,13 +7231,16 @@ function urRenderAcademies() {
   container.innerHTML = list.map(function(a) {
     var added = addedIds.indexOf(a.id) >= 0;
     var badgeHtml = a.badge ? '<span class="ur-badge' + (a.badge === '신규' ? ' new' : '') + '">' + a.badge + '</span>' : '';
+    var verifiedBadge = a.verified ? '<span class="ur-verified-badge">✓ 원장 인증</span>' : '';
     var timeTags = a.times.map(function(t) { return '<span class="ur-time-tag">' + t + '</span>'; }).join('');
     var shuttleHtml = a.shuttle ? '<span class="ur-meta-item">🚌 셔틀</span>' : '';
-    return '<div class="ur-academy-card">'
+    return '<div class="ur-academy-card' + (a.verified ? ' verified' : '') + '">'
+      + (a.verified ? '<div class="ur-verified-bar"></div>' : '')
       + '<div class="ur-academy-top">'
-      +   '<div style="display:flex;align-items:center;flex:1;min-width:0">'
-      +     '<span class="ur-subj-dot" style="background:' + a.color + '"></span>'
+      +   '<div style="display:flex;align-items:center;flex:1;min-width:0;gap:6px">'
+      +     '<span class="ur-subj-dot' + (a.verified ? ' verified-dot' : '') + '" style="background:' + a.color + ';' + (a.verified ? 'box-shadow:0 0 0 2px #fff,0 0 0 4px #6366F1;' : '') + '"></span>'
       +     '<span class="ur-academy-name">' + _escHtml(a.name) + '</span>'
+      +     verifiedBadge
       +   '</div>'
       +   badgeHtml
       + '</div>'
