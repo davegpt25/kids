@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>키즈루트 — 관리 포털</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+/* ── CSS 변수 (기존 index.html과 동일) ── */
+:root {
+  --primary:       #F97316;
+  --primary-dark:  #EA6C0A;
+  --primary-light: #FFF7ED;
+  --bg-base:       #F8FAFC;
+  --bg-card:       #FFFFFF;
+  --border:        #E2E8F0;
+  --text-main:     #1E293B;
+  --text-sub:      #64748B;
+  --text-muted:    #94A3B8;
+  --green:         #10B981;
+  --red:           #EF4444;
+  --yellow:        #F59E0B;
+  --indigo:        #6366F1;
+  --indigo-light:  #EEF2FF;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-main);
+  font-size: 13px;
+}
+
+/* ── 뷰 전환 ── */
+.view { display: none; }
+.view.active { display: flex; }
+
+/* ═══════════════════════════════
+   LOGIN VIEW
+═══════════════════════════════ */
+#view-login {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFF7ED 0%, #F8FAFC 100%);
+}
+.login-card {
+  background: white;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+  padding: 48px 40px;
+  width: 380px;
+  text-align: center;
+}
+.login-logo-wrap {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 32px;
+}
+.login-logo-icon {
+  width: 44px; height: 44px; border-radius: 14px;
+  background: linear-gradient(135deg, #FF9A3C, #F97316);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.login-logo-text {
+  font-size: 22px; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px;
+}
+.login-logo-text span { color: var(--primary); }
+.login-subtitle {
+  font-size: 14px; color: var(--text-sub); margin-bottom: 36px; line-height: 1.6;
+}
+.login-google-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: white; border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 14px 20px;
+  font-size: 14px; font-weight: 700; color: var(--text-main);
+  cursor: pointer; transition: all .15s; font-family: inherit;
+}
+.login-google-btn:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(249,115,22,0.15); }
+.login-google-icon { font-size: 20px; }
+.login-loading {
+  margin-top: 20px; font-size: 12px; color: var(--text-muted);
+  display: none;
+}
+.login-error {
+  margin-top: 16px; font-size: 12px; color: var(--red);
+  background: #FEF2F2; border-radius: 8px; padding: 10px 14px;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<!-- ══ VIEW: LOGIN ══ -->
+<div id="view-login" class="view active">
+  <div class="login-card">
+    <div class="login-logo-wrap">
+      <div class="login-logo-icon">🗺️</div>
+      <div class="login-logo-text">키즈<span>루트</span></div>
+    </div>
+    <p class="login-subtitle">관리자 및 학원 원장 포털에<br>오신 것을 환영합니다</p>
+    <button class="login-google-btn" id="googleLoginBtn" onclick="signInWithGoogle()">
+      <span class="login-google-icon">G</span>
+      Google 계정으로 로그인
+    </button>
+    <p class="login-loading" id="loginLoading">⏳ 로그인 처리 중...</p>
+    <p class="login-error" id="loginError"></p>
+  </div>
+</div>
+
+<!-- ══ VIEW: MASTER (Task 3에서 추가) ══ -->
+<div id="view-master" class="view">
+</div>
+
+<!-- ══ VIEW: ACADEMY PORTAL (Task 5에서 추가) ══ -->
+<div id="view-academy" class="view">
+</div>
+
+<script type="module">
+  window.signInWithGoogle = async function() {
+    document.getElementById('loginLoading').style.display = 'block';
+    document.getElementById('loginError').style.display = 'none';
+    setTimeout(() => {
+      document.getElementById('loginLoading').style.display = 'none';
+      document.getElementById('loginError').textContent = 'Firebase 설정이 필요합니다. Task 2에서 구현됩니다.';
+      document.getElementById('loginError').style.display = 'block';
+    }, 500);
+  };
+</script>
+</body>
+</html>
