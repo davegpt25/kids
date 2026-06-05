@@ -4597,6 +4597,13 @@ function onLoginSuccess(name, email, color, provider) {
   document.getElementById('ctaLoggedDesc').innerHTML =
     '<strong>' + email + '</strong>으로 출시 알림을 보내드릴게요.<br>얼리버드 혜택도 자동 적용됩니다.';
 
+  // 관리자 계정이면 대시보드 바로 진입
+  if (email === KR.ADMIN_EMAIL) {
+    KR.setAdminSession();
+    showAdminDashboard();
+    return;
+  }
+
   // 학부모 앱 뷰 전환
   if (typeof showUserDashboard === 'function') {
     showUserDashboard(name, email, color);
