@@ -121,15 +121,130 @@ body {
 </div>
 
 <script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+// ── Firebase 초기화 ──────────────────────────────────────
+// ⚠️  TODO: Firebase Console에서 웹 앱 설정을 가져와 아래에 붙여넣으세요
+// https://console.firebase.google.com → 프로젝트 설정 → 내 앱 → 웹앱 → firebaseConfig
+const firebaseConfig = {
+  apiKey:            "YOUR_API_KEY",
+  authDomain:        "YOUR_PROJECT.firebaseapp.com",
+  projectId:         "YOUR_PROJECT_ID",
+  storageBucket:     "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId:             "YOUR_APP_ID"
+};
+
+// Config 미설정 감지
+const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+
+let auth = null;
+if (isConfigured) {
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // ── 인증 상태 감지 ──────────────────────────────────────
+  onAuthStateChanged(auth, routeUser);
+
+  // ── Google 로그인 ────────────────────────────────────────
   window.signInWithGoogle = async function() {
     document.getElementById('loginLoading').style.display = 'block';
     document.getElementById('loginError').style.display = 'none';
-    setTimeout(() => {
+    document.getElementById('googleLoginBtn').disabled = true;
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
       document.getElementById('loginLoading').style.display = 'none';
-      document.getElementById('loginError').textContent = 'Firebase 설정이 필요합니다. Task 2에서 구현됩니다.';
+      document.getElementById('googleLoginBtn').disabled = false;
+      document.getElementById('loginError').textContent = '로그인 실패: ' + e.message;
       document.getElementById('loginError').style.display = 'block';
-    }, 500);
+    }
   };
+
+  // ── 로그아웃 ──────────────────────────────────────────────
+  window.handleSignOut = async function() {
+    await signOut(auth);
+    showView('view-login');
+    document.getElementById('loginError').style.display = 'none';
+  };
+
+} else {
+  // Config 미설정 시 안내 메시지
+  window.signInWithGoogle = function() {
+    document.getElementById('loginError').textContent =
+      '⚠️ Firebase 설정이 필요합니다. master.html의 firebaseConfig를 채워주세요. (Firebase Console → 프로젝트 설정 → 웹앱)';
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginLoading').style.display = 'none';
+  };
+  window.handleSignOut = function() { showView('view-login'); };
+}
+
+// ── 상수 ──────────────────────────────────────────────────
+const MASTER_EMAIL = 'davegpt25@gmail.com';
+
+// ── 뷰 전환 헬퍼 ──────────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+window.showView = showView;
+
+// ── localStorage 헬퍼 ─────────────────────────────────────
+window.getInvites = function() {
+  try { return JSON.parse(localStorage.getItem('kidsroute_invites') || '[]'); }
+  catch { return []; }
+};
+window.saveInvites = function(list) {
+  localStorage.setItem('kidsroute_invites', JSON.stringify(list));
+};
+window.getAcademyData = function(id) {
+  try { return JSON.parse(localStorage.getItem('kidsroute_academy_' + id) || 'null'); }
+  catch { return null; }
+};
+window.saveAcademyData = function(id, data) {
+  localStorage.setItem('kidsroute_academy_' + id, JSON.stringify(data));
+};
+
+// ── 라우팅 ────────────────────────────────────────────────
+function routeUser(user) {
+  if (!user) { showView('view-login'); return; }
+
+  const email = user.email;
+  document.getElementById('loginLoading').style.display = 'none';
+
+  if (email === MASTER_EMAIL) {
+    renderMasterDashboard(user);
+    showView('view-master');
+    return;
+  }
+
+  const invite = window.getInvites().find(i => i.email === email);
+  if (invite) {
+    renderAcademyPortal(user, invite);
+    showView('view-academy');
+    return;
+  }
+
+  // 접근 거부
+  showView('view-login');
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = email + ' 계정은 접근 권한이 없습니다. 관리자에게 초대를 요청하세요.';
+  errEl.style.display = 'block';
+  if (auth) signOut(auth);
+}
+
+// ── stubs (Task 3, 5에서 교체됨) ──────────────────────────
+window.renderMasterDashboard = function(user) {
+  document.getElementById('view-master').innerHTML =
+    '<div style="padding:40px;font-size:18px;font-weight:700;color:#1E293B;">✅ Master 대시보드: ' + user.email + '<br><br><button onclick="handleSignOut()" style="font-size:14px;padding:8px 16px;border:1px solid #E2E8F0;border-radius:8px;cursor:pointer;background:white;">로그아웃</button></div>';
+};
+window.renderAcademyPortal = function(user, invite) {
+  document.getElementById('view-academy').innerHTML =
+    '<div style="padding:40px;font-size:18px;font-weight:700;color:#6366F1;">🏫 원장 포털: ' + invite.academyName + '<br><br><button onclick="handleSignOut()" style="font-size:14px;padding:8px 16px;border:1px solid #E2E8F0;border-radius:8px;cursor:pointer;background:white;">로그아웃</button></div>';
+};
 </script>
 </body>
 </html>
