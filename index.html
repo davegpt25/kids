@@ -892,14 +892,35 @@
   position: relative;
   background: var(--primary-light); border: 2px solid #FED7AA;
   border-radius: 16px; padding: 20px; min-height: 120px;
-  margin-bottom: 16px;
+  margin-bottom: 16px; cursor: text;
+  transition: border-color .15s;
 }
-.demo-input-wrap.active-query { border-color: var(--primary); }
+.demo-input-wrap:hover { border-color: #FDBA74; }
+.demo-input-wrap.typing  { border-color: var(--primary); background: #fff; cursor: default; }
+.demo-typewriter-layer { }
 .demo-typewriter {
   font-size: 17px; font-weight: 500; color: var(--gray-900);
   line-height: 1.6; min-height: 80px;
   word-break: keep-all;
 }
+/* 직접 입력 오버레이 */
+.demo-overlay-input-layer {
+  display: flex; align-items: flex-end; gap: 8px;
+}
+.demo-overlay-textarea {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-size: 17px; font-weight: 500; color: var(--gray-900);
+  font-family: inherit; line-height: 1.6; resize: none;
+  min-height: 80px; width: 100%;
+}
+.demo-overlay-textarea::placeholder { color: #FDBA74; font-weight: 400; }
+.demo-overlay-send-btn {
+  width: 38px; height: 38px; background: var(--primary); color: white;
+  border: none; border-radius: 10px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s; margin-bottom: 2px;
+}
+.demo-overlay-send-btn:hover { background: var(--primary-dark); }
 .demo-cursor {
   display: inline-block; width: 2px; height: 1.1em;
   background: var(--primary); margin-left: 2px;
@@ -3840,22 +3861,24 @@
     <div class="demo-step active" id="demoStep1">
       <div class="demo-title">키즈루트에게 물어보세요 🗺️</div>
       <div class="demo-sub">아이 학원 스케줄, 이렇게 고민하고 계신가요?<br>예시를 클릭하거나 출시 알림을 신청해보세요.</div>
-      <!-- 타이핑 애니메이션 (자동 순환) -->
-      <div class="demo-input-wrap" id="demoInputWrap">
-        <div class="demo-typewriter" id="demoTypewriter"></div>
-        <span class="demo-cursor" id="demoCursorEl"></span>
-        <div class="demo-hint">위 예시처럼 아래에 직접 입력해보세요</div>
-      </div>
-
-      <!-- 직접 입력창 -->
-      <div class="demo-user-input-wrap">
-        <textarea class="demo-user-input" id="demoUserInput"
-          placeholder="궁금한 내용을 입력하세요..."
-          rows="2"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();demoAskQuestion();}"></textarea>
-        <button class="demo-ask-btn" onclick="demoAskQuestion()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
+      <!-- 주황 영역: 타이핑 애니메이션 + 직접 입력 오버레이 -->
+      <div class="demo-input-wrap" id="demoInputWrap" onclick="demoFocusInput()">
+        <!-- 애니메이션 레이어 (입력 중엔 숨김) -->
+        <div class="demo-typewriter-layer" id="demoTypewriterLayer">
+          <div class="demo-typewriter" id="demoTypewriter"></div>
+          <span class="demo-cursor" id="demoCursorEl"></span>
+        </div>
+        <!-- 직접 입력 레이어 (클릭 시 표시) -->
+        <div class="demo-overlay-input-layer" id="demoOverlayLayer" style="display:none;">
+          <textarea class="demo-overlay-textarea" id="demoUserInput"
+            placeholder="질문을 입력하세요..."
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();demoAskQuestion();}"
+            onblur="demoOnBlur()"></textarea>
+          <button class="demo-overlay-send-btn" onclick="demoAskQuestion()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="demo-hint" id="demoHintEl">클릭해서 직접 입력해보세요 ✏️</div>
       </div>
 
       <!-- 응답 영역 -->
@@ -4876,6 +4899,49 @@ const _demoAnswers = [
   }
 ];
 
+// 주황 영역 클릭 → 입력 모드 전환
+function demoFocusInput() {
+  var wrap    = document.getElementById('demoInputWrap');
+  var twLayer = document.getElementById('demoTypewriterLayer');
+  var ovLayer = document.getElementById('demoOverlayLayer');
+  var hint    = document.getElementById('demoHintEl');
+  var cursor  = document.getElementById('demoCursorEl');
+  if (wrap.classList.contains('typing')) return;
+  _stopTypewriter();
+  wrap.classList.add('typing');
+  twLayer.style.display = 'none';
+  if (cursor) cursor.style.display = 'none';
+  ovLayer.style.display = 'flex';
+  if (hint) hint.textContent = 'Enter로 전송 · Shift+Enter 줄바꿈';
+  setTimeout(function() { document.getElementById('demoUserInput').focus(); }, 50);
+}
+
+// blur 시 입력 내용 없으면 애니메이션으로 복귀
+function demoOnBlur() {
+  var input = document.getElementById('demoUserInput');
+  if ((input.value || '').trim()) return; // 내용 있으면 유지
+  setTimeout(function() {
+    // 전송 버튼 클릭 중일 수 있으니 짧게 대기
+    if ((input.value || '').trim()) return;
+    _demoResumeAnimation();
+  }, 200);
+}
+
+function _demoResumeAnimation() {
+  var wrap    = document.getElementById('demoInputWrap');
+  var twLayer = document.getElementById('demoTypewriterLayer');
+  var ovLayer = document.getElementById('demoOverlayLayer');
+  var hint    = document.getElementById('demoHintEl');
+  var cursor  = document.getElementById('demoCursorEl');
+  wrap.classList.remove('typing');
+  ovLayer.style.display = 'none';
+  twLayer.style.display = '';
+  if (cursor) cursor.style.display = '';
+  if (hint) hint.textContent = '클릭해서 직접 입력해보세요 ✏️';
+  _demoCharIdx = 0; _demoErasing = false;
+  _startTypewriterCycle();
+}
+
 function demoAskQuestion() {
   var input = document.getElementById('demoUserInput');
   var q = (input.value || '').trim();
@@ -4914,11 +4980,9 @@ function demoAskQuestion() {
   responseBubble.innerHTML = html;
   responseWrap.style.display = 'block';
 
-  // 입력창 초기화 + 커서 숨기기
+  // 입력창 비우고 포커스 유지 (다음 질문 입력 가능하도록)
   input.value = '';
-  var cursor = document.getElementById('demoCursorEl');
-  if (cursor) cursor.style.display = 'none';
-  setTimeout(function() { if (cursor) cursor.style.display = ''; }, 3000);
+  input.focus();
 }
 
 // ─── Map Step ───
