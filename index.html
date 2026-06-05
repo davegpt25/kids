@@ -4834,7 +4834,7 @@ function _typewriterTick() {
     if (_demoCharIdx > 0) {
       _demoCharIdx--;
       el.textContent = query.slice(0, _demoCharIdx);
-      _demoAutoTimer = setTimeout(_typewriterTick, 30);   // 35 → 30 (15% 빠름)
+      _demoAutoTimer = setTimeout(_typewriterTick, 35);
     } else {
       // 다음 문장 랜덤 선택 (현재와 다른 인덱스)
       let nextIdx;
@@ -4842,16 +4842,16 @@ function _typewriterTick() {
       while (nextIdx === _demoQueryIdx && _demoQueries.length > 1);
       _demoQueryIdx = nextIdx;
       _demoErasing = false;
-      _demoAutoTimer = setTimeout(_typewriterTick, 383);  // 450 → 383 (15% 빠름)
+      _demoAutoTimer = setTimeout(_typewriterTick, 450);
     }
   } else {
     if (_demoCharIdx < query.length) {
       el.textContent = query.slice(0, _demoCharIdx + 1);
       _demoCharIdx++;
-      _demoAutoTimer = setTimeout(_typewriterTick, 64);   // 75 → 64 (15% 빠름)
+      _demoAutoTimer = setTimeout(_typewriterTick, 75);
     } else {
       _demoErasing = true;
-      _demoAutoTimer = setTimeout(_typewriterTick, 1530); // 1800 → 1530 (15% 빠름)
+      _demoAutoTimer = setTimeout(_typewriterTick, 1800);
     }
   }
 }
