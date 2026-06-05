@@ -920,6 +920,8 @@ window.renderAcademyPortal = function(user, invite) {
   document.getElementById('f-address').value  = saved.address  || '';
   document.getElementById('f-capacity').value = saved.capacity || '';
   switchAcadTab('info', document.querySelector('.ap-tab'));
+  // 노출 설정을 미리 로드 (탭 클릭 전에도 localStorage 값 반영)
+  window.loadVisibilitySettings && window.loadVisibilitySettings();
 };
 
 window.switchAcadTab = function(tabId, el) {
