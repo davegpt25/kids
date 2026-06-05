@@ -2021,8 +2021,8 @@ const ADM_MASTER_EMAIL = 'davegpt25@gmail.com';
 
 // 트리거: 1) URL hash #admin  2) 로고 5번 클릭
 document.addEventListener('DOMContentLoaded', function() {
-  // URL hash 감지 — /kids/#admin 접속 시 바로 모달 오픈
-  if (location.hash === '#admin') admOpenModal();
+  // URL hash 감지 — /kids/#admin 접속 시 바로 대시보드 진입
+  if (location.hash === '#admin') admAutoLogin();
 
   // 로고 영역(이미지 + 텍스트 모두) 5번 클릭
   // nav 왼쪽 절반(로고 있는 구역)에 클릭 감지
@@ -2044,6 +2044,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function admOpenModal() {
   document.getElementById('adm-modal-backdrop').classList.add('open');
   setTimeout(() => document.getElementById('adm-email-input').focus(), 100);
+}
+
+function admAutoLogin() {
+  // #admin URL 접속 시 이메일 입력 없이 바로 대시보드 진입
+  document.getElementById('adm-avatar-char').textContent = 'D';
+  document.getElementById('adm-display-name').textContent = 'davegpt25';
+  document.getElementById('adm-dashboard').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  admSwitchTab('dashboard', document.querySelector('.adm-nav-item'));
+  admRenderAcadList();
 }
 function admCloseModal() {
   document.getElementById('adm-modal-backdrop').classList.remove('open');
