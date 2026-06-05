@@ -18,7 +18,7 @@
 <meta name="twitter:title" content="키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄">
 <meta name="twitter:description" content="GPS 반경 내 학원을 자동으로 찾아주고, 시간 겹침 없는 최적 조합을 3초 만에 추천해요.">
 <meta name="description" content="GPS 반경 내 학원을 자동으로 찾아주고, 시간 겹침 없는 최적 조합을 3초 만에 추천해요.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF9A3C'/%3E%3Cstop offset='100%25' stop-color='%23F97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='96' height='96' rx='24' fill='url(%23g)'/%3E%3Ccircle cx='48' cy='22' r='11' fill='white'/%3E%3Cline x1='48' y1='33' x2='48' y2='50' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3Cline x1='33' y1='41' x2='63' y2='41' stroke='white' stroke-width='4.5' stroke-linecap='round'/%3E%3Cline x1='48' y1='50' x2='38' y2='63' stroke='white' stroke-width='4.5' stroke-linecap='round'/%3E%3Cline x1='48' y1='50' x2='58' y2='63' stroke='white' stroke-width='4.5' stroke-linecap='round'/%3E%3Cpath d='M14 79 Q32 71 48 73 Q64 75 82 67' fill='none' stroke='white' stroke-width='2.8' stroke-dasharray='5%2C3.5' stroke-linecap='round' opacity='0.9'/%3E%3Ccircle cx='14' cy='79' r='4' fill='white'/%3E%3Cpath d='M78 64 L83 67 L78 71' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF9A3C'/%3E%3Cstop offset='100%25' stop-color='%23F97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='96' height='96' rx='22' fill='url(%23g)'/%3E%3Ccircle cx='48' cy='26' r='13' fill='white'/%3E%3Cpath d='M28 60 Q28 48 48 48 Q68 48 68 60' stroke='white' stroke-width='6' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='18' cy='76' r='5' fill='rgba(255%2C255%2C255%2C0.55)'/%3E%3Cline x1='24' y1='76' x2='38' y2='76' stroke='rgba(255%2C255%2C255%2C0.45)' stroke-width='3' stroke-dasharray='4%2C4' stroke-linecap='round'/%3E%3Ccircle cx='48' cy='76' r='5' fill='rgba(255%2C255%2C255%2C0.8)'/%3E%3Cline x1='54' y1='76' x2='68' y2='76' stroke='rgba(255%2C255%2C255%2C0.45)' stroke-width='3' stroke-dasharray='4%2C4' stroke-linecap='round'/%3E%3Ccircle cx='78' cy='76' r='6.5' fill='white'/%3E%3C/svg%3E">
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <!-- Kakao JavaScript SDK -->
@@ -2819,15 +2819,22 @@
           <stop offset="100%" stop-color="#F97316"/>
         </linearGradient>
       </defs>
-      <rect width="96" height="96" rx="24" fill="url(#navLogoGrad)"/>
-      <circle cx="48" cy="22" r="11" fill="white"/>
-      <line x1="48" y1="33" x2="48" y2="50" stroke="white" stroke-width="5" stroke-linecap="round"/>
-      <line x1="33" y1="41" x2="63" y2="41" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
-      <line x1="48" y1="50" x2="38" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
-      <line x1="48" y1="50" x2="58" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
-      <path d="M14 79 Q32 71 48 73 Q64 75 82 67" fill="none" stroke="white" stroke-width="2.8" stroke-dasharray="5,3.5" stroke-linecap="round" opacity="0.9"/>
-      <circle cx="14" cy="79" r="4" fill="white"/>
-      <path d="M78 64 L83 67 L78 71" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- 배경 -->
+      <rect width="96" height="96" rx="22" fill="url(#navLogoGrad)"/>
+      <!-- 아이 머리 -->
+      <circle cx="48" cy="26" r="13" fill="white"/>
+      <!-- 아이 몸 (어깨 곡선) -->
+      <path d="M28 60 Q28 48 48 48 Q68 48 68 60" stroke="white" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <!-- 경로 점 1 (출발: 학교) -->
+      <circle cx="18" cy="76" r="5" fill="rgba(255,255,255,0.55)"/>
+      <!-- 점선 -->
+      <line x1="24" y1="76" x2="38" y2="76" stroke="rgba(255,255,255,0.45)" stroke-width="3" stroke-dasharray="4,4" stroke-linecap="round"/>
+      <!-- 경로 점 2 (학원) -->
+      <circle cx="48" cy="76" r="5" fill="rgba(255,255,255,0.8)"/>
+      <!-- 점선 -->
+      <line x1="54" y1="76" x2="68" y2="76" stroke="rgba(255,255,255,0.45)" stroke-width="3" stroke-dasharray="4,4" stroke-linecap="round"/>
+      <!-- 경로 점 3 (귀가: 밝은 흰색) -->
+      <circle cx="78" cy="76" r="6.5" fill="white"/>
     </svg>키즈루트</a>
   <div class="nav-links">
     <button class="nav-cta" id="navCtaBtn" onclick="openGoogleLogin()">사전예약</button>
@@ -4251,14 +4258,14 @@
 <footer>
   <div class="footer-logo">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="24" height="24" style="border-radius:6px;flex-shrink:0;">
-      <rect width="96" height="96" rx="24" fill="rgba(255,255,255,0.15)"/>
-      <circle cx="48" cy="22" r="11" fill="white"/>
-      <line x1="48" y1="33" x2="48" y2="50" stroke="white" stroke-width="5" stroke-linecap="round"/>
-      <line x1="33" y1="41" x2="63" y2="41" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
-      <line x1="48" y1="50" x2="38" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
-      <line x1="48" y1="50" x2="58" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
-      <path d="M14 79 Q32 71 48 73 Q64 75 82 67" fill="none" stroke="white" stroke-width="2.8" stroke-dasharray="5,3.5" stroke-linecap="round" opacity="0.9"/>
-      <circle cx="14" cy="79" r="4" fill="white"/>
+      <rect width="96" height="96" rx="22" fill="rgba(255,255,255,0.15)"/>
+      <circle cx="48" cy="26" r="13" fill="white"/>
+      <path d="M28 60 Q28 48 48 48 Q68 48 68 60" stroke="white" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <circle cx="18" cy="76" r="5" fill="rgba(255,255,255,0.55)"/>
+      <line x1="24" y1="76" x2="38" y2="76" stroke="rgba(255,255,255,0.45)" stroke-width="3" stroke-dasharray="4,4" stroke-linecap="round"/>
+      <circle cx="48" cy="76" r="5" fill="rgba(255,255,255,0.8)"/>
+      <line x1="54" y1="76" x2="68" y2="76" stroke="rgba(255,255,255,0.45)" stroke-width="3" stroke-dasharray="4,4" stroke-linecap="round"/>
+      <circle cx="78" cy="76" r="6.5" fill="white"/>
     </svg>
     키즈루트
   </div>
