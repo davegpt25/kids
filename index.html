@@ -2024,11 +2024,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // URL hash 감지 — /kids/#admin 접속 시 바로 모달 오픈
   if (location.hash === '#admin') admOpenModal();
 
-  // 로고 5번 클릭
+  // 로고 영역(이미지 + 텍스트 모두) 5번 클릭
+  // nav 왼쪽 절반(로고 있는 구역)에 클릭 감지
   let clicks = 0, timer = null;
-  const logo = document.querySelector('.nav-logo');
-  if (logo) {
-    logo.addEventListener('click', function() {
+  const navEl = document.querySelector('nav');
+  if (navEl) {
+    navEl.addEventListener('click', function(e) {
+      // nav 왼쪽 절반 클릭만 카운트 (링크 등 오른쪽 메뉴 제외)
+      const rect = navEl.getBoundingClientRect();
+      if (e.clientX > rect.left + rect.width * 0.4) return;
       clicks++;
       clearTimeout(timer);
       if (clicks >= 5) { clicks = 0; admOpenModal(); return; }
