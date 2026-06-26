@@ -4717,6 +4717,9 @@ window.addEventListener('load', () => {
   if (typeof Kakao !== 'undefined' && KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE') {
     Kakao.init(KAKAO_APP_KEY);
   }
+
+  // 실제 학원 좌표를 네이버 지도 Geocoder로 보정 (1회, 도메인 인증된 ncpKeyId 필요 — 배포 도메인에서만 동작)
+  _loadNaverMapScript(function() { _urSyncAcademyCoordsFromNaver(); });
 });
 
 // ─── 모달 열기/닫기 ───
@@ -7381,12 +7384,39 @@ function heroRotate() {
 var UR_ACADEMIES = [
   { id:1, name:'짱솔학원',             subj:'math',    label:'수학', color:'#F97316', addr:'강남구 대치동',   lat:37.4931, lng:127.0583, dist:0.9, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
   { id:2, name:'함수학학원',           subj:'math',    label:'수학', color:'#F97316', addr:'강남구 대치동',   lat:37.4945, lng:127.0561, dist:0.9, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
-  { id:3, name:'아이큐브영어학원',      subj:'english', label:'영어', color:'#3B82F6', addr:'강남구 역삼동 역삼로52길', lat:37.4990, lng:127.0345, dist:0.8, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  { id:3, name:'아이큐브영어학원',      subj:'english', label:'영어', color:'#3B82F6', addr:'강남구 역삼로52길 14', lat:37.4990, lng:127.0345, dist:0.8, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
   { id:4, name:'정철어학원 역삼점',     subj:'english', label:'영어', color:'#3B82F6', addr:'강남구 역삼동',   lat:37.5005, lng:127.0365, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
   { id:5, name:'CIT 코딩학원',         subj:'coding',  label:'코딩', color:'#10B981', addr:'강남구 압구정동',  lat:37.5270, lng:127.0300, dist:1.5, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
   { id:6, name:'코듀크리에이티브 반포센터', subj:'coding', label:'코딩', color:'#10B981', addr:'서초구 반포동', lat:37.5034, lng:127.0107, dist:0.7, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
-  { id:7, name:'천년의미소미술학원',    subj:'art',     label:'미술', color:'#EC4899', addr:'서초구 방배동 방배로13길', lat:37.4869, lng:127.0048, dist:1.1, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false }
+  { id:7, name:'천년의미소미술학원',    subj:'art',     label:'미술', color:'#EC4899', addr:'서초구 방배로13길 19', lat:37.4869, lng:127.0048, dist:1.1, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false }
 ];
+
+// 위 lat/lng는 동 단위 추정치 — 페이지 로드 시 네이버 Geocoder로 실제 주소 좌표로 보정한다 (배포 도메인에서만 인증된 ncpKeyId로 동작).
+// 결과는 localStorage에 캐시해 반복 호출을 피한다.
+function _urSyncAcademyCoordsFromNaver() {
+  if (!window.naver || !naver.maps || !naver.maps.Service) return;
+  var CACHE_KEY = 'kr_naver_geocode_cache_v1';
+  var cache = {};
+  try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch (e) {}
+
+  UR_ACADEMIES.forEach(function(a) {
+    var cached = cache[a.id];
+    if (cached) { a.lat = cached.lat; a.lng = cached.lng; return; }
+
+    naver.maps.Service.geocode({ query: '서울 ' + a.addr }, function(status, response) {
+      if (status !== naver.maps.Service.Status.OK) return;
+      var found = response.v2.addresses[0];
+      if (!found) return;
+      a.lat = parseFloat(found.y);
+      a.lng = parseFloat(found.x);
+      cache[a.id] = { lat: a.lat, lng: a.lng };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+      // 이미 화면이 떠 있으면 보정된 좌표로 다시 그림
+      if (document.getElementById('urAcademyList')) { urUpdateDistances(); urRenderAcademies(); }
+      if (_urMap) urRenderMapMarkers();
+    });
+  });
+}
 
 // ══════════════════════════════════════════════════════════
 // 🔗 공유 데이터 레이어 — 학부모·관리자·원장 세 페이지 싱크
