@@ -3,6 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+// 배포할 때마다 BUILD 값을 올려주세요 — 이전 빌드를 캐시해둔 브라우저를 1회 강제 새로고침시켜 최신 버전을 받게 함
+(function () {
+  var BUILD = '2026-06-27.1';
+  var KEY = 'kr_build_version';
+  var stored = null;
+  try { stored = localStorage.getItem(KEY); } catch (e) {}
+  try { localStorage.setItem(KEY, BUILD); } catch (e) {}
+  if (stored !== null && stored !== BUILD && location.search.indexOf('_v=') < 0) {
+    location.replace(location.pathname + '?_v=' + Date.now());
+  }
+})();
+</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=5dq02tmsku&submodules=geocoder"></script>
@@ -7381,7 +7397,10 @@ var UR_ACADEMIES = [
   { id:4, name:'정철어학원 역삼점',     subj:'english', label:'영어', color:'#3B82F6', addr:'강남구 역삼동',   lat:37.5005, lng:127.0365, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
   { id:5, name:'CIT 코딩학원',         subj:'coding',  label:'코딩', color:'#10B981', addr:'강남구 압구정동',  lat:37.5270, lng:127.0300, dist:1.5, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
   { id:6, name:'코듀크리에이티브 반포센터', subj:'coding', label:'코딩', color:'#10B981', addr:'서초구 반포동', lat:37.5034, lng:127.0107, dist:0.7, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
-  { id:7, name:'천년의미소미술학원',    subj:'art',     label:'미술', color:'#EC4899', addr:'서초구 방배로13길 19', lat:37.4869, lng:127.0048, dist:1.1, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false }
+  { id:7, name:'천년의미소미술학원',    subj:'art',     label:'미술', color:'#EC4899', addr:'서초구 방배로13길 19', lat:37.4869, lng:127.0048, dist:1.1, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  { id:8, name:'임페라토 수학학원',     subj:'math',    label:'수학', color:'#F97316', addr:'서대문구 북가좌동 5-95', lat:37.5816, lng:126.9106, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  { id:9, name:'폴리어학원 서대문캠퍼스', subj:'english', label:'영어', color:'#3B82F6', addr:'서대문구 북가좌동 300-2', lat:37.5825, lng:126.9075, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  { id:10, name:'윤수진음악학원',      subj:'piano',   label:'피아노', color:'#8B5CF6', addr:'서대문구 가재울로6길 53', lat:37.5795, lng:126.9089, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false }
 ];
 
 // 위 lat/lng는 동 단위 추정치 — 페이지 로드 시 네이버 Geocoder로 실제 주소 좌표로 보정한다 (배포 도메인에서만 인증된 ncpKeyId로 동작).
