@@ -5564,12 +5564,18 @@ function _buildEmailHTML(name, email, location, radius, subjects, cards) {
     var numBg = isBest ? 'background:linear-gradient(135deg,#FF9A3C,#F97316);color:#fff;' : 'background:#E5E7EB;color:#6B7280;';
     var badge = isBest ? '<span style="display:inline-block;font-size:10px;font-weight:700;background:#F97316;color:#fff;border-radius:100px;padding:2px 9px;margin-right:5px;">1위 추천</span>' : '';
 
-    // 실제 학원을 찾지 못한 과목 — 허위 이름 없이 "준비중" 표시
+    // 실제 학원을 찾지 못한 과목 — 허위 이름 없이 "준비중"/"반경 밖" 안내로 대체
     if (ac.empty) {
+      var emptyMsg = ac.reason === 'out_of_radius'
+        ? '가장 가까운 ' + _escHtml(ac.nearestName||'') + '은 ' + (ac.distStr||'?') + ' 거리예요 — 반경을 넓혀보세요'
+        : '이 지역엔 등록된 실제 ' + (ac.label||ac.subj) + ' 학원이 아직 없어요';
+      var emptyTitle = ac.reason === 'out_of_radius'
+        ? '선택 반경 안엔 ' + (ac.label||ac.subj) + ' 학원이 없어요'
+        : (ac.label||ac.subj) + ' 학원 준비중';
       return '<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:10px;background:#FAFAFA;border:1.5px dashed #E5E7EB;border-radius:14px;overflow:hidden;">'
         +'<tr><td style="padding:16px 18px;">'
-        +'<div style="font-size:14px;font-weight:700;color:#9CA3AF;margin-bottom:3px;">'+(EMOJIS[ac.subj]||'🏫')+' '+(ac.label||ac.subj)+' 학원 준비중</div>'
-        +'<div style="font-size:12px;color:#9CA3AF;">이 지역엔 등록된 실제 '+(ac.label||ac.subj)+' 학원이 아직 없어요</div>'
+        +'<div style="font-size:14px;font-weight:700;color:#9CA3AF;margin-bottom:3px;">'+(EMOJIS[ac.subj]||'🏫')+' '+emptyTitle+'</div>'
+        +'<div style="font-size:12px;color:#9CA3AF;">'+emptyMsg+'</div>'
         +'</td></tr></table>';
     }
 
@@ -6411,12 +6417,28 @@ function _renderSimCards() {
           '<div class="sim-card-meta">이 지역엔 등록된 실제 ' + pool.label + ' 학원이 아직 없어요</div>' +
         '</div>';
       cardsEl.appendChild(card);
-      _lastSimResult.push({ empty: true, subj: subj, label: pool.label });
+      _lastSimResult.push({ empty: true, reason: 'none', subj: subj, label: pool.label });
+      return;
+    }
+
+    var distM = Math.round(ac._liveDistKm * 1000);
+
+    // 가장 가까운 학원이라도 선택한 반경보다 멀면 — 허위로 "1위 추천" 처리하지 않고 솔직하게 안내
+    if (distM > radius) {
+      var farDistLabel = distM >= 1000 ? (distM/1000).toFixed(1) + 'km' : distM + 'm';
+      card.className = 'sim-card sim-card-empty';
+      card.innerHTML =
+        '<div class="sim-card-rank">' + (i+1) + '</div>' +
+        '<div class="sim-card-icon">' + pool.icon + '</div>' +
+        '<div class="sim-card-body">' +
+          '<div class="sim-card-name" style="color:#9CA3AF">반경 ' + radiusLabel + ' 안엔 ' + pool.label + ' 학원이 없어요</div>' +
+          '<div class="sim-card-meta">가장 가까운 ' + _escHtml(ac.name) + '은 ' + farDistLabel + ' 거리예요 — 반경을 넓혀보세요</div>' +
+        '</div>';
+      cardsEl.appendChild(card);
+      _lastSimResult.push({ empty: true, reason: 'out_of_radius', subj: subj, label: pool.label, nearestName: ac.name, distStr: farDistLabel });
       return;
     }
     usedIds.push(ac.id);
-
-    var distM   = Math.round(ac._liveDistKm * 1000);
     var walkMin = Math.max(1, Math.round(distM / 67));
     var ratingHtml = ac.reviews > 0 ? ('⭐ ' + ac.rating) : '🆕 신규 등록';
     var tag1    = i === 0 ? '<span class="sim-card-tag">1위 추천</span>' : '';
@@ -7640,6 +7662,7 @@ function urSetRadius(btn) {
   urUpdateCircle();
   urUpdateDistances();
   urRenderMapMarkers();
+  if (_urView === 'list') urRenderAcademies();
 }
 
 // ── 거리 재계산 ──
@@ -7822,6 +7845,16 @@ function urSearchAddress() {
 
 // ── 필터 적용된 학원 목록 반환 ──
 function urGetFiltered() {
+  urUpdateDistances(); // 사용자 위치 기준 거리 최신화 — 반경 필터 적용 전 필수
+  return KR_SYNC.getMergedAcademies().filter(function(a) {
+    if (_urFilter !== 'all' && a.subj !== _urFilter) return false;
+    if (_urSearchText && a.name.toLowerCase().indexOf(_urSearchText) < 0 && a.label.indexOf(_urSearchText) < 0) return false;
+    if (a.dist * 1000 > _urRadius) return false;
+    return true;
+  });
+}
+// 반경/필터 조건 자체를 무시한 전체 목록 — 빈 결과일 때 "반경을 넓히면 있다"는 안내에 사용
+function urGetFilteredIgnoringRadius() {
   return KR_SYNC.getMergedAcademies().filter(function(a) {
     if (_urFilter !== 'all' && a.subj !== _urFilter) return false;
     if (_urSearchText && a.name.toLowerCase().indexOf(_urSearchText) < 0 && a.label.indexOf(_urSearchText) < 0) return false;
@@ -7841,7 +7874,18 @@ function urRenderAcademies() {
   var container = document.getElementById('urAcademyList');
   if (!container) return;
   if (!list.length) {
-    container.innerHTML = '<div class="ur-empty"><div class="ur-empty-icon">🔍</div>검색 결과가 없어요</div>';
+    var widerList = urGetFilteredIgnoringRadius();
+    var radiusLabel = _urRadius >= 1000 ? (_urRadius/1000) + 'km' : _urRadius + 'm';
+    if (widerList.length) {
+      var nearest = widerList.slice().sort(function(a,b){ return a.dist - b.dist; })[0];
+      container.innerHTML = '<div class="ur-empty"><div class="ur-empty-icon">📍</div>'
+        + '반경 ' + radiusLabel + ' 안엔 조건에 맞는 학원이 없어요<br>'
+        + '<span style="font-size:12px;color:#9CA3AF">가장 가까운 학원(' + _escHtml(nearest.name) + ')은 ' + nearest.dist + 'km 거리예요 — 반경을 넓혀보세요</span>'
+        + '</div>';
+    } else {
+      container.innerHTML = '<div class="ur-empty"><div class="ur-empty-icon">🔍</div>이 조건에 맞는 학원이 아직 등록되지 않았어요<br>'
+        + '<span style="font-size:12px;color:#9CA3AF">다른 과목이나 지역으로 다시 시도해보세요</span></div>';
+    }
     return;
   }
   container.innerHTML = list.map(function(a) {
