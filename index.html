@@ -2662,6 +2662,38 @@
   font-size: 14px; font-weight: 800; color: var(--text-main);
   margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
 }
+
+/* 🔔 하원 알림 — 여정 라인 */
+.ur-journey-master-btn {
+  font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 100px;
+  background: var(--primary); color: #fff; border: none; cursor: pointer;
+}
+.ur-journey-master-btn.off { background: #E5E7EB; color: #9CA3AF; }
+.ur-journey-hint { font-size: 11px; color: #9CA3AF; margin-bottom: 12px; line-height: 1.5; }
+.ur-journey-track {
+  display: flex; align-items: flex-start; overflow-x: auto;
+  background: #fff; border-radius: 14px; padding: 16px 14px 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.uj-stop { display: flex; flex-direction: column; align-items: center; width: 56px; flex-shrink: 0; }
+.uj-dot {
+  width: 32px; height: 32px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-size: 13px;
+  font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.uj-dot.school { background: #90A4AE; }
+.uj-dot.home   { background: #2E7D32; }
+.uj-name { font-size: 10px; font-weight: 700; color: var(--text-main); margin-top: 4px; text-align: center; line-height: 1.3; }
+.uj-time { font-size: 9px; color: #9CA3AF; text-align: center; }
+.uj-conn { flex: 1; min-width: 64px; display: flex; flex-direction: column; align-items: center; margin-top: 15px; }
+.uj-line { width: 100%; height: 3px; border-radius: 2px; background: #E5E7EB; }
+.uj-travel { font-size: 9px; color: #9CA3AF; margin-top: 3px; line-height: 1.5; text-align: center; }
+.uj-push-badge {
+  margin-top: 4px; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 100px;
+  cursor: pointer; white-space: nowrap; border: none; font-family: inherit;
+}
+.uj-push-badge.on  { background: var(--primary); color: #fff; box-shadow: 0 2px 5px rgba(249,115,22,0.35); }
+.uj-push-badge.off { background: #F1F5F9; color: #9CA3AF; }
 .ur-saved-card {
   background: #fff; border-radius: 14px; padding: 14px 16px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 10px;
@@ -7821,6 +7853,8 @@ function urRenderSchedule() {
   });
   var weekEl = document.getElementById('urWeekScroll');
   if (weekEl) weekEl.innerHTML = weekHtml;
+  // 🔔 하원 알림 — 여정 라인
+  urRenderJourney(schedule);
   // 등록 학원 목록
   var countEl = document.getElementById('urSchedCount');
   if (countEl) countEl.textContent = schedule.length + '개 학원';
@@ -7845,6 +7879,85 @@ function urRenderSchedule() {
       + '</div>';
   }).join('');
 }
+// ── 🔔 하원 알림 — 여정 라인 + 학원별 푸시 토글 ──────────
+function urGetPushPrefs() {
+  try { return JSON.parse(localStorage.getItem('kr_push_prefs') || '{}'); } catch(e) { return {}; }
+}
+function urSavePushPrefs(map) { localStorage.setItem('kr_push_prefs', JSON.stringify(map)); }
+
+function urRenderJourney(schedule) {
+  var section = document.getElementById('urJourneySection');
+  var track   = document.getElementById('urJourneyTrack');
+  if (!section || !track) return;
+
+  if (!schedule.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  var prefs = urGetPushPrefs();
+  // 가장 빠른 시간대 학원 순으로 정렬 (간단히 등록 순서 사용)
+  var ordered = schedule.slice();
+
+  var html = '';
+  // 하교 정거장
+  html += '<div class="uj-stop"><div class="uj-dot school">🏫</div><div class="uj-name">하교</div><div class="uj-time">15:00</div></div>';
+
+  ordered.forEach(function(s, i) {
+    var walk = 4 + (i * 3) + (s.academyId % 5); // 데모용 추정 이동시간
+    var drive = Math.max(2, Math.round(walk * 0.45));
+    var isOn = prefs[s.academyId] !== false; // 기본 ON
+    html += '<div class="uj-conn">'
+      +   '<div class="uj-line" style="background:linear-gradient(90deg,' + (i===0?'#90A4AE':(ordered[i-1].color||'#F97316')) + ',' + (s.color||'#F97316') + ')"></div>'
+      +   '<div class="uj-travel">🚶 ' + walk + '분 · 🚗 ' + drive + '분</div>'
+      +   '<button class="uj-push-badge ' + (isOn?'on':'off') + '" onclick="urTogglePush(' + s.academyId + ')">' + (isOn ? '🔔 종료알림' : '🔕 알림꺼짐') + '</button>'
+      + '</div>';
+    var timeLabel = (s.times || [])[0] || '';
+    html += '<div class="uj-stop"><div class="uj-dot" style="background:' + (s.color||'#F97316') + '">' + _escHtml((s.label||'').slice(0,1) || '학') + '</div>'
+      + '<div class="uj-name">' + _escHtml(s.name.length>6 ? s.name.slice(0,6)+'…' : s.name) + '</div>'
+      + '<div class="uj-time">' + _escHtml(timeLabel) + '</div></div>';
+  });
+
+  // 귀가 정거장 + 마지막 연결선
+  var lastColor = ordered[ordered.length-1].color || '#F97316';
+  var lastOn = prefs['home'] !== false;
+  html += '<div class="uj-conn">'
+    +   '<div class="uj-line" style="background:linear-gradient(90deg,' + lastColor + ',#2E7D32)"></div>'
+    +   '<div class="uj-travel">🚶 6분 · 🚗 3분</div>'
+    +   '<button class="uj-push-badge ' + (lastOn?'on':'off') + '" onclick="urTogglePush(\'home\')">' + (lastOn ? '🔔 종료알림' : '🔕 알림꺼짐') + '</button>'
+    + '</div>';
+  html += '<div class="uj-stop"><div class="uj-dot home">🏠</div><div class="uj-name">귀가</div><div class="uj-time">~18:30</div></div>';
+
+  track.innerHTML = html;
+
+  // 전체 ON/OFF 버튼 상태
+  var allIds = ordered.map(function(s){ return s.academyId; }).concat(['home']);
+  var allOn = allIds.every(function(id){ return prefs[id] !== false; });
+  var masterBtn = document.getElementById('urJourneyMasterBtn');
+  if (masterBtn) {
+    masterBtn.textContent = allOn ? '전체 ON' : '전체 켜기';
+    masterBtn.classList.toggle('off', !allOn);
+  }
+}
+
+function urTogglePush(id) {
+  var prefs = urGetPushPrefs();
+  prefs[id] = prefs[id] === false ? true : false;
+  urSavePushPrefs(prefs);
+  urRenderJourney(urGetSchedule());
+  showToast(prefs[id] ? '🔔 알림을 켰어요' : '🔕 알림을 껐어요');
+}
+
+function urToggleAllPush() {
+  var schedule = urGetSchedule();
+  var prefs = urGetPushPrefs();
+  var allIds = schedule.map(function(s){ return s.academyId; }).concat(['home']);
+  var allOn = allIds.every(function(id){ return prefs[id] !== false; });
+  var next = !allOn;
+  allIds.forEach(function(id) { prefs[id] = next; });
+  urSavePushPrefs(prefs);
+  urRenderJourney(schedule);
+  showToast(next ? '🔔 모든 알림을 켰어요' : '🔕 모든 알림을 껐어요');
+}
+
 function urRemoveSchedule(academyId) {
   var schedule = urGetSchedule();
   urSaveSchedule(schedule.filter(function(s) { return s.academyId !== academyId; }));
@@ -8301,6 +8414,17 @@ function urToggleNotif(btn) {
         </div>
       </div>
       <div class="ur-week-scroll" id="urWeekScroll"><!-- JS 렌더링 --></div>
+
+      <!-- 🔔 하원 알림 — 여정 라인 + 학원별 푸시 토글 -->
+      <div class="ur-sched-section" id="urJourneySection" style="display:none;">
+        <div class="ur-sched-section-title">
+          <span>🔔 하원 알림</span>
+          <button class="ur-journey-master-btn" id="urJourneyMasterBtn" onclick="urToggleAllPush()">전체 ON</button>
+        </div>
+        <div class="ur-journey-hint">학원 수업이 끝나면 알려드려요. 학원별로 따로 켜고 끌 수 있어요.</div>
+        <div class="ur-journey-track" id="urJourneyTrack"><!-- JS 렌더링 --></div>
+      </div>
+
       <div class="ur-sched-section">
         <div class="ur-sched-section-title">
           <span>등록된 학원</span>
