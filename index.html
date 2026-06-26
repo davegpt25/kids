@@ -7403,6 +7403,65 @@ var UR_ACADEMIES = [
   { id:10, name:'윤수진음악학원',      subj:'piano',   label:'피아노', color:'#8B5CF6', addr:'서대문구 가재울로6길 53', lat:37.5795, lng:126.9089, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false }
 ];
 
+// ══════════════════════════════════════════════════════════
+// 🏷️ 학원 카테고리 분류 — 네이버 지도 등에서 "학원"으로 검색해 얻은
+// 비정형 결과(이름·업종 텍스트)를 우리 8개 과목(subj) 체계로 자동 분류한다.
+// 새 학원을 추가할 때마다 매번 손으로 subj를 추측하지 않도록 시스템화한 부분.
+// ══════════════════════════════════════════════════════════
+var AC_SUBJECT_META = {
+  math:      { label:'수학',   color:'#F97316' },
+  english:   { label:'영어',   color:'#3B82F6' },
+  piano:     { label:'피아노', color:'#8B5CF6' },
+  art:       { label:'미술',   color:'#EC4899' },
+  taekwondo: { label:'태권도', color:'#EF4444' },
+  science:   { label:'과학',   color:'#06B6D4' },
+  coding:    { label:'코딩',   color:'#10B981' },
+  sports:    { label:'체육',   color:'#84CC16' }
+};
+// 우선순위 순서대로 검사 — 위에 있을수록 먼저 매칭 (복합 키워드 충돌 시 우선순위가 높은 과목으로 분류)
+var AC_CLASSIFY_RULES = [
+  { subj: 'taekwondo', pattern: /태권도|합기도|검도|무도|유도/ },
+  { subj: 'piano',     pattern: /피아노|음악|실용음악|바이올린|보컬|작곡|예술학원|음악실/ },
+  { subj: 'art',       pattern: /미술|아트|디자인|그림|회화/ },
+  { subj: 'coding',    pattern: /코딩|컴퓨터|소프트웨어|\bSW\b|로봇|프로그래밍|IT학원/i },
+  { subj: 'science',   pattern: /과학|사이언스|영재원|STEM/i },
+  { subj: 'sports',    pattern: /체육|축구|농구|줄넘기|스포츠|발레|체조/ },
+  { subj: 'english',   pattern: /영어|어학원|english|ESL|EFL|토익|토플|회화/i },
+  { subj: 'math',      pattern: /수학|매스|기하|올림피아드|수리논술/ }
+];
+// name(학원명) + rawCategory(네이버 등에서 제공하는 업종 텍스트, 있으면 같이 넘김) → subj 추론. 못 찾으면 null.
+function urClassifyAcademySubject(name, rawCategory) {
+  var text = ((rawCategory || '') + ' ' + (name || ''));
+  for (var i = 0; i < AC_CLASSIFY_RULES.length; i++) {
+    if (AC_CLASSIFY_RULES[i].pattern.test(text)) return AC_CLASSIFY_RULES[i].subj;
+  }
+  return null;
+}
+// 네이버 지도 등에서 수집한 비정형 학원 목록을 분류해 UR_ACADEMIES에 추가하는 표준 진입점.
+// raw: [{ name, addr, category? }] — category는 네이버가 주는 업종 텍스트(있으면 분류 정확도 향상)
+// 반환값: { added:[...], skipped:[{name,reason}] } — skipped엔 분류 실패/중복 사유 포함
+function urImportRawAcademies(raw) {
+  var added = [], skipped = [];
+  var nextId = UR_ACADEMIES.reduce(function(max, a) { return Math.max(max, a.id); }, 0) + 1;
+  (raw || []).forEach(function(r) {
+    if (!r || !r.name || !r.addr) { skipped.push({ name: r && r.name, reason: 'name/addr 누락' }); return; }
+    var dup = UR_ACADEMIES.some(function(a) { return a.name === r.name && a.addr === r.addr; });
+    if (dup) { skipped.push({ name: r.name, reason: '이미 등록됨' }); return; }
+    var subj = urClassifyAcademySubject(r.name, r.category);
+    if (!subj) { skipped.push({ name: r.name, reason: '과목 분류 실패 — 8개 카테고리 키워드와 매칭 안 됨' }); return; }
+    var meta = AC_SUBJECT_META[subj];
+    var entry = {
+      id: nextId++, name: r.name, subj: subj, label: meta.label, color: meta.color,
+      addr: r.addr, lat: r.lat || 37.5665, lng: r.lng || 126.9780, dist: 1.0,
+      rating: null, reviews: 0, times: [], hasTimetable: false, fee: null,
+      shuttle: false, badge: '', verified: false
+    };
+    UR_ACADEMIES.push(entry);
+    added.push(entry);
+  });
+  return { added: added, skipped: skipped };
+}
+
 // 위 lat/lng는 동 단위 추정치 — 페이지 로드 시 네이버 Geocoder로 실제 주소 좌표로 보정한다 (배포 도메인에서만 인증된 ncpKeyId로 동작).
 // 결과는 localStorage에 캐시해 반복 호출을 피한다.
 function _urSyncAcademyCoordsFromNaver() {
