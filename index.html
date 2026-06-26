@@ -1913,14 +1913,7 @@
 .demo-time-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
 /* ─── SIM PARTIAL REVEAL ─── */
 .sim-lock-wrap { position: relative; overflow: hidden; }
-.sim-card:nth-child(2) {
-  filter: blur(4px); opacity: 0.5;
-  pointer-events: none; user-select: none;
-}
-.sim-card:nth-child(n+3) {
-  filter: blur(8px); opacity: 0.22;
-  pointer-events: none; user-select: none;
-}
+/* 2·3위 카드 블러 처리 제거 — 실제 학원 데이터를 그대로 보여줌 */
 .sim-lock-fade {
   position: absolute; bottom: 0; left: 0; right: 0;
   height: 220px;
