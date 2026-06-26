@@ -7400,8 +7400,15 @@ var UR_ACADEMIES = [
   { id:7, name:'천년의미소미술학원',    subj:'art',     label:'미술', color:'#EC4899', addr:'서초구 방배로13길 19', lat:37.4869, lng:127.0048, dist:1.1, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
   { id:8, name:'임페라토 수학학원',     subj:'math',    label:'수학', color:'#F97316', addr:'서대문구 북가좌동 5-95', lat:37.5816, lng:126.9106, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
   { id:9, name:'폴리어학원 서대문캠퍼스', subj:'english', label:'영어', color:'#3B82F6', addr:'서대문구 북가좌동 300-2', lat:37.5825, lng:126.9075, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
-  { id:10, name:'윤수진음악학원',      subj:'piano',   label:'피아노', color:'#8B5CF6', addr:'서대문구 가재울로6길 53', lat:37.5795, lng:126.9089, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false }
+  { id:10, name:'윤수진음악학원',      subj:'piano',   label:'피아노', color:'#8B5CF6', addr:'서대문구 가재울로6길 53', lat:37.5795, lng:126.9089, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  // 네이버 지도 "학원" 검색 결과(사용자 제보 스크린샷)에서 urImportRawAcademies()로 분류해 추가한 항목들
+  { id:11, name:'자라다남아미술학원 서대문북가좌원', subj:'art',     label:'미술',   color:'#EC4899', addr:'서대문구 북가좌동', lat:37.5825, lng:126.9089, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  { id:12, name:'엘발레스튜디오 가좌점',            subj:'sports',  label:'체육',   color:'#84CC16', addr:'서대문구 북가좌동', lat:37.5821, lng:126.9092, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  { id:13, name:'소수정예 플랜수학',                subj:'math',    label:'수학',   color:'#F97316', addr:'서대문구 북가좌동', lat:37.5803, lng:126.9100, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  { id:14, name:'정이조주니어영어학원 가재울캠퍼스', subj:'english', label:'영어',   color:'#3B82F6', addr:'서대문구 북가좌동', lat:37.5798, lng:126.9105, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false },
+  { id:15, name:'에이펙스 영어 교습소',             subj:'english', label:'영어',   color:'#3B82F6', addr:'서대문구 남가좌동', lat:37.5795, lng:126.9108, dist:1.0, rating:null, reviews:0, times:[], hasTimetable:false, fee:null, shuttle:false, badge:'', verified:false }
 ];
+// 분류 보류 (이름만으론 과목 판단 불가 — 네이버 업종 태그 확인 후 재시도 필요): 대치쿰인학원 가재울캠퍼스, 앤트스터디 본관, 코와코이로이로, 토트학원
 
 // ══════════════════════════════════════════════════════════
 // 🏷️ 학원 카테고리 분류 — 네이버 지도 등에서 "학원"으로 검색해 얻은
@@ -7473,6 +7480,11 @@ function _urSyncAcademyCoordsFromNaver() {
   UR_ACADEMIES.forEach(function(a) {
     var cached = cache[a.id];
     if (cached) { a.lat = cached.lat; a.lng = cached.lng; return; }
+
+    // 동/구 단위까지만 있는 주소(번지·도로명 번호 없음)는 보정하지 않음 —
+    // 같은 동에 여러 학원이 있으면 전부 동의 중심점으로 뭉쳐서 "가장 가까운 학원" 순위가 무의미해지기 때문.
+    // 손으로 흩어놓은 추정 좌표를 그대로 유지한다.
+    if (!/\d/.test(a.addr)) return;
 
     naver.maps.Service.geocode({ query: '서울 ' + a.addr }, function(status, response) {
       if (status !== naver.maps.Service.Status.OK) return;
