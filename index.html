@@ -2550,6 +2550,15 @@
 }
 .ur-promo-today-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
+/* 오늘 타임테이블 */
+.ur-promo-timetable { margin-top: 8px; display: flex; flex-direction: column; gap: 7px; }
+.ur-tt-row { display: flex; align-items: center; gap: 9px; }
+.ur-tt-time {
+  flex-shrink: 0; width: 64px; font-size: 11.5px; font-weight: 700; color: #6B7280; text-align: right;
+}
+.ur-tt-bar { width: 4px; height: 22px; border-radius: 3px; flex-shrink: 0; }
+.ur-tt-name { font-size: 13px; font-weight: 700; color: var(--text-main); }
+
 /* ③ 과목 아이콘 그리드 */
 .ur-subject-grid {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 4px;
@@ -8849,14 +8858,34 @@ function urRenderHomePromo() {
   });
 
   el.className = 'ur-home-promo is-today';
-  var header = '<div class="ur-promo-top"><div class="ur-promo-title">📅 오늘(' + dayNames[today] + ') 일정</div><div class="ur-promo-cta">전체 보기 →</div></div>';
+  var header = '<div class="ur-promo-top"><div class="ur-promo-title">📅 오늘(' + dayNames[today] + ') 타임테이블</div><div class="ur-promo-cta">전체 보기 →</div></div>';
   if (!todayItems.length) {
     el.innerHTML = header + '<div class="ur-promo-sub">오늘은 등록된 학원 일정이 없어요</div>';
     return;
   }
-  el.innerHTML = header + '<div class="ur-promo-today-list">' + todayItems.map(function(s) {
-    return '<div class="ur-promo-today-item"><span class="ur-promo-today-dot" style="background:' + (s.color || '#F97316') + '"></span>' + _escHtml(s.name) + '</div>';
+  // 시간표가 있는 항목은 시작 시간 순으로, 없는 항목("시간표 미확인")은 맨 뒤로
+  var rows = todayItems.map(function(s) {
+    var raw = (s.times || [])[0] || '';
+    var timeLabel = raw ? raw.replace(/월화수목금|월수금|화목|주말반|주말오전/g, '').trim() : '';
+    return { s: s, timeLabel: timeLabel, sortKey: timeLabel ? _urTimeLabelToMinutes(timeLabel) : 9999 };
+  }).sort(function(a, b) { return a.sortKey - b.sortKey; });
+
+  el.innerHTML = header + '<div class="ur-promo-timetable">' + rows.map(function(r) {
+    return '<div class="ur-tt-row">'
+      + '<div class="ur-tt-time">' + (r.timeLabel ? _escHtml(r.timeLabel) : '⏳ 미확인') + '</div>'
+      + '<div class="ur-tt-bar" style="background:' + (r.s.color || '#F97316') + '"></div>'
+      + '<div class="ur-tt-name">' + _escHtml(r.s.name) + '</div>'
+      + '</div>';
   }).join('') + '</div>';
+}
+// "오후4시"/"오후 4:00" 등 시간 라벨 → 정렬용 분(分) 환산. 못 읽으면 큰 값(맨 뒤로)
+function _urTimeLabelToMinutes(label) {
+  var m = label.match(/(오전|오후)\s*(\d{1,2})(?::(\d{2}))?/);
+  if (!m) return 9999;
+  var hour = parseInt(m[2], 10);
+  var min = m[3] ? parseInt(m[3], 10) : 0;
+  if (m[1] === '오후' && hour < 12) hour += 12;
+  return hour * 60 + min;
 }
 function urHandleHomePromoClick() {
   if (!urGetSchedule().length) { openDemoModal(); }
