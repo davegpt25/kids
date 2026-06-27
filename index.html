@@ -2506,7 +2506,7 @@
   display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px;
   font-size: 15px; font-weight: 800; color: var(--text-main); cursor: pointer;
 }
-.ur-home-location-pin { font-size: 13px; }
+.ur-home-location-pin { display: inline-flex; align-items: center; color: var(--primary); }
 .ur-home-location-caret { font-size: 11px; color: #9CA3AF; margin-left: 1px; }
 .ur-home-search-row { display: flex; gap: 8px; align-items: center; }
 .ur-result-back {
@@ -8863,9 +8863,13 @@ function urHandleHomePromoClick() {
   else { userShowTab(1); }
 }
 function urOpenLocationPicker() {
-  urSetView('map');
-  var input = document.getElementById('urAddrInput');
-  if (input) input.focus();
+  showToast('📍 현재 위치를 다시 확인하고 있어요…');
+  urAutoLocate(true);
+}
+// 상단 로고 탭 → 진입 시 첫 화면(홈 탭, 결과화면 아니면)으로 복귀
+function urGoHome() {
+  if (typeof _urResultMode !== 'undefined' && _urResultMode) urExitResultMode();
+  userShowTab(0);
 }
 function urSetSort(el) {
   _urSort = el.dataset.sort;
@@ -9087,7 +9091,7 @@ function urFlyToAcademy(id) {
 // ── 내 위치로 이동 ──
 // 검색 탭에 들어올 때마다 실제 GPS로 기준 위치를 갱신 — 고정된 기본값(서초구 강남대로 인근)이
 // 계속 "내 위치"로 보이는 문제를 막기 위함. 권한 거부/실패 시에는 기존 기준 위치를 그대로 쓴다.
-function urAutoLocate() {
+function urAutoLocate(forceFresh) {
   if (!navigator.geolocation) { urReverseGeocode(_urUserLat, _urUserLng); return; }
   navigator.geolocation.getCurrentPosition(
     function(pos) {
@@ -9102,12 +9106,15 @@ function urAutoLocate() {
         _urMap.morph(new naver.maps.LatLng(_urUserLat, _urUserLng), 15);
       }
       urReverseGeocode(_urUserLat, _urUserLng);
+      if (forceFresh) showToast('📍 현재 위치로 갱신했어요');
     },
     function() {
       // 권한 거부/실패 — 기존 기준 위치 유지, 주소 표시만 갱신
       urReverseGeocode(_urUserLat, _urUserLng);
+      if (forceFresh) showToast('위치 권한이 필요해요. 브라우저 설정을 확인해주세요');
     },
-    { timeout: 8000, maximumAge: 60000 }
+    // 수동으로 다시 잡을 때(forceFresh)는 캐시된 좌표 대신 진짜 새 값을 받음
+    { timeout: 8000, maximumAge: forceFresh ? 0 : 60000 }
   );
 }
 function urMoveToMyLocation() {
@@ -9830,7 +9837,7 @@ function urToggleNotif(btn) {
 
   <!-- 상단 네비 -->
   <div class="ur-topnav">
-    <div class="ur-logo">
+    <div class="ur-logo" onclick="urGoHome()" style="cursor:pointer">
       <svg width="22" height="22" viewBox="0 0 96 96" style="border-radius:5px"><defs><linearGradient id="ug" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FF9A3C"/><stop offset="100%" stop-color="#F97316"/></linearGradient></defs><rect width="96" height="96" rx="24" fill="url(#ug)"/><circle cx="48" cy="22" r="11" fill="white"/><line x1="48" y1="33" x2="48" y2="50" stroke="white" stroke-width="5" stroke-linecap="round"/><line x1="33" y1="41" x2="63" y2="41" stroke="white" stroke-width="4.5" stroke-linecap="round"/><line x1="48" y1="50" x2="38" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/><line x1="48" y1="50" x2="58" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/></svg>
       키즈루트
     </div>
@@ -9846,8 +9853,10 @@ function urToggleNotif(btn) {
     <div class="ur-page active" id="urPageSearch">
       <!-- ① 위치 + 검색 헤더 -->
       <div class="ur-home-header" id="urHomeHeader">
-        <div class="ur-home-location" id="urHomeLocationBtn" onclick="urOpenLocationPicker()">
-          <span class="ur-home-location-pin">📍</span>
+        <div class="ur-home-location" id="urHomeLocationBtn" onclick="urOpenLocationPicker()" title="탭하면 현재 위치를 다시 잡아요">
+          <span class="ur-home-location-pin">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          </span>
           <span id="urHomeLocationText">위치 불러오는 중…</span>
           <span class="ur-home-location-caret">⌄</span>
         </div>
