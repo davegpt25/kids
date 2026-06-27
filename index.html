@@ -7,16 +7,21 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-// 배포할 때마다 BUILD 값을 올려주세요 — 이전 빌드를 캐시해둔 브라우저를 1회 강제 새로고침시켜 최신 버전을 받게 함
+// 캐시 자동 감지 — 사람이 버전 문자열을 매번 올려야 하는 방식은 깜빡하기 쉬워서(실제로 여러 번 빠뜨림),
+// 서버가 자동으로 바꿔주는 ETag/Last-Modified를 기준으로 비교한다. 배포할 때 손으로 건드릴 값이 없음.
 (function () {
-  var BUILD = '2026-06-27.2';
-  var KEY = 'kr_build_version';
-  var stored = null;
-  try { stored = localStorage.getItem(KEY); } catch (e) {}
-  try { localStorage.setItem(KEY, BUILD); } catch (e) {}
-  if (stored !== null && stored !== BUILD && location.search.indexOf('_v=') < 0) {
-    location.replace(location.pathname + '?_v=' + Date.now());
-  }
+  if (location.search.indexOf('_v=') >= 0) return; // 이미 강제 새로고침 1회 거친 요청 — 재귀 방지
+  var KEY = 'kr_page_fingerprint';
+  fetch(location.pathname, { method: 'HEAD', cache: 'no-store' }).then(function (res) {
+    var fingerprint = res.headers.get('ETag') || res.headers.get('Last-Modified');
+    if (!fingerprint) return;
+    var stored = null;
+    try { stored = localStorage.getItem(KEY); } catch (e) {}
+    try { localStorage.setItem(KEY, fingerprint); } catch (e) {}
+    if (stored !== null && stored !== fingerprint) {
+      location.replace(location.pathname + '?_v=' + Date.now());
+    }
+  }).catch(function () { /* HEAD 실패 시 그냥 평소처럼 로드 — 강제 새로고침 시도 안 함 */ });
 })();
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -5159,58 +5164,6 @@ function selectPill(el, text) {
   _showQueryInTypewriter(text);
 }
 
-// ─── 직접 질문 응답 ───
-const _demoAnswers = [
-  {
-    keywords: ['수학','math'],
-    answer: [
-      { badge: '추천 1위', text: '강남 베스트 수학 — 📍 0.4km · ⭐4.8 · 월수금 오후 4시' },
-      { badge: '추천 2위', text: '스피드 수학 — 📍 1.3km · ⭐4.3 · 월수금 오후 5시' },
-      { badge: '포인트', text: '두 학원 모두 시간 겹침 없이 조합 가능해요 ✅' }
-    ]
-  },
-  {
-    keywords: ['영어','english'],
-    answer: [
-      { badge: '추천 1위', text: 'YBM 영어 서초점 — 📍 0.7km · ⭐4.6 · 월화수목금 오후 4시' },
-      { badge: '추천 2위', text: 'ABC 영어 마을 — 📍 1.5km · ⭐4.7 · 월수금 오후 4시 (원장 인증 ✓)' },
-      { badge: '포인트', text: 'ABC 영어 마을은 원장 인증 학원으로 정보가 더 정확해요' }
-    ]
-  },
-  {
-    keywords: ['조합','추천','최적'],
-    answer: [
-      { badge: '조합 추천', text: '강남 베스트 수학 (월수금) + YBM 영어 (화목) — 겹침 없음 ✅' },
-      { badge: '월 비용', text: '30만원 + 28만원 = 약 58만원/월' },
-      { badge: '이동', text: '두 학원 간 도보 약 8분 · 무리 없는 동선이에요' }
-    ]
-  },
-  {
-    keywords: ['시간','겹침','스케줄'],
-    answer: [
-      { badge: '충돌 없음', text: '수학 (월·수·금) + 영어 (화·목) 조합은 요일이 완전히 분리돼요' },
-      { badge: '팁', text: '하교 후 30분 이동 버퍼를 포함해도 시간이 맞아요 🎯' },
-      { badge: '출시 후', text: '정확한 시간표 충돌 검사는 앱 출시 후 자동으로 제공됩니다' }
-    ]
-  },
-  {
-    keywords: ['반경','거리','근처','동네'],
-    answer: [
-      { badge: '반경 1km', text: '강남구 역삼동 기준 수학·영어·피아노 학원 10개 확인됨' },
-      { badge: '가장 가까운', text: '강남 베스트 수학 — 도보 5분 (320m)' },
-      { badge: '출시 후', text: 'GPS 기반 실시간 반경 탐색 기능이 제공됩니다' }
-    ]
-  },
-  {
-    keywords: ['피아노','미술','태권도','코딩','체육'],
-    answer: [
-      { badge: '예체능', text: '예원 피아노 (⭐4.9) · 하늘 미술 (⭐4.5) · 챔피언 태권도 (⭐4.4)' },
-      { badge: '조합 팁', text: '학습 2개 + 예체능 1개 조합이 주간 균형에 좋아요' },
-      { badge: '포인트', text: '예체능은 주 2~3회로 수학·영어와 요일 분리가 쉬워요' }
-    ]
-  }
-];
-
 // 포커스 시 → 애니메이션 오버레이 숨김, 전송 버튼 표시
 function demoOnFocus() {
   var overlay = document.getElementById('demoAnimOverlay');
@@ -5242,6 +5195,26 @@ function _demoResumeAnimation() {
   _startTypewriterCycle();
 }
 
+// 자유 텍스트에서 "지역"과 "학원 카테고리(과목)"를 뽑아낸다 — 구 이름 + 분류기(urClassifyAcademySubject) 재사용.
+// 구 이름은 길게 일치하는 것부터 검사 ("중구"가 "중"보다 먼저 잡히도록).
+var _UR_REGION_WORDS = ['강남','강동','강북','강서','관악','광진','구로','금천','노원','도봉',
+  '동대문','동작','마포','서대문','서초','성동','성북','송파','양천','영등포',
+  '용산','은평','종로','중랑','중구','중'].sort(function(a,b){ return b.length - a.length; });
+function urParseFreeTextQuery(q) {
+  var classified = urClassifyAcademySubject(q, null);
+  var region = null;
+  for (var i = 0; i < _UR_REGION_WORDS.length; i++) {
+    if (q.indexOf(_UR_REGION_WORDS[i]) >= 0) { region = _UR_REGION_WORDS[i]; break; }
+  }
+  var radiusMeters = 1000;
+  var m = q.match(/(\d+(?:\.\d+)?)\s*(km|k|m)\b/i);
+  if (m) {
+    var val = parseFloat(m[1]);
+    radiusMeters = Math.round(m[2].toLowerCase() === 'm' ? val : val * 1000);
+  }
+  return { subj: classified.subj, region: region, radiusMeters: radiusMeters };
+}
+
 function demoAskQuestion() {
   var input = document.getElementById('demoUserInput');
   var q = (input.value || '').trim();
@@ -5249,40 +5222,39 @@ function demoAskQuestion() {
 
   var responseWrap  = document.getElementById('demoResponseWrap');
   var responseBubble = document.getElementById('demoResponseBubble');
+  var parsed = urParseFreeTextQuery(q);
 
-  // 키워드 매칭
-  var matched = null;
-  var ql = q.toLowerCase();
-  for (var i = 0; i < _demoAnswers.length; i++) {
-    var item = _demoAnswers[i];
-    for (var j = 0; j < item.keywords.length; j++) {
-      if (ql.indexOf(item.keywords[j]) >= 0) { matched = item; break; }
-    }
-    if (matched) break;
+  // 과목을 못 알아들었으면 — 추측해서 잘못된 결과로 넘기지 말고 다시 입력하도록 안내
+  if (!parsed.subj) {
+    var html = '<div class="resp-header">🗺️ 키즈루트 답변</div>'
+      + '<div class="resp-item"><span class="resp-badge">안내</span><span>과목을 못 알아들었어요 — "강남 수학 학원 1km"처럼 과목을 포함해서 입력해보세요</span></div>';
+    responseBubble.innerHTML = html;
+    responseWrap.style.display = 'block';
+    return;
   }
 
-  var items;
-  if (matched) {
-    items = matched.answer;
-  } else {
-    items = [
-      { badge: '안내', text: '정확한 결과는 출시 후 앱에서 GPS 기반으로 제공돼요 🗺️' },
-      { badge: '사전예약', text: '지금 예약하시면 출시 즉시 맞춤 분석 결과를 받을 수 있어요 🎯' },
-      { badge: '예시 질문', text: '"수학 영어 조합 추천해줘" 처럼 과목이나 조합 키워드를 포함해보세요' }
-    ];
-  }
-
-  var html = '<div class="resp-header">🗺️ 키즈루트 답변</div>';
-  items.forEach(function(it) {
-    html += '<div class="resp-item"><span class="resp-badge">' + it.badge + '</span><span>' + it.text + '</span></div>';
-  });
-
-  responseBubble.innerHTML = html;
-  responseWrap.style.display = 'block';
-
-  // 입력창 비우고 포커스 유지 (다음 질문 입력 가능하도록)
   input.value = '';
-  input.focus();
+  _demoSubjects = [parsed.subj];
+  _demoRadius = parsed.radiusMeters;
+
+  function _goToResults(lat, lng) {
+    _demoGPSLat = lat; _demoGPSLng = lng;
+    _stopTypewriter();
+    _showDemoStep('demoStepSim');
+    _renderSimCards();
+  }
+  if (parsed.region && window.naver && naver.maps && naver.maps.Service) {
+    naver.maps.Service.geocode({ query: parsed.region }, function(status, response) {
+      if (status === naver.maps.Service.Status.OK && response.v2.addresses.length) {
+        var r = response.v2.addresses[0];
+        _goToResults(parseFloat(r.y), parseFloat(r.x));
+      } else {
+        _goToResults(_demoGPSLat, _demoGPSLng);
+      }
+    });
+  } else {
+    _goToResults(_demoGPSLat, _demoGPSLng);
+  }
 }
 
 // ─── Map Step ───
