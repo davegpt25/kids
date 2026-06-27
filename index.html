@@ -2504,6 +2504,13 @@
 .ur-home-location-pin { font-size: 13px; }
 .ur-home-location-caret { font-size: 11px; color: #9CA3AF; margin-left: 1px; }
 .ur-home-search-row { display: flex; gap: 8px; align-items: center; }
+.ur-result-back {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: #F4F4F5; color: var(--text-main);
+  font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.ur-result-back:hover { background: #E5E7EB; }
+.ur-result-title { font-size: 15px; font-weight: 800; color: var(--text-main); margin-top: 10px; }
 .ur-home-search-wrap {
   flex: 1; display: flex; align-items: center; gap: 8px;
   background: #F4F4F5; border-radius: 14px; padding: 12px 16px;
@@ -8060,8 +8067,33 @@ function urSetFilter(el) {
   Array.prototype.forEach.call(document.querySelectorAll('.ur-subject-item'), function(c) {
     c.classList.toggle('active', c === el);
   });
-  // 과목 아이콘을 탭하면 지도 기반 결과 화면으로 전환 (참조 UI와 동일한 흐름)
+  // 과목 아이콘을 탭하면 홈 메뉴는 숨기고 지도 기반 결과 화면으로 전환 (참조 UI와 동일한 흐름)
+  var labelEl = el.querySelector('.ur-subject-label');
+  urEnterResultMode(labelEl ? labelEl.textContent : '전체');
   urSetView('map');
+}
+var _urResultMode = false;
+function urEnterResultMode(subjLabel) {
+  _urResultMode = true;
+  ['urHomeLocationBtn','urHomePromo','urSubjectGrid'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  var backBtn = document.getElementById('urResultBackBtn');
+  var titleEl = document.getElementById('urResultTitle');
+  if (backBtn) backBtn.style.display = 'flex';
+  if (titleEl) { titleEl.style.display = 'block'; titleEl.textContent = (subjLabel || '전체') + ' 학원 검색 결과'; }
+}
+function urExitResultMode() {
+  _urResultMode = false;
+  ['urHomeLocationBtn','urHomePromo','urSubjectGrid'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = '';
+  });
+  var backBtn = document.getElementById('urResultBackBtn');
+  var titleEl = document.getElementById('urResultTitle');
+  if (backBtn) backBtn.style.display = 'none';
+  if (titleEl) titleEl.style.display = 'none';
 }
 
 // ── ③ 과목 아이콘 그리드 — 새 과목이 생기면 이 배열만 추가하면 됨 ──
@@ -9083,13 +9115,14 @@ function urToggleNotif(btn) {
     <!-- ── 홈(학원 검색) 탭 ── -->
     <div class="ur-page active" id="urPageSearch">
       <!-- ① 위치 + 검색 헤더 -->
-      <div class="ur-home-header">
+      <div class="ur-home-header" id="urHomeHeader">
         <div class="ur-home-location" id="urHomeLocationBtn" onclick="urOpenLocationPicker()">
           <span class="ur-home-location-pin">📍</span>
           <span id="urHomeLocationText">위치 불러오는 중…</span>
           <span class="ur-home-location-caret">⌄</span>
         </div>
         <div class="ur-home-search-row">
+          <button class="ur-result-back" id="urResultBackBtn" style="display:none" onclick="urExitResultMode()">←</button>
           <div class="ur-home-search-wrap">
             <span>🔍</span>
             <input type="text" id="urSearchInput" placeholder="학원 이름, 과목을 검색해보세요" oninput="urOnSearch()">
@@ -9099,6 +9132,7 @@ function urToggleNotif(btn) {
             <button class="ur-view-btn" id="urViewMapBtn" onclick="urSetView('map')">지도</button>
           </div>
         </div>
+        <div class="ur-result-title" id="urResultTitle" style="display:none"></div>
       </div>
 
       <!-- ② 추천/일정 카드 (적응형 — 등록된 학원이 없으면 AI 추천, 있으면 오늘 일정) -->
