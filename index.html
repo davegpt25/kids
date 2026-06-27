@@ -9,7 +9,7 @@
 <script>
 // 배포할 때마다 BUILD 값을 올려주세요 — 이전 빌드를 캐시해둔 브라우저를 1회 강제 새로고침시켜 최신 버전을 받게 함
 (function () {
-  var BUILD = '2026-06-27.1';
+  var BUILD = '2026-06-27.2';
   var KEY = 'kr_build_version';
   var stored = null;
   try { stored = localStorage.getItem(KEY); } catch (e) {}
@@ -10131,10 +10131,10 @@ function urToggleNotif(btn) {
     <button class="ur-tab active" id="urTab0" onclick="userShowTab(0)">
       <div class="ur-tab-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <path d="M3 9.5L12 3l9 6.5"/><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9"/>
         </svg>
       </div>
-      <div class="ur-tab-label">학원 검색</div>
+      <div class="ur-tab-label">홈</div>
     </button>
     <button class="ur-tab" id="urTab1" onclick="userShowTab(1)">
       <div class="ur-tab-icon">
