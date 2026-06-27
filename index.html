@@ -1962,6 +1962,11 @@
 }
 .sim-card-tag.orange { background: #FFF7ED; color: var(--orange); }
 .sim-card-tag.pending { background: #FFF7ED; color: #C2410C; }
+.sim-report-btn {
+  margin-left: auto; padding: 2px 8px; border-radius: 100px; border: 1.5px solid #FEE2E2;
+  background: #fff; color: #DC2626; font-size: 10px; font-weight: 700; cursor: pointer;
+}
+.sim-auto-disclaimer { font-size: 10px; color: #B45309; margin-top: 5px; }
 .sim-card.sim-card-empty { background: var(--gray-50); border-style: dashed; }
 .sim-card-rank {
   width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
@@ -2533,6 +2538,14 @@
   display: inline-flex; align-items: center; gap: 2px;
 }
 .ur-fee-pending { font-size: 13px; font-weight: 600; color: #9CA3AF; }
+.ur-auto-disclaimer { font-size: 10.5px; color: #B45309; background: #FFFBEB; border-radius: 6px; padding: 4px 8px; margin-bottom: 8px; }
+.ur-report-btn {
+  padding: 7px 10px; border-radius: 100px; border: 1.5px solid #FEE2E2;
+  background: #fff; color: #DC2626; font-size: 12px; font-weight: 700;
+  cursor: pointer; flex-shrink: 0;
+}
+.ur-report-btn:hover { background: #FEF2F2; }
+.ur-data-attribution { font-size: 11px; color: #9CA3AF; text-align: center; padding: 10px 4px 4px; }
 .ur-academy-footer { display: flex; justify-content: space-between; align-items: center; }
 .ur-fee { font-size: 14px; font-weight: 700; color: var(--text-main); }
 .ur-fee small { font-size: 11px; font-weight: 400; color: #9CA3AF; }
@@ -6472,12 +6485,14 @@ function _renderSimCards() {
       '<div class="sim-card-body">' +
         '<div class="sim-card-name">' + _escHtml(ac.name) + '</div>' +
         '<div class="sim-card-meta">' + ratingHtml + ' &nbsp;·&nbsp; 🚶 ' + walkMin + '분 (' + distM + 'm)' + (ac.hasTimetable ? ('&nbsp;·&nbsp; 🕐 ' + timeStr) : '') + '</div>' +
-        '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">' + tag1 + tag2 + ttTag + '</div>' +
+        '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;align-items:center">' + tag1 + tag2 + ttTag +
+        '<button class="sim-report-btn" onclick="urReportAcademyPrompt(' + ac.id + ',event)">🚩 신고</button></div>' +
+        '<div class="sim-auto-disclaimer">공개 데이터 기반 자동 수집 정보 · 출처: 네이버 지도</div>' +
       '</div>';
     cardsEl.appendChild(card);
 
     _lastSimResult.push({
-      empty: false, name: ac.name, subj: subj, rating: ac.reviews > 0 ? ac.rating : null,
+      empty: false, id: ac.id, name: ac.name, subj: subj, rating: ac.reviews > 0 ? ac.rating : null,
       distStr: distM + 'm', walkMin: walkMin,
       timeStr: ac.hasTimetable ? timeStr : null, hasTimetable: !!ac.hasTimetable
     });
@@ -7761,6 +7776,7 @@ var KR_SYNC = {
     return UR_ACADEMIES.map(function(base) {
       var over = map[String(base.id)];
       if (!over) return base;
+      var reportPending = !!(over.report && !over.report.resolved);
       return Object.assign({}, base, {
         name:     over.name     || base.name,
         fee:      over.fee      != null ? Number(over.fee) : base.fee,
@@ -7769,10 +7785,15 @@ var KR_SYNC = {
         // 시간표 오버라이드 → times 배열 재생성 (원장이 직접 입력한 경우에만 존재)
         times:        over.timetable ? KR_SYNC._ttToTimes(over.timetable) : base.times,
         hasTimetable: over.timetable ? Object.keys(over.timetable).some(function(k){ return over.timetable[k]; }) : base.hasTimetable,
-        // 노출 설정: 검색 노출 꺼져 있으면 숨김
-        _hidden:  (over.visibility && over.visibility.search === false)
+        reportPending: reportPending,
+        // 노출 설정: 검색 노출 꺼져 있거나, 정보 신고가 접수돼 검토 대기 중이면 공개 목록에서 숨김
+        _hidden:  (over.visibility && over.visibility.search === false) || reportPending
       });
     }).filter(function(a) { return !a._hidden; });
+  },
+  // 학원 정보 신고 — 접수 즉시 getMergedAcademies()에서 자동 제외(숨김), 별도 검토 후 해제
+  reportAcademy: function(id, reason) {
+    this.set(id, { report: { reason: reason || '', reportedAt: Date.now(), resolved: false } });
   },
 
   // 시간표 객체 → times 배열 (예: "0_16" → "월 오후4시")
@@ -8248,6 +8269,7 @@ function urRenderAcademies() {
     var shuttleHtml = a.shuttle ? '<span class="ur-meta-item">🚌 셔틀</span>' : '';
     var ratingHtml = a.reviews > 0 ? ('⭐ ' + a.rating + ' (' + a.reviews + ')') : '🆕 신규 등록 학원';
     var feeHtml = a.fee != null ? ((a.fee/10000).toFixed(0) + '만원 <small>/월</small>') : '<span class="ur-fee-pending">수강료 미확인</span>';
+    var disclaimerHtml = a.verified ? '' : '<div class="ur-auto-disclaimer">공개 데이터 기반 자동 수집 정보 — 실제와 다를 수 있어요</div>';
     return '<div class="ur-academy-card' + (a.verified ? ' verified' : '') + '">'
       + (a.verified ? '<div class="ur-verified-bar"></div>' : '')
       + '<div class="ur-academy-top">'
@@ -8265,14 +8287,29 @@ function urRenderAcademies() {
       +   shuttleHtml
       + '</div>'
       + '<div class="ur-times">' + timeTags + '</div>'
+      + disclaimerHtml
       + '<div class="ur-academy-footer">'
       +   '<div class="ur-fee">' + feeHtml + '</div>'
-      +   '<button class="ur-add-btn' + (added ? ' added' : '') + '" onclick="urToggleSchedule(' + a.id + ',this)">'
-      +     (added ? '✓ 등록됨' : '+ 추가')
-      +   '</button>'
+      +   '<div style="display:flex;gap:6px">'
+      +     '<button class="ur-report-btn" onclick="urReportAcademyPrompt(' + a.id + ',event)" title="정보가 잘못됐나요?">🚩 신고</button>'
+      +     '<button class="ur-add-btn' + (added ? ' added' : '') + '" onclick="urToggleSchedule(' + a.id + ',this)">'
+      +       (added ? '✓ 등록됨' : '+ 추가')
+      +     '</button>'
+      +   '</div>'
       + '</div>'
       + '</div>';
-  }).join('');
+  }).join('') + '<div class="ur-data-attribution">학원 정보 출처: 네이버 지도 공개 정보 · 잘못된 정보는 🚩 신고로 알려주세요</div>';
+}
+// 학원 정보 신고 — 접수 즉시 공개 목록에서 숨기고(검토 대기), 신고 사유는 KR_SYNC에 기록
+function urReportAcademyPrompt(academyId, event) {
+  if (event) event.stopPropagation();
+  var reason = window.prompt('이 학원 정보에서 어떤 부분이 잘못됐나요? (예: 폐업함, 과목이 다름, 주소가 다름)');
+  if (reason === null) return; // 취소
+  KR_SYNC.reportAcademy(academyId, reason);
+  showToast('🚩 신고 접수했어요 — 확인 전까지 검색 결과에서 숨길게요');
+  if (document.getElementById('urAcademyList')) urRenderAcademies();
+  if (_urMap) urRenderMapMarkers();
+  if (document.getElementById('simCards') && document.getElementById('simCards').innerHTML) _renderSimCards();
 }
 function urToggleSchedule(academyId, btn) {
   var schedule = urGetSchedule();
