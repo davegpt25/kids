@@ -2055,7 +2055,6 @@
 .sim-confidence.low    { background: #F3F4F6; color: #6B7280; }
 .sim-confidence.locked {
   background: #F3F4F6; color: #9CA3AF;
-  filter: blur(4px); pointer-events: none; user-select: none;
 }
 
 /* ─── WTP: VACANCY ALERT ─── */
@@ -6405,7 +6404,8 @@ function _renderSimCards() {
     var locTxt = locEl ? locEl.textContent : '';
     var locStr = (locTxt && locTxt !== '클릭해서 위치를 불러오세요')
                   ? locTxt.split(' ').slice(0,3).join(' ') + ' · ' : '';
-    subEl.textContent = locStr + '반경 ' + radiusLabel + ' · ' + rawSubjects.length + '개 과목 조합';
+    var subjLabels = rawSubjects.map(function(s) { return (_SIM_POOLS[s] || _SIM_POOLS['default']).label; }).join('·');
+    subEl.textContent = locStr + '반경 ' + radiusLabel + ' · ' + subjLabels;
   }
 
   // Render academy cards — 현재 위치(GPS) 기준 실제 학원 데이터에서 과목별 최단거리 1곳을 매칭
