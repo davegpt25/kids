@@ -2228,14 +2228,6 @@
 }
 .adm-nav-badge.adm-badge-green { background: #10B981; }
 .adm-sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid #F1F5F9; }
-.adm-local-link {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 10px; border-radius: 10px; margin-bottom: 8px;
-  background: #F0FDF4; border: 1px solid #BBF7D0;
-  font-size: 11px; font-weight: 600; color: #16A34A;
-  text-decoration: none; transition: background 0.15s;
-}
-.adm-local-link:hover { background: #DCFCE7; }
 .adm-profile {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 10px; border-radius: 10px; background: #F8FAFC;
@@ -8795,6 +8787,8 @@ function urEnterResultMode(subjLabel) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
+  var resultsArea = document.getElementById('urResultsArea');
+  if (resultsArea) resultsArea.style.display = 'block';
   var backBtn = document.getElementById('urResultBackBtn');
   var titleEl = document.getElementById('urResultTitle');
   if (backBtn) backBtn.style.display = 'flex';
@@ -8806,6 +8800,8 @@ function urExitResultMode() {
     var el = document.getElementById(id);
     if (el) el.style.display = '';
   });
+  var resultsArea = document.getElementById('urResultsArea');
+  if (resultsArea) resultsArea.style.display = 'none';
   var backBtn = document.getElementById('urResultBackBtn');
   var titleEl = document.getElementById('urResultTitle');
   if (backBtn) backBtn.style.display = 'none';
@@ -9912,11 +9908,7 @@ function urToggleNotif(btn) {
         <!-- JS 렌더링 -->
       </div>
 
-      <!-- ③ 과목 아이콘 그리드 -->
-      <div class="ur-subject-grid" id="urSubjectGrid">
-        <!-- JS 렌더링 -->
-      </div>
-
+      <!-- ① 연령 메뉴바 — 과목 그리드보다 위에 배치 -->
       <div class="ur-filter-row" id="urAgeFilterRow">
         <div class="ur-age-chip active" data-age="all" onclick="urSetAgeFilter(this)">연령 전체</div>
         <div class="ur-age-chip" data-age="toddler" onclick="urSetAgeFilter(this)">유아</div>
@@ -9925,6 +9917,13 @@ function urToggleNotif(btn) {
         <div class="ur-age-chip" data-age="high" onclick="urSetAgeFilter(this)">고등</div>
       </div>
 
+      <!-- ③ 과목 아이콘 그리드 -->
+      <div class="ur-subject-grid" id="urSubjectGrid">
+        <!-- JS 렌더링 -->
+      </div>
+
+      <!-- 결과 화면(목록/지도) — 홈에서는 숨김, 과목 선택 시(결과모드)에만 표시 -->
+      <div id="urResultsArea" style="display:none">
       <!-- 목록 뷰 -->
       <div id="urListView">
         <div style="display:flex;gap:6px;padding:10px 16px 4px;background:#fff;border-bottom:1px solid #F0F0F0;">
@@ -9968,6 +9967,7 @@ function urToggleNotif(btn) {
           <div class="ur-map-cards" id="urMapCards"><!-- JS 렌더링 --></div>
         </div>
       </div>
+      </div><!-- /urResultsArea -->
     </div>
 
     <!-- ── 스케줄 탭 ── -->
@@ -10215,9 +10215,6 @@ function urToggleNotif(btn) {
     </div>
 
     <div class="adm-sidebar-footer">
-      <a class="adm-local-link" href="http://localhost:63523/" target="_blank" rel="noopener">
-        🖥️ 로컬 컴패니언 열기
-      </a>
       <div class="adm-profile">
         <div class="adm-avatar">D</div>
         <div>
