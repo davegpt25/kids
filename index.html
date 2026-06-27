@@ -8060,8 +8060,8 @@ function urSetFilter(el) {
   Array.prototype.forEach.call(document.querySelectorAll('.ur-subject-item'), function(c) {
     c.classList.toggle('active', c === el);
   });
-  if (_urView === 'list') urRenderAcademies();
-  else urRenderMapMarkers();
+  // 과목 아이콘을 탭하면 지도 기반 결과 화면으로 전환 (참조 UI와 동일한 흐름)
+  urSetView('map');
 }
 
 // ── ③ 과목 아이콘 그리드 — 새 과목이 생기면 이 배열만 추가하면 됨 ──
