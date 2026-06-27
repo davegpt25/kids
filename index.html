@@ -2048,6 +2048,23 @@
 }
 .sim-save-btn:hover { background: var(--primary-light); }
 .sim-save-btn.saved { background: var(--primary-light); border-color: var(--primary-light); color: var(--primary); }
+.sim-viewall-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 11px; border-radius: 12px; margin-top: 14px;
+  background: #F8FAFC; border: 1.5px solid #E2E8F0;
+  color: #475569; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.sim-viewall-btn:hover { background: #F1F5F9; }
+.sim-all-list { margin-top: 10px; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px; background: #fff; }
+.sim-all-count { font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px; }
+.sim-all-empty { font-size: 12px; color: #9CA3AF; text-align: center; padding: 10px; }
+.sim-all-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid #F1F5F9; }
+.sim-all-item:first-of-type { border-top: none; }
+.sim-all-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.sim-all-body { flex: 1; min-width: 0; }
+.sim-all-name { font-size: 12.5px; font-weight: 700; color: #1A1A2E; }
+.sim-all-subj { font-size: 10px; font-weight: 600; color: #9CA3AF; }
+.sim-all-meta { font-size: 11px; color: #6B7280; margin-top: 2px; }
 
 /* ─── WTP: CONFIDENCE SCORE ─── */
 .sim-confidence {
@@ -2474,6 +2491,70 @@
   color: #6B7280; background: #fff; cursor: pointer; transition: all .15s;
 }
 .ur-filter-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* ① 홈 헤더 — 위치 + 검색 */
+.ur-home-header {
+  padding: 14px 16px 10px; background: #fff;
+  border-bottom: 1px solid #F0F0F0; position: sticky; top: 0; z-index: 10;
+}
+.ur-home-location {
+  display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px;
+  font-size: 15px; font-weight: 800; color: var(--text-main); cursor: pointer;
+}
+.ur-home-location-pin { font-size: 13px; }
+.ur-home-location-caret { font-size: 11px; color: #9CA3AF; margin-left: 1px; }
+.ur-home-search-row { display: flex; gap: 8px; align-items: center; }
+.ur-home-search-wrap {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  background: #F4F4F5; border-radius: 14px; padding: 12px 16px;
+}
+.ur-home-search-wrap input {
+  flex: 1; border: none; background: none; font-size: 14px; outline: none;
+  font-family: 'Pretendard', sans-serif; color: var(--text-main);
+}
+.ur-home-search-wrap input::placeholder { color: #9CA3AF; }
+
+/* ② 추천/일정 프로모 카드 */
+.ur-home-promo {
+  margin: 12px 16px 0; border-radius: 16px; padding: 16px 18px;
+  cursor: pointer; transition: transform .1s;
+}
+.ur-home-promo:active { transform: scale(0.99); }
+.ur-home-promo.is-ai {
+  background: linear-gradient(135deg,#FFF4E8,#FFE8D6);
+  border: 1.5px solid #FFD9B3;
+}
+.ur-home-promo.is-today {
+  background: #fff; border: 1.5px solid #E5E7EB;
+}
+.ur-promo-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.ur-promo-title { font-size: 14px; font-weight: 800; color: var(--text-main); display:flex; align-items:center; gap: 6px; }
+.ur-promo-cta { font-size: 12px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.ur-promo-sub { font-size: 12px; color: #6B7280; line-height: 1.5; }
+.ur-promo-today-list { display: flex; gap: 8px; overflow-x: auto; margin-top: 6px; }
+.ur-promo-today-item {
+  flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+  background: #F8FAFC; border-radius: 10px; padding: 7px 11px; font-size: 12px; font-weight: 700;
+}
+.ur-promo-today-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ③ 과목 아이콘 그리드 */
+.ur-subject-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 4px;
+  padding: 16px 16px 6px;
+}
+.ur-subject-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; background: none; border: none; padding: 0; font-family: inherit;
+}
+.ur-subject-icon {
+  width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center;
+  justify-content: center; font-size: 22px; background: #F4F4F5; transition: all .15s;
+}
+.ur-subject-item.active .ur-subject-icon { background: var(--primary); }
+.ur-subject-item.active .ur-subject-label { color: var(--primary); font-weight: 800; }
+.ur-subject-label { font-size: 11.5px; font-weight: 600; color: #4B5563; }
+
 .ur-age-chip {
   flex-shrink: 0; padding: 5px 13px; border-radius: 100px;
   border: 1.5px solid #E5E7EB; font-size: 12px; font-weight: 600;
@@ -4252,6 +4333,9 @@
           <div class="sim-lock-badge">🔒 나머지 결과를 이메일로 확인하세요</div>
         </div>
       </div>
+
+      <button class="sim-viewall-btn" id="simViewAllBtn" onclick="urToggleSimAllAcademies()">🔍 반경 내 전체 학원 보기</button>
+      <div class="sim-all-list" id="simAllList" style="display:none"></div>
 
       <button class="sim-save-btn" id="simSaveBtn" onclick="saveCurrentSchedule()">
         💾 이 조합 저장하기
@@ -6352,6 +6436,7 @@ function _findRealAcademyForSubject(subj, lat, lng, usedIds) {
 }
 // 화면에 실제로 표시된 카드 — 이메일 발송 시 동일 데이터를 재사용하기 위해 보관
 var _lastSimResult = [];
+var _lastSimContext = {}; // { lat, lng, radius, radiusLabel } — "반경 내 전체 학원 보기" 토글에서 재사용
 
 function _renderSimCards() {
   var radius      = typeof _demoRadius     !== 'undefined' ? _demoRadius     : 1000;
@@ -6367,6 +6452,13 @@ function _renderSimCards() {
   var TIME_STARTS = ['오전 9:00','오전 10:00','오전 11:00','오후 4:00','오후 5:00','오후 6:00','오후 7:00'];
   var TIME_ENDS   = ['오전 10:30','오전 11:30','오후 12:30','오후 5:30','오후 6:30','오후 7:30','오후 8:30'];
   var radiusLabel = radius >= 1000 ? (radius/1000)+'km' : radius+'m';
+
+  // "반경 내 전체 학원 보기"에서 재사용 — 이 데모 실행의 위치/반경 컨텍스트 보관
+  _lastSimContext = { lat: _demoGPSLat, lng: _demoGPSLng, radius: radius, radiusLabel: radiusLabel };
+  var simAllList = document.getElementById('simAllList');
+  if (simAllList) simAllList.style.display = 'none';
+  var simViewAllBtn = document.getElementById('simViewAllBtn');
+  if (simViewAllBtn) simViewAllBtn.textContent = '🔍 반경 내 전체 학원 보기';
   // Convert slot index to grid row 0-3
   function slotToRow(slot) { return Math.min(slot >= 3 ? slot - 3 : slot, 3); }
 
@@ -6529,6 +6621,55 @@ function _renderSimCards() {
       if (cell) cell.innerHTML = '<div class="sim-slot c' + i + '">' + pool.icon + '</div>';
     });
   });
+}
+
+// ── "반경 내 전체 학원 보기" — AI가 고른 1곳씩 말고, 반경 안의 모든 실제 학원(8개 과목 전체)을 보여줌 ──
+function urToggleSimAllAcademies() {
+  var listEl = document.getElementById('simAllList');
+  var btnEl  = document.getElementById('simViewAllBtn');
+  if (!listEl || !btnEl) return;
+  var opening = listEl.style.display === 'none';
+  if (opening) {
+    _renderSimAllAcademies();
+    listEl.style.display = 'block';
+    btnEl.textContent = '🔼 접기';
+  } else {
+    listEl.style.display = 'none';
+    btnEl.textContent = '🔍 반경 내 전체 학원 보기';
+  }
+}
+function _renderSimAllAcademies() {
+  var listEl = document.getElementById('simAllList');
+  if (!listEl) return;
+  var ctx = _lastSimContext;
+  var all = KR_SYNC.getMergedAcademies().map(function(a) {
+    return Object.assign({}, a, { _liveDistKm: _haversineKm(ctx.lat, ctx.lng, a.lat, a.lng) });
+  }).filter(function(a) {
+    return a._liveDistKm * 1000 <= ctx.radius;
+  }).sort(function(a, b) { return a._liveDistKm - b._liveDistKm; });
+
+  if (!all.length) {
+    listEl.innerHTML = '<div class="sim-all-empty">반경 ' + ctx.radiusLabel + ' 안엔 등록된 실제 학원이 없어요</div>';
+    return;
+  }
+
+  listEl.innerHTML = '<div class="sim-all-count">반경 ' + ctx.radiusLabel + ' 안의 실제 학원 ' + all.length + '곳</div>'
+    + all.map(function(a) {
+      var distM = Math.round(a._liveDistKm * 1000);
+      var distLabel = distM >= 1000 ? (distM/1000).toFixed(1) + 'km' : distM + 'm';
+      var ratingHtml = a.reviews > 0 ? ('⭐ ' + a.rating) : '🆕 신규 등록';
+      var ttHtml = a.hasTimetable ? '' : ' · ⏳ 시간표 확인 필요';
+      var verifiedHtml = a.verified ? ' · <span style="color:#16A34A">✓ 원장 인증</span>' : '';
+      return '<div class="sim-all-item">'
+        + '<span class="sim-all-dot" style="background:' + a.color + '"></span>'
+        + '<div class="sim-all-body">'
+        +   '<div class="sim-all-name">' + _escHtml(a.name) + ' <span class="sim-all-subj">' + a.label + '</span></div>'
+        +   '<div class="sim-all-meta">' + distLabel + ' · ' + ratingHtml + ttHtml + verifiedHtml + '</div>'
+        + '</div>'
+        + '<button class="sim-report-btn" onclick="urReportAcademyPrompt(' + a.id + ',event)">🚩</button>'
+        + '</div>';
+    }).join('')
+    + '<div class="sim-auto-disclaimer">공개 데이터 기반 자동 수집 정보 · 출처: 네이버 지도</div>';
 }
 function toggleSubject(el) {
   var subj = el.dataset.subj;
@@ -7903,7 +8044,12 @@ function userShowTab(idx) {
   }
   var content = document.getElementById('urContent');
   if (content) content.scrollTop = 0;
-  if (idx === 0) urRenderAcademies();
+  if (idx === 0) {
+    urRenderAcademies();
+    urRenderSubjectGrid();
+    urRenderHomePromo();
+    urReverseGeocode(_urUserLat, _urUserLng);
+  }
   if (idx === 1) urRenderSchedule();
   if (idx === 2) urRenderMyInfo();
 }
@@ -7911,11 +8057,78 @@ function userShowTab(idx) {
 // ── 학원 검색 ──
 function urSetFilter(el) {
   _urFilter = el.dataset.subj;
-  Array.prototype.forEach.call(document.querySelectorAll('.ur-filter-chip'), function(c) {
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-subject-item'), function(c) {
     c.classList.toggle('active', c === el);
   });
   if (_urView === 'list') urRenderAcademies();
   else urRenderMapMarkers();
+}
+
+// ── ③ 과목 아이콘 그리드 — 새 과목이 생기면 이 배열만 추가하면 됨 ──
+var UR_SUBJECT_GRID = [
+  { subj:'math',      icon:'📐', label:'수학' },
+  { subj:'english',   icon:'🔤', label:'영어' },
+  { subj:'piano',     icon:'🎹', label:'피아노' },
+  { subj:'art',       icon:'🎨', label:'미술' },
+  { subj:'taekwondo', icon:'🥋', label:'태권도' },
+  { subj:'science',   icon:'🔬', label:'과학' },
+  { subj:'coding',    icon:'💻', label:'코딩' },
+  { subj:'sports',    icon:'⚽', label:'체육' }
+];
+function urRenderSubjectGrid() {
+  var gridEl = document.getElementById('urSubjectGrid');
+  if (!gridEl) return;
+  var html = '<button class="ur-subject-item' + (_urFilter === 'all' ? ' active' : '') + '" data-subj="all" onclick="urSetFilter(this)">'
+    + '<div class="ur-subject-icon">🏠</div><div class="ur-subject-label">전체</div></button>';
+  html += UR_SUBJECT_GRID.map(function(s) {
+    var active = _urFilter === s.subj;
+    return '<button class="ur-subject-item' + (active ? ' active' : '') + '" data-subj="' + s.subj + '" onclick="urSetFilter(this)">'
+      + '<div class="ur-subject-icon">' + s.icon + '</div><div class="ur-subject-label">' + s.label + '</div></button>';
+  }).join('');
+  gridEl.innerHTML = html;
+}
+
+// ── ② 추천/일정 프로모 카드 — 등록된 학원이 없으면 AI 추천 유도, 있으면 오늘 일정 미리보기 ──
+function urRenderHomePromo() {
+  var el = document.getElementById('urHomePromo');
+  if (!el) return;
+  var schedule = urGetSchedule();
+
+  if (!schedule.length) {
+    el.className = 'ur-home-promo is-ai';
+    el.innerHTML = '<div class="ur-promo-top"><div class="ur-promo-title">🧠 AI 추천 받기</div><div class="ur-promo-cta">받기 →</div></div>'
+      + '<div class="ur-promo-sub">반경·과목만 알려주시면 시간 안 겹치는 학원 조합을 3초 만에 찾아드려요</div>';
+    return;
+  }
+
+  var dayNames = ['일','월','화','수','목','금','토'];
+  var today = new Date().getDay();
+  var timeMap = {
+    '월화수목금 오후4시': [1,2,3,4,5], '월수금 오후4시': [1,3,5], '월수금 오후5시': [1,3,5],
+    '화목 오후4시': [2,4], '화목 오후5시': [2,4], '주말반': [6,0], '주말오전': [6,0]
+  };
+  var todayItems = schedule.filter(function(s) {
+    return (s.times || []).some(function(t) { return (timeMap[t] || []).indexOf(today) >= 0; });
+  });
+
+  el.className = 'ur-home-promo is-today';
+  var header = '<div class="ur-promo-top"><div class="ur-promo-title">📅 오늘(' + dayNames[today] + ') 일정</div><div class="ur-promo-cta">전체 보기 →</div></div>';
+  if (!todayItems.length) {
+    el.innerHTML = header + '<div class="ur-promo-sub">오늘은 등록된 학원 일정이 없어요</div>';
+    return;
+  }
+  el.innerHTML = header + '<div class="ur-promo-today-list">' + todayItems.map(function(s) {
+    return '<div class="ur-promo-today-item"><span class="ur-promo-today-dot" style="background:' + (s.color || '#F97316') + '"></span>' + _escHtml(s.name) + '</div>';
+  }).join('') + '</div>';
+}
+function urHandleHomePromoClick() {
+  if (!urGetSchedule().length) { openDemoModal(); }
+  else { userShowTab(1); }
+}
+function urOpenLocationPicker() {
+  urSetView('map');
+  var input = document.getElementById('urAddrInput');
+  if (input) input.focus();
 }
 function urSetSort(el) {
   _urSort = el.dataset.sort;
@@ -8168,16 +8381,28 @@ function urReverseGeocode(lat, lng) {
     orders: [naver.maps.Service.OrderType.ROAD_ADDR, naver.maps.Service.OrderType.ADDR]
   }, function(status, response) {
     var badge = document.getElementById('urAddrBadge');
-    if (!badge) return;
-    if (status !== naver.maps.Service.Status.OK) { badge.style.display = 'none'; return; }
+    var homeLocEl = document.getElementById('urHomeLocationText');
+    if (status !== naver.maps.Service.Status.OK) {
+      if (badge) badge.style.display = 'none';
+      return;
+    }
     var addr = '';
     try {
       addr = response.v2.address.roadAddress || response.v2.address.jibunAddress || '';
       // 시/도 제거하고 구/동 부터만 표시
       addr = addr.replace(/^(서울특별시|서울시|경기도|부산광역시)\s*/, '');
     } catch(e) { addr = ''; }
-    if (addr) { badge.textContent = '📍 ' + addr; badge.style.display = 'block'; }
-    else { badge.style.display = 'none'; }
+    if (badge) {
+      if (addr) { badge.textContent = '📍 ' + addr; badge.style.display = 'block'; }
+      else { badge.style.display = 'none'; }
+    }
+    if (homeLocEl) {
+      // 동/읍/면 단위만 짧게 표시 (예: "서초구 서초동" → "서초동")
+      var shortAddr = addr;
+      var m = addr.match(/([가-힣0-9]+(동|읍|면))(?!\S)/);
+      if (m) shortAddr = m[1];
+      homeLocEl.textContent = shortAddr || addr || '위치 설정';
+    }
   });
 }
 
@@ -8310,6 +8535,8 @@ function urReportAcademyPrompt(academyId, event) {
   if (document.getElementById('urAcademyList')) urRenderAcademies();
   if (_urMap) urRenderMapMarkers();
   if (document.getElementById('simCards') && document.getElementById('simCards').innerHTML) _renderSimCards();
+  var simAllList = document.getElementById('simAllList');
+  if (simAllList && simAllList.style.display !== 'none') _renderSimAllAcademies();
 }
 function urToggleSchedule(academyId, btn) {
   var schedule = urGetSchedule();
@@ -8328,6 +8555,7 @@ function urToggleSchedule(academyId, btn) {
     showToast(_escHtml(a.name) + ' 스케줄 추가! 📅');
   }
   urSaveSchedule(schedule);
+  urRenderHomePromo();
 }
 
 // ── 스케줄 탭 ──
@@ -8481,6 +8709,7 @@ function urRemoveSchedule(academyId) {
   urSaveSchedule(schedule.filter(function(s) { return s.academyId !== academyId; }));
   urRenderSchedule();
   urRenderAcademies();
+  urRenderHomePromo();
   showToast('스케줄에서 제거했어요');
 }
 
@@ -8851,37 +9080,43 @@ function urToggleNotif(btn) {
   <!-- 콘텐츠 영역 -->
   <div class="ur-content" id="urContent">
 
-    <!-- ── 학원 검색 탭 ── -->
+    <!-- ── 홈(학원 검색) 탭 ── -->
     <div class="ur-page active" id="urPageSearch">
-      <!-- 검색바 + 뷰 토글 (목록/지도 공통) -->
-      <div class="ur-search-bar">
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-          <div class="ur-search-wrap" style="flex:1;margin-bottom:0">
+      <!-- ① 위치 + 검색 헤더 -->
+      <div class="ur-home-header">
+        <div class="ur-home-location" id="urHomeLocationBtn" onclick="urOpenLocationPicker()">
+          <span class="ur-home-location-pin">📍</span>
+          <span id="urHomeLocationText">위치 불러오는 중…</span>
+          <span class="ur-home-location-caret">⌄</span>
+        </div>
+        <div class="ur-home-search-row">
+          <div class="ur-home-search-wrap">
             <span>🔍</span>
-            <input type="text" id="urSearchInput" placeholder="학원 이름, 과목 검색..." oninput="urOnSearch()">
+            <input type="text" id="urSearchInput" placeholder="학원 이름, 과목을 검색해보세요" oninput="urOnSearch()">
           </div>
           <div class="ur-view-toggle">
             <button class="ur-view-btn active" id="urViewListBtn" onclick="urSetView('list')">목록</button>
             <button class="ur-view-btn" id="urViewMapBtn" onclick="urSetView('map')">지도</button>
           </div>
         </div>
-        <div class="ur-filter-row" id="urFilterRow">
-          <div class="ur-filter-chip active" data-subj="all" onclick="urSetFilter(this)">전체</div>
-          <div class="ur-filter-chip" data-subj="math" onclick="urSetFilter(this)">📐 수학</div>
-          <div class="ur-filter-chip" data-subj="english" onclick="urSetFilter(this)">🔤 영어</div>
-          <div class="ur-filter-chip" data-subj="piano" onclick="urSetFilter(this)">🎹 피아노</div>
-          <div class="ur-filter-chip" data-subj="art" onclick="urSetFilter(this)">🎨 미술</div>
-          <div class="ur-filter-chip" data-subj="taekwondo" onclick="urSetFilter(this)">🥋 태권도</div>
-          <div class="ur-filter-chip" data-subj="coding" onclick="urSetFilter(this)">💻 코딩</div>
-          <div class="ur-filter-chip" data-subj="sports" onclick="urSetFilter(this)">⚽ 체육</div>
-        </div>
-        <div class="ur-filter-row" id="urAgeFilterRow">
-          <div class="ur-age-chip active" data-age="all" onclick="urSetAgeFilter(this)">연령 전체</div>
-          <div class="ur-age-chip" data-age="toddler" onclick="urSetAgeFilter(this)">유아</div>
-          <div class="ur-age-chip" data-age="elementary" onclick="urSetAgeFilter(this)">초등</div>
-          <div class="ur-age-chip" data-age="middle" onclick="urSetAgeFilter(this)">중등</div>
-          <div class="ur-age-chip" data-age="high" onclick="urSetAgeFilter(this)">고등</div>
-        </div>
+      </div>
+
+      <!-- ② 추천/일정 카드 (적응형 — 등록된 학원이 없으면 AI 추천, 있으면 오늘 일정) -->
+      <div class="ur-home-promo" id="urHomePromo" onclick="urHandleHomePromoClick()">
+        <!-- JS 렌더링 -->
+      </div>
+
+      <!-- ③ 과목 아이콘 그리드 -->
+      <div class="ur-subject-grid" id="urSubjectGrid">
+        <!-- JS 렌더링 -->
+      </div>
+
+      <div class="ur-filter-row" id="urAgeFilterRow">
+        <div class="ur-age-chip active" data-age="all" onclick="urSetAgeFilter(this)">연령 전체</div>
+        <div class="ur-age-chip" data-age="toddler" onclick="urSetAgeFilter(this)">유아</div>
+        <div class="ur-age-chip" data-age="elementary" onclick="urSetAgeFilter(this)">초등</div>
+        <div class="ur-age-chip" data-age="middle" onclick="urSetAgeFilter(this)">중등</div>
+        <div class="ur-age-chip" data-age="high" onclick="urSetAgeFilter(this)">고등</div>
       </div>
 
       <!-- 목록 뷰 -->
