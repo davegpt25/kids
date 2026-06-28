@@ -2589,12 +2589,24 @@
 .ur-subject-item.active .ur-subject-label { color: var(--text-main); font-weight: 800; }
 .ur-subject-label { font-size: 11.5px; font-weight: 600; color: #6B7280; }
 
-.ur-age-chip {
-  flex-shrink: 0; padding: 5px 13px; border-radius: 100px;
-  border: 1.5px solid #E5E7EB; font-size: 12px; font-weight: 600;
-  color: #6B7280; background: #fff; cursor: pointer; transition: all .15s;
+.ur-age-filter { position: relative; padding: 10px 16px 4px; }
+.ur-age-trigger {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1.5px solid #E5E7EB; background: #fff; color: #374151;
+  font-size: 12px; font-weight: 700; border-radius: 100px; padding: 6px 13px;
+  cursor: pointer; font-family: inherit;
 }
-.ur-age-chip.active { background: #111; border-color: #111; color: #fff; }
+.ur-age-trigger-caret { font-size: 10px; color: #9CA3AF; }
+.ur-age-menu {
+  position: absolute; top: 100%; left: 16px; margin-top: 4px;
+  background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 6px; z-index: 20; min-width: 120px;
+}
+.ur-age-menu-item {
+  padding: 9px 12px; font-size: 13px; font-weight: 600; color: #374151;
+  border-radius: 8px; cursor: pointer;
+}
+.ur-age-menu-item.active { background: #F4F4F5; color: #111; font-weight: 800; }
 .ur-sort-row {
   display: flex; gap: 6px; padding: 10px 16px 0; background: #fff;
 }
@@ -9354,14 +9366,28 @@ function urGetFiltered() {
 function urGetFilteredIgnoringRadius() {
   return KR_SYNC.getMergedAcademies().filter(_urMatchesCommonFilters);
 }
+function urToggleAgeMenu() {
+  var menu = document.getElementById('urAgeMenu');
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
 function urSetAgeFilter(el) {
   _urAgeFilter = el.dataset.age;
-  Array.prototype.forEach.call(document.querySelectorAll('.ur-age-chip'), function(c) {
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-age-menu-item'), function(c) {
     c.classList.toggle('active', c === el);
   });
+  var label = document.getElementById('urAgeTriggerLabel');
+  if (label) label.textContent = el.dataset.label;
+  urToggleAgeMenu(); // 선택하면 메뉴 닫기
   if (_urView === 'list') urRenderAcademies();
   else urRenderMapMarkers();
 }
+// 드롭다운 바깥을 탭하면 닫히도록 — 메뉴/트리거 자체를 누른 경우는 onclick에서 직접 처리하므로 제외
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('urAgeMenu');
+  if (!menu || menu.style.display === 'none') return;
+  if (e.target.closest('.ur-age-filter')) return;
+  menu.style.display = 'none';
+});
 // 도로명주소에서 "시 + 구(+동/읍/면, 있으면)"만 짧게 추출 — 학원 addr엔 지번/동 정보가 없는 경우가 많아 구까지만 보장
 function _urShortRegion(addr) {
   if (!addr) return '';
@@ -10006,12 +10032,19 @@ function urToggleNotif(btn) {
       </div>
 
       <!-- ① 연령 메뉴바 — 과목 그리드보다 위에 배치 -->
-      <div class="ur-filter-row" id="urAgeFilterRow">
-        <div class="ur-age-chip active" data-age="all" onclick="urSetAgeFilter(this)">연령 전체</div>
-        <div class="ur-age-chip" data-age="toddler" onclick="urSetAgeFilter(this)">유아</div>
-        <div class="ur-age-chip" data-age="elementary" onclick="urSetAgeFilter(this)">초등</div>
-        <div class="ur-age-chip" data-age="middle" onclick="urSetAgeFilter(this)">중등</div>
-        <div class="ur-age-chip" data-age="high" onclick="urSetAgeFilter(this)">고등</div>
+      <!-- 연령 필터 — 칩 5개를 한 줄로 펼치던 것을 드롭다운 1개로 축소 (옵션 3 채택) -->
+      <div class="ur-age-filter" id="urAgeFilterRow">
+        <button class="ur-age-trigger" id="urAgeTrigger" onclick="urToggleAgeMenu()">
+          <span id="urAgeTriggerLabel">연령 전체</span>
+          <span class="ur-age-trigger-caret">⌄</span>
+        </button>
+        <div class="ur-age-menu" id="urAgeMenu" style="display:none">
+          <div class="ur-age-menu-item active" data-age="all" data-label="연령 전체" onclick="urSetAgeFilter(this)">전체</div>
+          <div class="ur-age-menu-item" data-age="toddler" data-label="유아" onclick="urSetAgeFilter(this)">유아</div>
+          <div class="ur-age-menu-item" data-age="elementary" data-label="초등" onclick="urSetAgeFilter(this)">초등</div>
+          <div class="ur-age-menu-item" data-age="middle" data-label="중등" onclick="urSetAgeFilter(this)">중등</div>
+          <div class="ur-age-menu-item" data-age="high" data-label="고등" onclick="urSetAgeFilter(this)">고등</div>
+        </div>
       </div>
 
       <!-- ③ 과목 아이콘 그리드 -->
