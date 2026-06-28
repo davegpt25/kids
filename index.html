@@ -3033,7 +3033,11 @@
    목록/지도를 탭으로 나누지 않고 지도를 항상 깔아두고, 그 위에 끌어올리고 내릴 수 있는
    학원 목록 시트를 얹는다. 시트를 올리면 목록을, 내리면 지도 핀을 보게 됨. */
 .ur-map-sheet-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; }
-#urMapEl { position: absolute; inset: 0; z-index: 1; }
+/* width/height:100% (절대 위치 inset:0이 아닌)로 둔다 — 네이버 지도 SDK가 컨테이너에
+   내부적으로 inline position을 다시 설정하면서 absolute+inset:0 기반 크기가 깨지고
+   height가 0으로 무너지는 문제가 있었음. 일반 블록으로 두면 부모(.ur-map-sheet-wrap,
+   flex로 정해진 높이)의 퍼센트 높이를 안전하게 그대로 물려받는다. */
+#urMapEl { width: 100%; height: 100%; position: relative; z-index: 1; }
 /* Leaflet popup 커스텀 */
 .ur-map-popup { font-family: 'Pretendard', sans-serif; min-width: 160px; }
 .ur-map-popup-name { font-size: 13px; font-weight: 800; color: #1C1C1C; margin-bottom: 4px; }
@@ -9013,21 +9017,31 @@ function urOnSearch() {
 function urFilterAcademies() { urOnSearch(); }
 
 // ── 지도(핀)와 목록(바텀시트)을 동시에 다시 그림 — 탭으로 분리하지 않으므로 항상 같이 갱신 ──
-// 지도를 처음 만들 때는 컨테이너가 display:none → flex로 막 바뀐 직후라 레이아웃이
-// 아직 자리잡지 않았을 수 있어(크기 0으로 초기화되면 타일이 영영 안 뜸), 데모 체험
-// 플로우(openMapStep)와 동일하게 약간의 지연을 줘서 flex 레이아웃이 자리잡은 뒤에 생성한다.
-// 이미 만들어진 지도를 갱신할 때는(_urMap 존재) 지연 없이 바로 갱신.
 function urRenderResults() {
   urRenderAcademies();
   if (document.getElementById('urSheet').style.height === '') urSetSheetState('half');
-  if (_urMap) { urInitMap(); } else { setTimeout(urInitMap, 200); }
+  urInitMap();
 }
 
 // ── 네이버 지도 초기화 ──
+// 컨테이너가 display:none → flex로 막 바뀐 직후라 레이아웃이 아직 자리잡지 않아
+// 크기가 0일 수 있다 — 그 상태로 naver.maps.Map을 만들면 인증/스타일 로딩까지는
+// 끝나도(네트워크 200) 타일을 그릴 영역이 없어 영영 안 뜬다. 크기가 실제로 잡힐
+// 때까지 짧게 재시도하고, 생성 직후에도 resize 이벤트를 한 번 더 강제로 쏴서
+// 컨테이너 크기를 다시 인식시킨다.
+var _urMapInitRetries = 0;
 function urInitMap() {
   if (!window.naver || !naver.maps) return;
   var el = document.getElementById('urMapEl');
   if (!el) return;
+  if (!_urMap && (!el.offsetWidth || !el.offsetHeight)) {
+    if (_urMapInitRetries < 20) { // 최대 약 1초(50ms × 20) 재시도
+      _urMapInitRetries++;
+      setTimeout(urInitMap, 50);
+      return;
+    }
+  }
+  _urMapInitRetries = 0;
   if (!_urMap) {
     _urMap = new naver.maps.Map('urMapEl', {
       center: new naver.maps.LatLng(_urUserLat, _urUserLng),
@@ -9053,6 +9067,11 @@ function urInitMap() {
       backgroundColor: 'transparent',
       pixelOffset: new naver.maps.Point(0, -8)
     });
+    // 생성 시점에 잡힌 크기가 그새 또 바뀌었을 가능성에 대비한 안전장치
+    setTimeout(function() {
+      naver.maps.Event.trigger(_urMap, 'resize');
+      _urMap.setCenter(_urMap.getCenter());
+    }, 150);
   }
   urUpdateUserMarker();
   urUpdateCircle();
