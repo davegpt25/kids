@@ -2443,6 +2443,8 @@
 }
 .ur-content { flex: 1; overflow-y: auto; overflow-x: hidden; }
 .ur-page { display: none; padding-bottom: 80px; min-height: calc(100vh - 116px); }
+/* 홈 탭은 카드들 사이로 회색 캔버스가 비치지 않도록 흰 배경으로 통일 (연령칩/과목그리드 영역 이질감 제거) */
+#urPageSearch { background: #fff; }
 .ur-page.active { display: block; }
 .ur-tabs {
   display: flex; align-items: stretch;
@@ -2458,9 +2460,8 @@
 .ur-tab.active .ur-tab-icon svg { stroke: #111; stroke-width: 2.5; }
 .ur-tab-icon {
   font-size: 20px; line-height: 1; display:flex; align-items:center; justify-content:center;
-  width: 36px; height: 28px; border-radius: 12px; transition: background .15s;
+  width: 36px; height: 28px;
 }
-.ur-tab.active .ur-tab-icon { background: rgba(17,17,17,0.08); }
 .ur-tab-icon svg { stroke: #9CA3AF; transition: stroke .15s; }
 .ur-tab-label { font-size: 11px; font-weight: 600; }
 /* 학원 검색 */
@@ -2580,7 +2581,7 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .ur-subject-item:active .ur-subject-icon { transform: scale(0.94); }
-.ur-subject-item.active .ur-subject-icon { background: rgba(17,17,17,0.08); box-shadow: 0 4px 10px rgba(0,0,0,0.16); }
+.ur-subject-item.active .ur-subject-icon { box-shadow: 0 4px 10px rgba(0,0,0,0.16); }
 .ur-subject-item.active .ur-subject-label { color: var(--text-main); font-weight: 800; }
 .ur-subject-label { font-size: 11.5px; font-weight: 600; color: #6B7280; }
 
