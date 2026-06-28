@@ -2429,7 +2429,18 @@
 /* ═══════════════════════════════════════════
    학부모 앱 뷰 (USER DASHBOARD)
 ════════════════════════════════════════════ */
-#userRoot { font-family: 'Pretendard', sans-serif; }
+#userRoot { font-family: 'Pretendard', sans-serif; background: #1A1A2E; }
+.ur-app-shell {
+  display: flex; flex-direction: column; width: 100%; height: 100%;
+  background: #F8F9FA; overflow: hidden;
+}
+/* 데스크탑(769px 이상)에서는 모바일 앱처럼 가운데 고정폭 카드로 보이게 — 그 외엔 모바일과 동일하게 전체 너비 */
+@media (min-width: 769px) {
+  .ur-app-shell {
+    width: 430px; height: min(90vh, 900px);
+    border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+}
 .ur-topnav {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px; height: 56px; background: #fff;
@@ -2561,12 +2572,14 @@
   cursor: pointer; background: none; border: none; padding: 0; font-family: inherit;
 }
 .ur-subject-icon {
-  width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center;
-  justify-content: center; font-size: 22px; background: #F4F4F5; transition: all .15s;
+  width: 52px; height: 52px; border-radius: 17px; display: flex; align-items: center;
+  justify-content: center; font-size: 23px; background: #F4F4F5; transition: all .15s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-.ur-subject-item.active .ur-subject-icon { background: var(--primary); }
-.ur-subject-item.active .ur-subject-label { color: var(--primary); font-weight: 800; }
-.ur-subject-label { font-size: 11.5px; font-weight: 600; color: #4B5563; }
+.ur-subject-item:active .ur-subject-icon { transform: scale(0.94); }
+.ur-subject-item.active .ur-subject-icon { box-shadow: 0 4px 10px rgba(0,0,0,0.16); }
+.ur-subject-item.active .ur-subject-label { color: var(--text-main); font-weight: 800; }
+.ur-subject-label { font-size: 11.5px; font-weight: 600; color: #6B7280; }
 
 .ur-age-chip {
   flex-shrink: 0; padding: 5px 13px; border-radius: 100px;
@@ -8772,12 +8785,12 @@ function userShowTab(idx) {
 // ── 학원 검색 ──
 function urSetFilter(el) {
   _urFilter = el.dataset.subj;
-  Array.prototype.forEach.call(document.querySelectorAll('.ur-subject-item'), function(c) {
-    c.classList.toggle('active', c === el);
-  });
-  // 과목 아이콘을 탭하면 홈 메뉴는 숨기고 지도 기반 결과 화면으로 전환 (참조 UI와 동일한 흐름)
   var labelEl = el.querySelector('.ur-subject-label');
-  urEnterResultMode(labelEl ? labelEl.textContent : '전체');
+  var label = labelEl ? labelEl.textContent : '전체';
+  // 다시 그려야 비활성 톤(옅은 틴트) ↔ 활성 톤(원색) 배경이 _urFilter에 맞게 갱신됨 (인라인 style이라 클래스 토글만으론 안 바뀜)
+  urRenderSubjectGrid();
+  // 과목 아이콘을 탭하면 홈 메뉴는 숨기고 지도 기반 결과 화면으로 전환 (참조 UI와 동일한 흐름)
+  urEnterResultMode(label);
   urSetView('map');
 }
 var _urResultMode = false;
@@ -8819,15 +8832,24 @@ var UR_SUBJECT_GRID = [
   { subj:'coding',    icon:'💻', label:'코딩' },
   { subj:'sports',    icon:'⚽', label:'체육' }
 ];
+// hex 색상 → rgba 변환 (아이콘 비활성 톤은 브랜드 색의 옅은 틴트로, 선택 시엔 원색으로)
+function _urHexToRgba(hex, alpha) {
+  var h = hex.replace('#', '');
+  var r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
 function urRenderSubjectGrid() {
   var gridEl = document.getElementById('urSubjectGrid');
   if (!gridEl) return;
-  var html = '<button class="ur-subject-item' + (_urFilter === 'all' ? ' active' : '') + '" data-subj="all" onclick="urSetFilter(this)">'
-    + '<div class="ur-subject-icon">🏠</div><div class="ur-subject-label">전체</div></button>';
+  var allActive = _urFilter === 'all';
+  var html = '<button class="ur-subject-item' + (allActive ? ' active' : '') + '" data-subj="all" onclick="urSetFilter(this)">'
+    + '<div class="ur-subject-icon" style="background:' + (allActive ? '#F97316' : _urHexToRgba('#F97316', 0.12)) + '">🏠</div><div class="ur-subject-label">전체</div></button>';
   html += UR_SUBJECT_GRID.map(function(s) {
     var active = _urFilter === s.subj;
+    var color = (AC_SUBJECT_META[s.subj] || {}).color || '#F97316';
+    var bg = active ? color : _urHexToRgba(color, 0.12);
     return '<button class="ur-subject-item' + (active ? ' active' : '') + '" data-subj="' + s.subj + '" onclick="urSetFilter(this)">'
-      + '<div class="ur-subject-icon">' + s.icon + '</div><div class="ur-subject-label">' + s.label + '</div></button>';
+      + '<div class="ur-subject-icon" style="background:' + bg + '">' + s.icon + '</div><div class="ur-subject-label">' + s.label + '</div></button>';
   }).join('');
   gridEl.innerHTML = html;
 }
@@ -9862,7 +9884,8 @@ function urToggleNotif(btn) {
 <!-- ═══════════════════════════════════════════
      학부모 앱 뷰 (로그인 후 표시)
 ════════════════════════════════════════════ -->
-<div id="userRoot" style="display:none;position:fixed;inset:0;z-index:9000;background:#F8F9FA;flex-direction:column;overflow:hidden;">
+<div id="userRoot" style="display:none;position:fixed;inset:0;z-index:9000;overflow:hidden;align-items:center;justify-content:center;">
+<div class="ur-app-shell">
 
   <!-- 상단 네비 -->
   <div class="ur-topnav">
@@ -10171,6 +10194,7 @@ function urToggleNotif(btn) {
     </button>
   </div>
 
+</div><!-- /ur-app-shell -->
 </div><!-- /userRoot -->
 
 <!-- ═══════════════════════════════════════════
