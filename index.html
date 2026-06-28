@@ -2884,6 +2884,8 @@
 .ur-empty-icon { font-size: 36px; margin-bottom: 8px; }
 /* 내 정보 */
 .ur-info-section { padding: 14px 16px; }
+/* 탭 최상단 페이지 제목 — 스케줄 탭의 .ur-sched-title과 같은 크기/굵기로 통일 */
+.ur-page-title { font-size: 17px; font-weight: 800; color: var(--text-main); margin-bottom: 10px; }
 .ur-section-label { font-size: 12px; font-weight: 700; color: #9CA3AF; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 8px; }
 .ur-profile-card {
   background: #fff; border-radius: 16px; padding: 18px;
@@ -9011,10 +9013,14 @@ function urOnSearch() {
 function urFilterAcademies() { urOnSearch(); }
 
 // ── 지도(핀)와 목록(바텀시트)을 동시에 다시 그림 — 탭으로 분리하지 않으므로 항상 같이 갱신 ──
+// 지도를 처음 만들 때는 컨테이너가 display:none → flex로 막 바뀐 직후라 레이아웃이
+// 아직 자리잡지 않았을 수 있어(크기 0으로 초기화되면 타일이 영영 안 뜸), 데모 체험
+// 플로우(openMapStep)와 동일하게 약간의 지연을 줘서 flex 레이아웃이 자리잡은 뒤에 생성한다.
+// 이미 만들어진 지도를 갱신할 때는(_urMap 존재) 지연 없이 바로 갱신.
 function urRenderResults() {
-  urInitMap();
   urRenderAcademies();
   if (document.getElementById('urSheet').style.height === '') urSetSheetState('half');
+  if (_urMap) { urInitMap(); } else { setTimeout(urInitMap, 200); }
 }
 
 // ── 네이버 지도 초기화 ──
@@ -10114,7 +10120,7 @@ function urToggleNotif(btn) {
     <!-- ── 스케줄 탭 ── -->
     <div class="ur-page" id="urPageSchedule">
       <div class="ur-sched-header">
-        <div class="ur-sched-title">📅 내 스케줄</div>
+        <div class="ur-sched-title">스케줄</div>
         <div style="display:flex;gap:8px;">
           <button class="ur-share-btn" onclick="openShareCard()">🔗 공유하기</button>
           <button class="ur-sched-sim-btn" onclick="hideUserDashboard(); openDemoModal()">✨ AI 추천</button>
@@ -10146,7 +10152,7 @@ function urToggleNotif(btn) {
 
       <!-- 계정 프로필 -->
       <div class="ur-info-section">
-        <div class="ur-section-label">내 계정</div>
+        <div class="ur-page-title">마이페이지</div>
         <div class="ur-profile-card" id="urProfileCard">
           <div class="ur-p-avatar" id="urProfileAvatar"></div>
           <div>
