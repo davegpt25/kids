@@ -2432,7 +2432,7 @@
 #userRoot { font-family: 'Pretendard', sans-serif; background: #1A1A2E; }
 .ur-app-shell {
   display: flex; flex-direction: column; width: 100%; height: 100%;
-  background: #F8F9FA; overflow: hidden;
+  background: #F8F9FA; overflow: hidden; position: relative;
 }
 /* 데스크탑(769px 이상)에서는 모바일 앱처럼 가운데 고정폭 카드로 보이게 — 그 외엔 모바일과 동일하게 전체 너비 */
 @media (min-width: 769px) {
@@ -2511,9 +2511,13 @@
   background: rgba(249,115,22,0.12); cursor: pointer; font-family: inherit;
 }
 .ur-bell-btn {
-  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; position: relative;
   display: flex; align-items: center; justify-content: center;
   border: none; background: #F4F4F5; color: #6B7280; cursor: pointer;
+}
+.ur-bell-dot {
+  position: absolute; top: 6px; right: 7px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--primary); border: 1.5px solid #fff;
 }
 .ur-home-search-row { display: flex; gap: 8px; align-items: center; }
 .ur-result-back {
@@ -2640,6 +2644,38 @@
 }
 .ur-row-add.added { background: #10B981; }
 .ur-data-attribution { font-size: 11px; color: #9CA3AF; text-align: center; padding: 10px 4px 4px; }
+
+/* 알림 화면 */
+.ur-notif-screen {
+  position: absolute; inset: 0; background: #fff; z-index: 60;
+  display: flex; flex-direction: column;
+}
+.ur-notif-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid #F0F0F0; flex-shrink: 0;
+}
+.ur-notif-back { border: none; background: none; font-size: 18px; cursor: pointer; padding: 4px; }
+.ur-notif-title { font-size: 16px; font-weight: 800; color: var(--text-main); }
+.ur-notif-mark-all { border: none; background: none; font-size: 12px; font-weight: 700; color: #9CA3AF; cursor: pointer; }
+.ur-notif-tabs { display: flex; border-bottom: 1px solid #F0F0F0; flex-shrink: 0; }
+.ur-notif-tab {
+  flex: 1; padding: 12px 0; border: none; background: none; cursor: pointer;
+  font-size: 13px; font-weight: 700; color: #9CA3AF; border-bottom: 2px solid transparent;
+}
+.ur-notif-tab.active { color: var(--text-main); border-bottom-color: var(--text-main); }
+.ur-notif-list { flex: 1; overflow-y: auto; }
+.ur-notif-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; padding: 40px 30px; text-align: center; color: #9CA3AF; font-size: 13px; line-height: 1.6;
+}
+.ur-notif-empty-icon { font-size: 32px; margin-bottom: 14px; opacity: .6; }
+.ur-notif-item { padding: 14px 16px; border-bottom: 1px solid #F0F0F0; }
+.ur-notif-item.unread { background: #FFF8F3; }
+.ur-notif-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.ur-notif-scope { font-size: 11px; font-weight: 700; color: var(--primary); }
+.ur-notif-time { font-size: 11px; color: #9CA3AF; }
+.ur-notif-item-title { font-size: 13.5px; font-weight: 800; color: var(--text-main); margin-bottom: 3px; }
+.ur-notif-item-body { font-size: 12.5px; color: #6B7280; line-height: 1.5; }
 /* 스케줄 */
 .ur-sched-header {
   padding: 16px; background: #fff; border-bottom: 1px solid #F0F0F0;
@@ -8723,6 +8759,83 @@ function urGetNotifPrefs() {
 }
 function urSaveNotifPrefs(p) { localStorage.setItem('kr_notif_prefs', JSON.stringify(p)); }
 
+// ── 알림 센터 ──
+// 알림 한 건의 모양: { id, scope: 'personal'|'notice'|'academy', academyId, academyName, title, body, createdAt, read }
+// scope로 라우팅 구분: 'personal'(나에게만 온 개인 알림 — 하원 알림 등), 'notice'(키즈루트 공지), 'academy'(특정 학원이 보낸 알림 — academyId 필수).
+// 실서비스에서 푸시/웹소켓으로 알림이 도착하면 urAddNotification()만 호출하면 벨 배지·목록에 바로 반영됨.
+function urGetNotifications() {
+  try { return JSON.parse(localStorage.getItem('kr_notifications') || '[]'); } catch(e) { return []; }
+}
+function urSaveNotifications(list) { localStorage.setItem('kr_notifications', JSON.stringify(list)); }
+function urUnreadNotifCount() { return urGetNotifications().filter(function(n) { return !n.read; }).length; }
+function urUpdateBellDot() {
+  var dot = document.getElementById('urBellDot');
+  if (dot) dot.style.display = urUnreadNotifCount() > 0 ? 'block' : 'none';
+}
+function urAddNotification(notif) {
+  var list = urGetNotifications();
+  list.unshift(Object.assign(
+    { id: 'n' + Date.now() + Math.random().toString(36).slice(2), createdAt: Date.now(), read: false },
+    notif
+  ));
+  urSaveNotifications(list);
+  urUpdateBellDot();
+}
+function urMarkAllNotifsRead() {
+  urSaveNotifications(urGetNotifications().map(function(n) { n.read = true; return n; }));
+  urUpdateBellDot();
+  urRenderNotifList();
+}
+var _urNotifTab = 'general';
+function urSetNotifTab(el) {
+  _urNotifTab = el.dataset.tab;
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-notif-tab'), function(t) {
+    t.classList.toggle('active', t === el);
+  });
+  urRenderNotifList();
+}
+function urOpenNotifications() {
+  var screen = document.getElementById('urNotifScreen');
+  if (screen) screen.style.display = 'flex';
+  urRenderNotifList();
+}
+function urCloseNotifications() {
+  var screen = document.getElementById('urNotifScreen');
+  if (screen) screen.style.display = 'none';
+}
+function _urFormatNotifTime(ts) {
+  var diffMin = Math.round((Date.now() - ts) / 60000);
+  if (diffMin < 1) return '방금';
+  if (diffMin < 60) return diffMin + '분 전';
+  if (diffMin < 1440) return Math.round(diffMin / 60) + '시간 전';
+  return Math.round(diffMin / 1440) + '일 전';
+}
+function urRenderNotifList() {
+  var listEl = document.getElementById('urNotifList');
+  if (!listEl) return;
+  // 상담톡(학원 1:1 채팅)은 별도 기능으로 추후 구현 — 지금은 탭만 마련해두고 빈 상태만 보여줌
+  var filtered = _urNotifTab === 'consult' ? [] : urGetNotifications();
+  if (!filtered.length) {
+    listEl.innerHTML = '<div class="ur-notif-empty"><div class="ur-notif-empty-icon">🗂️</div>'
+      + (_urNotifTab === 'consult'
+        ? '새로운 상담톡이 없어요.<br>학원과 상담하면 여기에서 볼 수 있어요.'
+        : '새로운 알림이 없어요.<br>알림이 오면 여기에서 볼 수 있어요.')
+      + '</div>';
+    return;
+  }
+  listEl.innerHTML = filtered.map(function(n) {
+    var scopeLabel = n.scope === 'academy' ? (n.academyName || '학원') : (n.scope === 'notice' ? '공지' : '개인 알림');
+    return '<div class="ur-notif-item' + (n.read ? '' : ' unread') + '">'
+      + '<div class="ur-notif-item-top">'
+      +   '<span class="ur-notif-scope">' + _escHtml(scopeLabel) + '</span>'
+      +   '<span class="ur-notif-time">' + _urFormatNotifTime(n.createdAt) + '</span>'
+      + '</div>'
+      + '<div class="ur-notif-item-title">' + _escHtml(n.title) + '</div>'
+      + '<div class="ur-notif-item-body">' + _escHtml(n.body) + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 // ── 대시보드 진입/퇴출 ──
 function showUserDashboard(name, email, color) {
   _urUser = { name: name, email: email, color: color || '#F97316' };
@@ -8730,9 +8843,7 @@ function showUserDashboard(name, email, color) {
   if (!root) return;
   root.style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  // 아바타
-  var av = document.getElementById('urAvatar');
-  if (av) { av.textContent = (name || '?').charAt(0); av.style.background = color || '#F97316'; }
+  urUpdateBellDot();
   // 초기 탭
   userShowTab(0);
 }
@@ -9872,8 +9983,9 @@ function urToggleNotif(btn) {
           </div>
           <div class="ur-home-top-actions" id="urHomeTopActions">
             <button class="ur-membership-pill" onclick="userShowTab(2)" title="멤버십">멤버십</button>
-            <button class="ur-bell-btn" onclick="userShowTab(2)" title="알림">
+            <button class="ur-bell-btn" id="urBellBtn" onclick="urOpenNotifications()" title="알림">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="ur-bell-dot" id="urBellDot" style="display:none"></span>
             </button>
           </div>
         </div>
@@ -10150,6 +10262,20 @@ function urToggleNotif(btn) {
       </div>
       <div class="ur-tab-label">내 정보</div>
     </button>
+  </div>
+
+  <!-- 알림 화면 — 벨 아이콘 탭 시 전체 화면으로 덮음. 일반 알림(개인/공지/학원별)과 상담톡(학원 1:1 채팅)을 탭으로 구분 -->
+  <div class="ur-notif-screen" id="urNotifScreen" style="display:none">
+    <div class="ur-notif-header">
+      <button class="ur-notif-back" onclick="urCloseNotifications()">←</button>
+      <div class="ur-notif-title">알림</div>
+      <button class="ur-notif-mark-all" onclick="urMarkAllNotifsRead()">모두 읽기</button>
+    </div>
+    <div class="ur-notif-tabs">
+      <button class="ur-notif-tab active" data-tab="general" onclick="urSetNotifTab(this)">일반 알림</button>
+      <button class="ur-notif-tab" data-tab="consult" onclick="urSetNotifTab(this)">상담톡</button>
+    </div>
+    <div class="ur-notif-list" id="urNotifList"><!-- JS 렌더링 --></div>
   </div>
 
 </div><!-- /ur-app-shell -->
