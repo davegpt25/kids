@@ -2441,19 +2441,6 @@
     border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.35);
   }
 }
-.ur-topnav {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px; height: 56px; background: #fff;
-  border-bottom: 1px solid #F0F0F0; flex-shrink: 0;
-}
-.ur-logo { display: flex; align-items: center; gap: 7px; font-size: 17px; font-weight: 800; color: var(--primary); }
-.ur-topnav-right { display: flex; align-items: center; gap: 8px; }
-.ur-avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 800; color: #fff;
-  background: var(--primary); cursor: pointer; flex-shrink: 0;
-}
 .ur-content { flex: 1; overflow-y: auto; overflow-x: hidden; }
 .ur-page { display: none; padding-bottom: 80px; min-height: calc(100vh - 116px); }
 .ur-page.active { display: block; }
@@ -2469,7 +2456,11 @@
 }
 .ur-tab.active { color: var(--primary); }
 .ur-tab.active .ur-tab-icon svg { stroke: var(--primary); stroke-width: 2.5; }
-.ur-tab-icon { font-size: 20px; line-height: 1; display:flex; align-items:center; justify-content:center; }
+.ur-tab-icon {
+  font-size: 20px; line-height: 1; display:flex; align-items:center; justify-content:center;
+  width: 36px; height: 28px; border-radius: 12px; transition: background .15s;
+}
+.ur-tab.active .ur-tab-icon { background: rgba(249,115,22,0.12); }
 .ur-tab-icon svg { stroke: #9CA3AF; transition: stroke .15s; }
 .ur-tab-label { font-size: 11px; font-weight: 600; }
 /* 학원 검색 */
@@ -2505,12 +2496,24 @@
   padding: 14px 16px 10px; background: #fff;
   border-bottom: 1px solid #F0F0F0; position: sticky; top: 0; z-index: 10;
 }
+.ur-home-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .ur-home-location {
-  display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px;
+  display: inline-flex; align-items: center; gap: 4px;
   font-size: 15px; font-weight: 800; color: var(--text-main); cursor: pointer;
 }
 .ur-home-location-pin { display: inline-flex; align-items: center; color: var(--primary); }
 .ur-home-location-caret { font-size: 11px; color: #9CA3AF; margin-left: 1px; }
+.ur-home-top-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.ur-membership-pill {
+  border: none; border-radius: 100px; padding: 6px 12px;
+  font-size: 11.5px; font-weight: 700; color: var(--primary);
+  background: rgba(249,115,22,0.12); cursor: pointer; font-family: inherit;
+}
+.ur-bell-btn {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: #F4F4F5; color: #6B7280; cursor: pointer;
+}
 .ur-home-search-row { display: flex; gap: 8px; align-items: center; }
 .ur-result-back {
   flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
@@ -2559,7 +2562,7 @@
 .ur-tt-time {
   flex-shrink: 0; width: 64px; font-size: 11.5px; font-weight: 700; color: #6B7280; text-align: right;
 }
-.ur-tt-bar { width: 4px; height: 22px; border-radius: 3px; flex-shrink: 0; }
+.ur-tt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .ur-tt-name { font-size: 13px; font-weight: 700; color: var(--text-main); }
 
 /* ③ 과목 아이콘 그리드 */
@@ -8893,7 +8896,7 @@ function urRenderHomePromo() {
   el.innerHTML = header + '<div class="ur-promo-timetable">' + rows.map(function(r) {
     return '<div class="ur-tt-row">'
       + '<div class="ur-tt-time">' + (r.timeLabel ? _escHtml(r.timeLabel) : '⏳ 미확인') + '</div>'
-      + '<div class="ur-tt-bar" style="background:' + (r.s.color || '#F97316') + '"></div>'
+      + '<div class="ur-tt-dot" style="background:' + (r.s.color || '#F97316') + '"></div>'
       + '<div class="ur-tt-name">' + _escHtml(r.s.name) + '</div>'
       + '</div>';
   }).join('') + '</div>';
@@ -8914,11 +8917,6 @@ function urHandleHomePromoClick() {
 function urOpenLocationPicker() {
   showToast('📍 현재 위치를 다시 확인하고 있어요…');
   urAutoLocate(true);
-}
-// 상단 로고 탭 → 진입 시 첫 화면(홈 탭, 결과화면 아니면)으로 복귀
-function urGoHome() {
-  if (typeof _urResultMode !== 'undefined' && _urResultMode) urExitResultMode();
-  userShowTab(0);
 }
 function urSetSort(el) {
   _urSort = el.dataset.sort;
@@ -9887,30 +9885,27 @@ function urToggleNotif(btn) {
 <div id="userRoot" style="display:none;position:fixed;inset:0;z-index:9000;overflow:hidden;align-items:center;justify-content:center;">
 <div class="ur-app-shell">
 
-  <!-- 상단 네비 -->
-  <div class="ur-topnav">
-    <div class="ur-logo" onclick="urGoHome()" style="cursor:pointer">
-      <svg width="22" height="22" viewBox="0 0 96 96" style="border-radius:5px"><defs><linearGradient id="ug" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FF9A3C"/><stop offset="100%" stop-color="#F97316"/></linearGradient></defs><rect width="96" height="96" rx="24" fill="url(#ug)"/><circle cx="48" cy="22" r="11" fill="white"/><line x1="48" y1="33" x2="48" y2="50" stroke="white" stroke-width="5" stroke-linecap="round"/><line x1="33" y1="41" x2="63" y2="41" stroke="white" stroke-width="4.5" stroke-linecap="round"/><line x1="48" y1="50" x2="38" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/><line x1="48" y1="50" x2="58" y2="63" stroke="white" stroke-width="4.5" stroke-linecap="round"/></svg>
-      키즈루트
-    </div>
-    <div class="ur-topnav-right">
-      <div class="ur-avatar" id="urAvatar" title="내 계정"></div>
-    </div>
-  </div>
-
   <!-- 콘텐츠 영역 -->
   <div class="ur-content" id="urContent">
 
     <!-- ── 홈(학원 검색) 탭 ── -->
     <div class="ur-page active" id="urPageSearch">
-      <!-- ① 위치 + 검색 헤더 -->
+      <!-- ① 위치 + 검색 헤더 (상단 통합 헤더 — 로고 바 제거하고 이 자리로 합침) -->
       <div class="ur-home-header" id="urHomeHeader">
-        <div class="ur-home-location" id="urHomeLocationBtn" onclick="urOpenLocationPicker()" title="탭하면 현재 위치를 다시 잡아요">
-          <span class="ur-home-location-pin">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-          </span>
-          <span id="urHomeLocationText">위치 불러오는 중…</span>
-          <span class="ur-home-location-caret">⌄</span>
+        <div class="ur-home-top-row">
+          <div class="ur-home-location" id="urHomeLocationBtn" onclick="urOpenLocationPicker()" title="탭하면 현재 위치를 다시 잡아요">
+            <span class="ur-home-location-pin">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            </span>
+            <span id="urHomeLocationText">위치 불러오는 중…</span>
+            <span class="ur-home-location-caret">⌄</span>
+          </div>
+          <div class="ur-home-top-actions">
+            <button class="ur-membership-pill" onclick="userShowTab(2)" title="멤버십">멤버십</button>
+            <button class="ur-bell-btn" onclick="userShowTab(2)" title="알림">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </button>
+          </div>
         </div>
         <div class="ur-home-search-row">
           <button class="ur-result-back" id="urResultBackBtn" style="display:none" onclick="urExitResultMode()">←</button>
