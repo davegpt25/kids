@@ -34,10 +34,6 @@
 - `GET /academies/reports/pending`, `PATCH /academies/reports/:id/resolve` ([kidsroute-backend/src/academy/academy.controller.ts](../../kidsroute-backend/src/academy/academy.controller.ts))가 일반 로그인 사용자 누구나 접근 가능 — admin role 시스템이 아직 없어서 임시로 JWT 인증만 걸어둠.
 - 별도 관리자 role/가드가 생기면 이 두 엔드포인트부터 교체할 것.
 
-## 8. `findNearby`의 time_slots JOIN 컬럼명 의심
-- [kidsroute-backend/src/academy/academy.service.ts](../../kidsroute-backend/src/academy/academy.service.ts)의 raw SQL이 `ts.academy_id`(snake_case)를 참조하는데, TypeORM 기본 네이밍 전략이면 실제 컬럼은 `academyId`(camelCase)일 가능성이 높음.
-- 지금까지 테스트가 전부 `repository.query()`를 mock해서 실행돼서 실제 DB로 한 번도 검증된 적이 없는 코드 — 실제 DB 연결 시 가장 먼저 확인해야 함.
-
 ## 9. 네이버 오픈API 출처 표시 의무 — 법률 검토 필요
 - 학원 목록에 "출처: 네이버 지도 공개 정보" 문구를 기본값으로 넣어뒀지만, 정확한 약관 조항(재배포 범위, 표시 방식 요건)은 변호사 검토가 필요함. 데모 범위를 넘어 정식 서비스로 확장하기 전에 확인할 것.
 
@@ -49,10 +45,18 @@
 - 네이버 지역검색이 좌표/반경 파라미터를 지원하지 않아 "동네이름+과목"으로 검색하는데, 전국 행정동 목록(427개)을 안전하게 확보 못 해서 일단 25개 구 단위(200건 검색)로 921개를 모음.
 - 구 단위라 한 구 안에서도 특정 동에 검색이 몰리거나 빠질 수 있음. 필요한 동이 생기면(예: 반포동·서대문 사례처럼) 그 동만 추가로 보강하는 식으로 점진 개선.
 
+## 12. 그리드 키워드 검색의 구조적 재현율 한계 (display=5)
+- `collector/naver_local_client.py`는 "동네이름+과목" 검색당 최대 5건만 받음. "와이키즈 서대문센터" 사례처럼 일반 키워드("북가좌동 학원 영어")로는 5건 안에 안 잡히고, 브랜드명을 직접 검색("서대문 와이키즈")해야만 나오는 학원이 있음 — 2026-06-28에 실제로 겪어서 수동으로 DB에 복구함.
+- `classify.py`의 `_BRAND_RULES`를 고쳐도, 애초에 grid 검색 결과에 안 잡히면 다음 정기 크롤링에서도 자동 재발견이 안 됨. display 파라미터 확장 가능 여부 재확인, 또는 알려진 브랜드명을 별도 시드 검색어로 추가하는 보강이 필요.
+
+## 13. 마케팅 FAQ가 실제 기능/데이터와 안 맞음
+- "학원을 직접 추가할 수 있나요?" FAQ([kids/index.html:4122](../index.html#L4122))는 "학원 제보 기능으로 24시간 내 반영, 제보자에게 멤버십 1개월"이라고 안내하지만, 실제로는 그런 제보 흐름이 없음(기존 학원의 잘못된 정보를 신고하는 🚩 버튼만 있고, "없는 학원 추가"는 UI 자체가 없음). 검색 결과 0건 화면에도 제보 버튼이 없음.
+- "어떤 학원 데이터를 사용하나요?" FAQ([kids/index.html:4102](../index.html#L4102))의 "강남구 2,400개+"는 실제 데이터(현재 9개 동 325개, 정적 목업은 921개)와 안 맞는 수치 — 마케팅 카피가 실제 파이프라인 구축 이전에 쓰여서 그대로 남아있는 것으로 보임.
+
 ---
 ## 진행 로그 (2026-06-28)
 지난 업데이트(2026-06-27) 이후 실제로 만들고 배포까지 끝낸 것들:
-- **실제 학원 데이터 파이프라인**: 네이버 지역검색 API 연동(`kidsroute-crawler/collector/naver_local_client.py`, `classify.py`, `pipeline_naver.py`) 구축, 실제 키로 라이브 호출 검증, 로컬 Postgres(+PostGIS)에 전체 흐름(`findNearby` GIS 쿼리 포함) 끝까지 통과.
+- **실제 학원 데이터 파이프라인**: 네이버 지역검색 API 연동(`kidsroute-crawler/collector/naver_local_client.py`, `classify.py`, `pipeline_naver.py`) 구축, 실제 키로 라이브 호출 검증, 로컬 Postgres에 upsert까지 통과. (⚠️ 2026-06-28 재검증 결과: PostGIS는 로컬에 설치돼 있지 않아 `findNearby` GIS 쿼리까지는 검증된 적 없음 — 항목 16 참고. 이전 기록 정정.)
 - **서울 25개 구 921개 실제 학원**으로 정적 목업 `UR_ACADEMIES` 교체 (기존 188개 → 921개, 분류 실패 0건).
 - **학원 정보 신고 파이프라인**: 정적 목업(신고 즉시 비공개) + 백엔드(`AcademyReport`/`isActive`, `POST /academies/:id/reports` 등) 양쪽 구현 — 단 배포·연동은 항목 6에 남아있음.
 - **캐시 문제 근본 해결**: 수동 버전 문자열 방식(자주 깜빡함) → ETag/Last-Modified 자동 비교 방식으로 교체.
@@ -62,4 +66,15 @@
 - **타겟팅 전략 반영**: 1차 유아~초등5학년 / 2차 중1~중2로 카피·신뢰배지 수정 ("우리 아이" 문구 유지, 연령 필터 기본값은 위 10번 한계로 "전체" 유지).
 - 죽은 링크("로컬 컴패니언 열기") 제거.
 
-*상태: 백로그. 우선순위 1, 2번이 가장 눈에 띄는 구멍. 6~9번은 2026-06-27, 10~11번은 2026-06-28 작업 중 추가됨.*
+*상태: 백로그. 우선순위 1, 2번이 가장 눈에 띄는 구멍. 6~9번은 2026-06-27, 10~13번은 2026-06-28 작업 중 추가됨.*
+
+---
+## 진행 로그 (2026-06-29)
+2026-06-28에 추가됐던 항목 8(time_slots 컬럼명 의심)·14(Academy 엔티티 불일치)·15(deactivate_missing 스코프 버그)·16(PostGIS 미설치) 네 가지를 실제 로컬 DB에 끝까지 검증하며 모두 해결:
+
+- **Academy/TimeSlot 엔티티를 실제 마이그레이션 스키마와 정확히 맞춤** — `id`를 uuid→serial integer로, `isActive`/`dataSource`/`hasTimetable`/`name`/`address`/`phone` 등 컬럼명·타입을 전부 실제와 일치시킴(`kidsroute-backend` 커밋 참고). `@Unique(['name','address'])`/`@Index()`를 명시하지 않으면 `synchronize`가 크롤러의 `ON CONFLICT(name,address)` upsert가 의존하는 제약을 실제로 지워버린다는 것도 발견해서 같이 막음.
+- **`findNearby` raw SQL의 실제 버그 확정·수정** — 항목 8에서 의심했던 것과 달리 `time_slots` JOIN(`ts.academy_id`)은 문제없었고, 대신 `a."isActive"`/`r."academyId"`(camelCase, 존재하지 않는 컬럼)를 참조하던 게 진짜 버그였음. `a.is_active`/`r.academy_id`로 수정.
+- **PostGIS 설치 + DB 소유권 문제 해결** — 로컬 PostgreSQL 17에 PostGIS 3.6.2 설치, `academies`/`time_slots` 소유자가 `postgres`라 런타임 계정(`kidsroute`)이 DDL을 못 하던 문제를 `ALTER TABLE ... OWNER TO kidsroute`로 해소.
+- **`deactivate_missing()` 스코프 버그 수정** — `area_names` 파라미터를 받아 그 지역 주소 패턴에 해당하는 학원만 비교 대상으로 좁히도록 변경(`kidsroute-crawler` 커밋 참고). 부분 지역만 돌려도 다른 지역이 더 이상 비활성화되지 않음을 재현 테스트로 확인.
+- **end-to-end 검증 완료**: `kidsroute-backend`를 실제로 기동해서 DB 동기화 통과 확인(이전엔 권한/타입 충돌로 항상 실패), 실제 `ST_DWithin`/`ST_Distance` PostGIS 쿼리로 와이키즈 서대문센터가 최상위 결과로 나오는 것까지 확인.
+- 남은 항목(8/14/15/16)은 모두 닫힘. 항목 12(그리드 재현율 한계)·13(마케팅 FAQ 불일치)은 아직 백로그.
