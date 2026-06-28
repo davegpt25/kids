@@ -9008,7 +9008,14 @@ function urSetSort(el) {
 }
 function urOnSearch() {
   var inp = document.getElementById('urSearchInput');
-  _urSearchText = inp ? inp.value.trim().toLowerCase() : '';
+  var raw = inp ? inp.value.trim() : '';
+  _urSearchText = raw.toLowerCase();
+  // 홈 화면에서 검색어를 입력하면 과목 아이콘을 누른 것과 동일하게 결과모드(지도+목록)로 전환
+  if (raw && !_urResultMode) {
+    urEnterResultMode(raw);
+    urRenderResults();
+    return;
+  }
   urRenderAcademies();
   urRenderMapMarkers();
 }
