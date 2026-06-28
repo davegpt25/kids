@@ -2599,73 +2599,47 @@
   border: 1px solid #E5E7EB; background: #fff; color: #6B7280; cursor: pointer;
 }
 .ur-sort-btn.active { background: #FFF7ED; border-color: #FED7AA; color: var(--primary); }
-.ur-academy-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; }
-.ur-academy-card {
-  background: #fff; border-radius: 16px; padding: 16px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.07); cursor: pointer;
-  transition: box-shadow .15s; position: relative; overflow: hidden;
+/* 학원 목록 — 카드가 아닌 레일(rail) 리스트. 구분선으로만 항목을 나눈다 */
+.ur-academy-list { background: #fff; }
+.ur-academy-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px 16px; border-bottom: 1px solid #F0F0F0;
 }
-.ur-academy-card:active { box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
-
-/* 인증 학원 — 왼쪽 인디고 보더 */
-.ur-academy-card.verified {
-  box-shadow: 0 2px 12px rgba(99,102,241,0.12);
+.ur-academy-row-main { flex: 1; min-width: 0; }
+.ur-row-name-line { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.ur-academy-name { font-size: 15px; font-weight: 800; color: var(--text-main); }
+.ur-subj-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
-.ur-verified-bar {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-  background: linear-gradient(180deg, #6366F1, #818CF8);
-  border-radius: 4px 0 0 4px;
-}
-
-/* 인증 배지 */
 .ur-verified-badge {
   font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 100px;
   background: #EEF2FF; color: #6366F1; flex-shrink: 0;
-  display: inline-flex; align-items: center; gap: 2px;
 }
-
-.ur-academy-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-.ur-academy-name { font-size: 15px; font-weight: 800; color: var(--text-main); }
-.ur-badge {
-  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
-  background: #FFF7ED; color: var(--primary); flex-shrink: 0; margin-left: 6px;
-}
-.ur-badge.new { background: #F0FDF4; color: #16A34A; }
-.ur-subj-dot {
-  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-  margin-right: 5px; vertical-align: middle;
-}
-.ur-academy-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
-.ur-meta-item { font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 3px; }
-.ur-times { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
-.ur-time-tag {
-  font-size: 11px; padding: 3px 9px; border-radius: 6px;
-  background: #F4F4F5; color: #374151; font-weight: 600;
-}
-.ur-time-tag.ur-tt-pending { background: #FFF7ED; color: #C2410C; }
 .ur-unverified-badge {
   font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 100px;
   background: #F4F4F5; color: #9CA3AF; flex-shrink: 0;
-  display: inline-flex; align-items: center; gap: 2px;
 }
-.ur-fee-pending { font-size: 13px; font-weight: 600; color: #9CA3AF; }
-.ur-auto-disclaimer { font-size: 10.5px; color: #B45309; background: #FFFBEB; border-radius: 6px; padding: 4px 8px; margin-bottom: 8px; }
-.ur-report-btn {
-  padding: 7px 10px; border-radius: 100px; border: 1.5px solid #FEE2E2;
-  background: #fff; color: #DC2626; font-size: 12px; font-weight: 700;
-  cursor: pointer; flex-shrink: 0;
+.ur-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
+  background: #FFF7ED; color: var(--primary); flex-shrink: 0;
 }
-.ur-report-btn:hover { background: #FEF2F2; }
+.ur-badge.new { background: #F0FDF4; color: #16A34A; }
+.ur-row-hours { font-size: 12px; margin-bottom: 4px; }
+.ur-row-hours-ok { color: #16A34A; font-weight: 600; }
+.ur-row-hours-pending { color: #C2410C; font-weight: 600; }
+.ur-row-meta { font-size: 12px; color: #6B7280; }
+.ur-row-actions { display: flex; flex-direction: column; gap: 6px; align-items: center; flex-shrink: 0; }
+.ur-row-report {
+  width: 26px; height: 26px; border-radius: 50%; border: none;
+  background: #F4F4F5; font-size: 12px; cursor: pointer;
+}
+.ur-row-add {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: var(--primary); color: #fff; font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: background .15s;
+}
+.ur-row-add.added { background: #10B981; }
 .ur-data-attribution { font-size: 11px; color: #9CA3AF; text-align: center; padding: 10px 4px 4px; }
-.ur-academy-footer { display: flex; justify-content: space-between; align-items: center; }
-.ur-fee { font-size: 14px; font-weight: 700; color: var(--text-main); }
-.ur-fee small { font-size: 11px; font-weight: 400; color: #9CA3AF; }
-.ur-add-btn {
-  padding: 7px 16px; border-radius: 100px; border: none;
-  background: var(--primary); color: #fff; font-size: 13px; font-weight: 700;
-  cursor: pointer; transition: background .15s; flex-shrink: 0;
-}
-.ur-add-btn.added { background: #10B981; }
 /* 스케줄 */
 .ur-sched-header {
   padding: 16px; background: #fff; border-bottom: 1px solid #F0F0F0;
@@ -8805,7 +8779,7 @@ function urSetFilter(el) {
 var _urResultMode = false;
 function urEnterResultMode(subjLabel) {
   _urResultMode = true;
-  ['urHomeLocationBtn','urHomePromo','urSubjectGrid'].forEach(function(id) {
+  ['urHomeTopRow','urHomePromo','urSubjectGrid'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -8818,7 +8792,7 @@ function urEnterResultMode(subjLabel) {
 }
 function urExitResultMode() {
   _urResultMode = false;
-  ['urHomeLocationBtn','urHomePromo','urSubjectGrid'].forEach(function(id) {
+  ['urHomeTopRow','urHomePromo','urSubjectGrid'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = '';
   });
@@ -9227,7 +9201,7 @@ function urReverseGeocode(lat, lng) {
 // ── 주소 검색 (Geocoding) ──
 function urSearchAddress() {
   if (!window.naver || !naver.maps || !naver.maps.Service) return;
-  var input = document.getElementById('urAddrInput');
+  var input = document.getElementById('urSearchInput');
   var query = input ? input.value.trim() : '';
   if (!query) { showToast('검색어를 입력해주세요'); return; }
   naver.maps.Service.geocode({ query: query }, function(status, response) {
@@ -9277,6 +9251,13 @@ function urSetAgeFilter(el) {
   if (_urView === 'list') urRenderAcademies();
   else urRenderMapMarkers();
 }
+// 도로명주소에서 "시 + 구(+동/읍/면, 있으면)"만 짧게 추출 — 학원 addr엔 지번/동 정보가 없는 경우가 많아 구까지만 보장
+function _urShortRegion(addr) {
+  if (!addr) return '';
+  var m = addr.match(/^(서울특별시|서울시|경기도|부산광역시)?\s*([가-힣]+구)?\s*([가-힣0-9]+(동|읍|면))?/);
+  if (!m) return addr;
+  return [m[1], m[2], m[3]].filter(Boolean).join(' ');
+}
 function urRenderAcademies() {
   var schedule = urGetSchedule();
   var addedIds = schedule.map(function(s) { return s.academyId; });
@@ -9307,41 +9288,28 @@ function urRenderAcademies() {
   container.innerHTML = list.map(function(a) {
     var added = addedIds.indexOf(a.id) >= 0;
     var badgeHtml = a.badge ? '<span class="ur-badge' + (a.badge === '신규' ? ' new' : '') + '">' + a.badge + '</span>' : '';
-    var verifiedBadge = a.verified ? '<span class="ur-verified-badge">✓ 원장 인증</span>' : '<span class="ur-unverified-badge">⏳ 원장 인증 대기</span>';
-    var timeTags = a.hasTimetable
-      ? a.times.map(function(t) { return '<span class="ur-time-tag">' + t + '</span>'; }).join('')
-      : '<span class="ur-time-tag ur-tt-pending">⏳ 시간표 미확인 — 원장 인증 후 공개</span>';
-    var shuttleHtml = a.shuttle ? '<span class="ur-meta-item">🚌 셔틀</span>' : '';
-    var ratingHtml = a.reviews > 0 ? ('⭐ ' + a.rating + ' (' + a.reviews + ')') : '🆕 신규 등록 학원';
-    var feeHtml = a.fee != null ? ((a.fee/10000).toFixed(0) + '만원 <small>/월</small>') : '<span class="ur-fee-pending">수강료 미확인</span>';
-    var disclaimerHtml = a.verified ? '' : '<div class="ur-auto-disclaimer">공개 데이터 기반 자동 수집 정보 — 실제와 다를 수 있어요</div>';
-    return '<div class="ur-academy-card' + (a.verified ? ' verified' : '') + '">'
-      + (a.verified ? '<div class="ur-verified-bar"></div>' : '')
-      + '<div class="ur-academy-top">'
-      +   '<div style="display:flex;align-items:center;flex:1;min-width:0;gap:6px">'
-      +     '<span class="ur-subj-dot" style="background:' + a.color + '"></span>'
-      +     '<span class="ur-academy-name">' + _escHtml(a.name) + '</span>'
-      +     verifiedBadge
+    var verifiedBadge = a.verified ? '<span class="ur-verified-badge">✓ 원장 인증</span>' : '<span class="ur-unverified-badge">⏳ 인증 대기</span>';
+    var hoursHtml = a.hasTimetable
+      ? '<span class="ur-row-hours-ok">🟢 ' + a.times.join(' · ') + '</span>'
+      : '<span class="ur-row-hours-pending">⏳ 시간표 미확인</span>';
+    var region = _urShortRegion(a.addr);
+    var feeHtml = a.fee != null ? ((a.fee/10000).toFixed(0) + '만원/월') : '수강료 미확인';
+    return '<div class="ur-academy-row">'
+      +   '<div class="ur-academy-row-main">'
+      +     '<div class="ur-row-name-line">'
+      +       '<span class="ur-subj-dot" style="background:' + a.color + '"></span>'
+      +       '<span class="ur-academy-name">' + _escHtml(a.name) + '</span>'
+      +       verifiedBadge + badgeHtml
+      +     '</div>'
+      +     '<div class="ur-row-hours">' + hoursHtml + '</div>'
+      +     '<div class="ur-row-meta">📍 ' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + '</div>'
       +   '</div>'
-      +   badgeHtml
-      + '</div>'
-      + '<div class="ur-academy-meta">'
-      +   '<span class="ur-meta-item">📍 ' + a.dist + 'km</span>'
-      +   '<span class="ur-meta-item">' + ratingHtml + '</span>'
-      +   '<span class="ur-meta-item">🏷️ ' + a.label + '</span>'
-      +   shuttleHtml
-      + '</div>'
-      + '<div class="ur-times">' + timeTags + '</div>'
-      + disclaimerHtml
-      + '<div class="ur-academy-footer">'
-      +   '<div class="ur-fee">' + feeHtml + '</div>'
-      +   '<div style="display:flex;gap:6px">'
-      +     '<button class="ur-report-btn" onclick="urReportAcademyPrompt(' + a.id + ',event)" title="정보가 잘못됐나요?">🚩 신고</button>'
-      +     '<button class="ur-add-btn' + (added ? ' added' : '') + '" onclick="urToggleSchedule(' + a.id + ',this)">'
-      +       (added ? '✓ 등록됨' : '+ 추가')
+      +   '<div class="ur-row-actions">'
+      +     '<button class="ur-row-report" onclick="urReportAcademyPrompt(' + a.id + ',event)" title="정보가 잘못됐나요?">🚩</button>'
+      +     '<button class="ur-row-add' + (added ? ' added' : '') + '" onclick="urToggleSchedule(' + a.id + ',this)">'
+      +       (added ? '✓' : '+')
       +     '</button>'
       +   '</div>'
-      + '</div>'
       + '</div>';
   }).join('') + '<div class="ur-data-attribution">학원 정보 출처: 네이버 지도 공개 정보 · 잘못된 정보는 🚩 신고로 알려주세요</div>';
 }
@@ -9894,7 +9862,7 @@ function urToggleNotif(btn) {
     <div class="ur-page active" id="urPageSearch">
       <!-- ① 위치 + 검색 헤더 (상단 통합 헤더 — 로고 바 제거하고 이 자리로 합침) -->
       <div class="ur-home-header" id="urHomeHeader">
-        <div class="ur-home-top-row">
+        <div class="ur-home-top-row" id="urHomeTopRow">
           <div class="ur-home-location" id="urHomeLocationBtn" onclick="urOpenLocationPicker()" title="탭하면 현재 위치를 다시 잡아요">
             <span class="ur-home-location-pin">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
@@ -9902,7 +9870,7 @@ function urToggleNotif(btn) {
             <span id="urHomeLocationText">위치 불러오는 중…</span>
             <span class="ur-home-location-caret">⌄</span>
           </div>
-          <div class="ur-home-top-actions">
+          <div class="ur-home-top-actions" id="urHomeTopActions">
             <button class="ur-membership-pill" onclick="userShowTab(2)" title="멤버십">멤버십</button>
             <button class="ur-bell-btn" onclick="userShowTab(2)" title="알림">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -9913,7 +9881,8 @@ function urToggleNotif(btn) {
           <button class="ur-result-back" id="urResultBackBtn" style="display:none" onclick="urExitResultMode()">←</button>
           <div class="ur-home-search-wrap">
             <span>🔍</span>
-            <input type="text" id="urSearchInput" placeholder="학원 이름, 과목을 검색해보세요" oninput="urOnSearch()">
+            <input type="text" id="urSearchInput" placeholder="학원 이름, 과목, 지역을 검색해보세요" oninput="urOnSearch()"
+              onkeydown="if(event.key==='Enter' && _urView==='map') urSearchAddress()">
           </div>
         </div>
         <div class="ur-result-title" id="urResultTitle" style="display:none"></div>
@@ -9958,16 +9927,6 @@ function urToggleNotif(btn) {
 
       <!-- 지도 뷰 -->
       <div id="urMapContainer">
-        <!-- 주소 검색 -->
-        <div style="padding:8px 16px;background:#fff;border-bottom:1px solid #F0F0F0;display:flex;gap:8px">
-          <div style="flex:1;display:flex;align-items:center;gap:8px;background:#F4F4F5;border-radius:10px;padding:8px 12px">
-            <span style="font-size:14px">🔎</span>
-            <input type="text" id="urAddrInput" placeholder="주소 또는 지역 검색 (예: 강남구 역삼동)"
-              style="flex:1;border:none;background:none;font-size:13px;outline:none;font-family:'Pretendard',sans-serif"
-              onkeydown="if(event.key==='Enter') urSearchAddress()">
-          </div>
-          <button onclick="urSearchAddress()" style="padding:8px 14px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0">검색</button>
-        </div>
         <!-- 반경 선택 -->
         <div class="ur-radius-row">
           <span style="font-size:12px;font-weight:700;color:#6B7280;align-self:center;flex-shrink:0">반경</span>
