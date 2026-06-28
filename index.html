@@ -2446,6 +2446,12 @@
 /* 홈 탭은 카드들 사이로 회색 캔버스가 비치지 않도록 흰 배경으로 통일 (연령칩/과목그리드 영역 이질감 제거) */
 #urPageSearch { background: #fff; }
 .ur-page.active { display: block; }
+/* 결과모드(지도+바텀시트)일 땐 페이지 전체를 flex column으로 바꿔서 #urResultsArea가
+   남는 공간을 정확히 채우게 함 — calc() 추측 대신 flex로 헤더 높이 변화에도 안전하게 대응 */
+#urPageSearch.active { display: flex; flex-direction: column; height: 100%; padding-bottom: 0; }
+#urPageSearch .ur-home-header,
+#urPageSearch .ur-age-filter { flex-shrink: 0; }
+#urResultsArea { flex: 1; min-height: 0; flex-direction: column; }
 .ur-tabs {
   display: flex; align-items: stretch;
   height: 60px; background: #fff;
@@ -3021,26 +3027,11 @@
 /* 서명 미리보기 썸네일 */
 .ur-sign-thumb { width:60px; height:30px; border-radius:6px; border:1px solid #E5E7EB; object-fit:contain; background:#fff; vertical-align:middle; }
 
-/* ── 지도 검색 뷰 ── */
-.ur-view-toggle {
-  display: flex; gap: 0; border-radius: 10px; overflow: hidden;
-  border: 1.5px solid #E5E7EB; flex-shrink: 0;
-}
-.ur-view-btn {
-  padding: 6px 14px; font-size: 12px; font-weight: 700; border: none;
-  background: #fff; color: #6B7280; cursor: pointer; transition: all .15s;
-}
-.ur-view-btn.active { background: var(--primary); color: #fff; }
-#urMapContainer {
-  display: none; flex-direction: column;
-  height: calc(100vh - 56px - 60px); /* topnav + tabs */
-  position: relative;
-}
-#urMapContainer.active { display: flex; }
-#urMapEl {
-  flex: 1; min-height: 0;
-  z-index: 1;
-}
+/* ── 지도 + 학원 목록 바텀시트 뷰 ──
+   목록/지도를 탭으로 나누지 않고 지도를 항상 깔아두고, 그 위에 끌어올리고 내릴 수 있는
+   학원 목록 시트를 얹는다. 시트를 올리면 목록을, 내리면 지도 핀을 보게 됨. */
+.ur-map-sheet-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+#urMapEl { position: absolute; inset: 0; z-index: 1; }
 /* Leaflet popup 커스텀 */
 .ur-map-popup { font-family: 'Pretendard', sans-serif; min-width: 160px; }
 .ur-map-popup-name { font-size: 13px; font-weight: 800; color: #1C1C1C; margin-bottom: 4px; }
@@ -3051,39 +3042,29 @@
   cursor: pointer; font-family: 'Pretendard', sans-serif;
 }
 .ur-map-popup-btn.added { background: #10B981; }
-/* 내 위치 버튼 */
+/* 내 위치 버튼 — 시트 높이(--ur-sheet-h, JS가 드래그/스냅마다 갱신)만큼 항상 시트 위에 떠 있음 */
 #urLocBtn {
-  position: absolute; bottom: 120px; right: 14px; z-index: 500;
+  position: absolute; bottom: calc(var(--ur-sheet-h, 50%) + 14px); right: 14px; z-index: 500;
   width: 44px; height: 44px; border-radius: 50%; border: none;
   background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: bottom .25s ease;
 }
-/* 지도 하단 학원 카드 슬라이더 */
-#urMapBottomSheet {
-  flex-shrink: 0; background: #fff;
-  border-top: 1px solid #F0F0F0;
-  padding: 10px 0 10px 16px; z-index: 400;
+/* 학원 목록 바텀시트 */
+.ur-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 50;
+  height: 50%; display: flex; flex-direction: column;
+  background: #fff; border-radius: 18px 18px 0 0;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.12);
+  transition: height .25s ease; touch-action: none;
 }
-.ur-map-cards {
-  display: flex; gap: 10px; overflow-x: auto; padding-right: 16px;
-  scrollbar-width: none;
-}
-.ur-map-cards::-webkit-scrollbar { display: none; }
-.ur-map-mini-card {
-  flex-shrink: 0; width: 200px; background: #fff;
-  border-radius: 12px; padding: 12px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
-  border: 1.5px solid transparent; cursor: pointer; transition: all .15s;
-}
-.ur-map-mini-card.highlight { border-color: var(--primary); box-shadow: 0 2px 10px rgba(249,115,22,0.2); }
-.ur-mini-name { font-size: 13px; font-weight: 800; color: #1C1C1C; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ur-mini-meta { font-size: 11px; color: #6B7280; margin-bottom: 8px; line-height: 1.6; }
-.ur-mini-add {
-  width: 100%; padding: 6px; border-radius: 8px; border: none;
-  background: var(--primary); color: #fff; font-size: 12px; font-weight: 700;
-  cursor: pointer; transition: background .15s;
-}
-.ur-mini-add.added { background: #10B981; }
+.ur-sheet.dragging { transition: none; }
+.ur-sheet-handle { flex-shrink: 0; padding: 10px 16px 8px; cursor: grab; }
+.ur-sheet-grip { width: 36px; height: 4px; border-radius: 2px; background: #E5E7EB; margin: 0 auto 8px; }
+.ur-sheet-count { font-size: 11px; font-weight: 700; color: #9CA3AF; text-align: center; }
+.ur-sheet-sort-row { display: flex; gap: 6px; padding: 0 16px 10px; flex-shrink: 0; border-bottom: 1px solid #F0F0F0; }
+.ur-sheet .ur-academy-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.ur-academy-row.highlight { background: #FFF7ED; }
 /* 반경 선택 */
 .ur-radius-row {
   display: flex; gap: 6px; padding: 8px 16px;
@@ -8734,7 +8715,6 @@ var _urUser = { name: '', email: '', color: '#F97316' };
 var _urFilter = 'all';
 var _urSort = 'dist';
 var _urSearchText = '';
-var _urView = 'list'; // 'list' | 'map'
 var _urMap = null;
 var _urMarkers = {};
 var _urCircle = null;
@@ -8897,7 +8877,7 @@ function urSetFilter(el) {
   urRenderSubjectGrid();
   // 과목 아이콘을 탭하면 홈 메뉴는 숨기고 지도 기반 결과 화면으로 전환 (참조 UI와 동일한 흐름)
   urEnterResultMode(label);
-  urSetView('map');
+  urRenderResults();
 }
 var _urResultMode = false;
 function urEnterResultMode(subjLabel) {
@@ -8907,7 +8887,7 @@ function urEnterResultMode(subjLabel) {
     if (el) el.style.display = 'none';
   });
   var resultsArea = document.getElementById('urResultsArea');
-  if (resultsArea) resultsArea.style.display = 'block';
+  if (resultsArea) resultsArea.style.display = 'flex';
   var backBtn = document.getElementById('urResultBackBtn');
   var titleEl = document.getElementById('urResultTitle');
   if (backBtn) backBtn.style.display = 'flex';
@@ -9025,24 +9005,16 @@ function urSetSort(el) {
 function urOnSearch() {
   var inp = document.getElementById('urSearchInput');
   _urSearchText = inp ? inp.value.trim().toLowerCase() : '';
-  if (_urView === 'list') urRenderAcademies();
-  else urRenderMapMarkers();
+  urRenderAcademies();
+  urRenderMapMarkers();
 }
 function urFilterAcademies() { urOnSearch(); }
 
-// ── 뷰 전환 (목록 ↔ 지도) ──
-function urSetView(mode) {
-  _urView = mode;
-  var listView = document.getElementById('urListView');
-  var mapCont  = document.getElementById('urMapContainer');
-  var listBtn  = document.getElementById('urViewListBtn');
-  var mapBtn   = document.getElementById('urViewMapBtn');
-  if (listView) listView.style.display = mode === 'list' ? '' : 'none';
-  if (mapCont)  mapCont.classList.toggle('active', mode === 'map');
-  if (listBtn)  listBtn.classList.toggle('active', mode === 'list');
-  if (mapBtn)   mapBtn.classList.toggle('active', mode === 'map');
-  if (mode === 'list') { urRenderAcademies(); }
-  else { urInitMap(); }
+// ── 지도(핀)와 목록(바텀시트)을 동시에 다시 그림 — 탭으로 분리하지 않으므로 항상 같이 갱신 ──
+function urRenderResults() {
+  urInitMap();
+  urRenderAcademies();
+  if (document.getElementById('urSheet').style.height === '') urSetSheetState('half');
 }
 
 // ── 네이버 지도 초기화 ──
@@ -9121,7 +9093,7 @@ function urSetRadius(btn) {
   urUpdateCircle();
   urUpdateDistances();
   urRenderMapMarkers();
-  if (_urView === 'list') urRenderAcademies();
+  urRenderAcademies();
 }
 
 // ── 거리 재계산 ──
@@ -9187,41 +9159,25 @@ function urRenderMapMarkers() {
     })(a, marker);
     _urMarkers[a.id] = marker;
   });
-  urRenderMapCards(filtered);
+  var countEl = document.getElementById('urMapCount');
+  if (countEl) countEl.textContent = filtered.length + '개 학원 검색됨';
 }
 
-// ── 하단 카드 슬라이더 ──
-function urRenderMapCards(list) {
-  var count = document.getElementById('urMapCount');
-  if (count) count.textContent = list.length + '개 학원 검색됨';
-  var container = document.getElementById('urMapCards');
-  if (!container) return;
-  var addedIds = urGetSchedule().map(function(s) { return s.academyId; });
-  container.innerHTML = list.map(function(a) {
-    var added = addedIds.indexOf(a.id) >= 0;
-    var miniRegion = _urShortRegion(a.addr);
-    return '<div class="ur-map-mini-card' + (_urHighlightId === a.id ? ' highlight' : '') + '" id="urCard' + a.id + '" onclick="urFlyToAcademy(' + a.id + ')">'
-      + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
-      +   '<span style="width:8px;height:8px;border-radius:50%;background:' + a.color + ';flex-shrink:0"></span>'
-      +   '<div class="ur-mini-name">' + _escHtml(a.name) + '</div>'
-      + '</div>'
-      + '<div class="ur-mini-meta">' + _urHoursLine(a) + '<br>📍 ' + a.dist + 'km' + (miniRegion ? ' &nbsp;' + _escHtml(miniRegion) : '') + '</div>'
-      + '<button class="ur-mini-add' + (added ? ' added' : '') + '" onclick="event.stopPropagation();urToggleSchedule(' + a.id + ',this);urRenderMapMarkers()">'
-      +   (added ? '✓ 등록됨' : '+ 추가')
-      + '</button>'
-      + '</div>';
-  }).join('');
-}
-
-// ── 카드 하이라이트 ──
+// ── 핀 탭 → 목록(바텀시트)에서 해당 학원 행을 하이라이트 + 스크롤.
+//    시트가 접혀 있으면(collapsed) 행이 안 보이니 half까지 끌어올려서 보여줌 ──
 function urHighlightCard(id) {
   _urHighlightId = id;
-  Array.prototype.forEach.call(document.querySelectorAll('.ur-map-mini-card'), function(el) { el.classList.remove('highlight'); });
-  var card = document.getElementById('urCard' + id);
-  if (card) { card.classList.add('highlight'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
+  Array.prototype.forEach.call(document.querySelectorAll('.ur-academy-row'), function(el) { el.classList.remove('highlight'); });
+  var row = document.getElementById('urCard' + id);
+  if (row) {
+    row.classList.add('highlight');
+    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  var sheet = document.getElementById('urSheet');
+  if (sheet && sheet.dataset.state === 'collapsed') urSetSheetState('half');
 }
 
-// ── 카드 클릭 → 지도 이동 + 마커 팝업 ──
+// ── 목록 행 클릭 → 지도 이동 + 마커 팝업 (역방향: 지도→목록은 urHighlightCard) ──
 function urFlyToAcademy(id) {
   _urHighlightId = id;
   urHighlightCard(id);
@@ -9231,6 +9187,64 @@ function urFlyToAcademy(id) {
   setTimeout(function() {
     if (_urMarkers[id]) naver.maps.Event.trigger(_urMarkers[id], 'click');
   }, 500);
+}
+
+// ── 학원 목록 바텀시트 드래그 ──
+// 손잡이를 끌어올리면 목록이 펼쳐지고(expanded) 내리면 지도 핀이 다시 보임(collapsed).
+// 손가락 떼면 collapsed/half/expanded 중 가장 가까운 지점으로 스냅.
+var UR_SHEET_STATES = { collapsed: 0.16, half: 0.5, expanded: 0.92 };
+var _urSheetDrag = { dragging: false, startY: 0, startH: 0 };
+function urSheetWrapHeight() {
+  var wrap = document.getElementById('urMapSheetWrap');
+  return wrap ? wrap.clientHeight : 0;
+}
+function urSetSheetState(state) {
+  var sheet = document.getElementById('urSheet');
+  var wrap = document.getElementById('urMapSheetWrap');
+  if (!sheet || !wrap || !UR_SHEET_STATES[state]) return;
+  var h = urSheetWrapHeight() * UR_SHEET_STATES[state];
+  sheet.dataset.state = state;
+  sheet.style.height = h + 'px';
+  wrap.style.setProperty('--ur-sheet-h', h + 'px');
+}
+function urSheetPointerDown(e) {
+  var sheet = document.getElementById('urSheet');
+  if (!sheet) return;
+  _urSheetDrag.dragging = true;
+  _urSheetDrag.startY = e.clientY;
+  _urSheetDrag.startH = sheet.getBoundingClientRect().height;
+  _urSheetDrag.lastH = _urSheetDrag.startH;
+  sheet.classList.add('dragging');
+  try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) { /* 일부 환경에서 활성 포인터가 아니면 던짐 — 캡처 없이도 드래그 자체는 동작하므로 무시 */ }
+}
+function urSheetPointerMove(e) {
+  if (!_urSheetDrag.dragging) return;
+  var sheet = document.getElementById('urSheet');
+  var wrap = document.getElementById('urMapSheetWrap');
+  if (!sheet || !wrap) return;
+  var wrapH = urSheetWrapHeight();
+  var minH = wrapH * UR_SHEET_STATES.collapsed;
+  var maxH = wrapH * UR_SHEET_STATES.expanded;
+  var delta = _urSheetDrag.startY - e.clientY; // 위로 끌수록 +
+  var h = Math.max(minH, Math.min(maxH, _urSheetDrag.startH + delta));
+  _urSheetDrag.lastH = h; // pointerup에서 다시 레이아웃을 읽지 않고 이 값을 그대로 씀(레이아웃 타이밍 의존 제거)
+  sheet.style.height = h + 'px';
+  wrap.style.setProperty('--ur-sheet-h', h + 'px');
+}
+function urSheetPointerUp(e) {
+  if (!_urSheetDrag.dragging) return;
+  _urSheetDrag.dragging = false;
+  var sheet = document.getElementById('urSheet');
+  if (!sheet) return;
+  sheet.classList.remove('dragging');
+  var wrapH = urSheetWrapHeight();
+  var curH = _urSheetDrag.lastH;
+  var best = 'half', bestDiff = Infinity;
+  Object.keys(UR_SHEET_STATES).forEach(function(s) {
+    var diff = Math.abs(curH - wrapH * UR_SHEET_STATES[s]);
+    if (diff < bestDiff) { bestDiff = diff; best = s; }
+  });
+  urSetSheetState(best);
 }
 
 // ── 내 위치로 이동 ──
@@ -9379,8 +9393,8 @@ function urSetAgeFilter(el) {
   var label = document.getElementById('urAgeTriggerLabel');
   if (label) label.textContent = el.dataset.label;
   urToggleAgeMenu(); // 선택하면 메뉴 닫기
-  if (_urView === 'list') urRenderAcademies();
-  else urRenderMapMarkers();
+  urRenderAcademies();
+  urRenderMapMarkers();
 }
 // 드롭다운 바깥을 탭하면 닫히도록 — 메뉴/트리거 자체를 누른 경우는 onclick에서 직접 처리하므로 제외
 document.addEventListener('click', function(e) {
@@ -9434,7 +9448,7 @@ function urRenderAcademies() {
     var hoursHtml = '<span class="ur-row-hours-' + (a.hasTimetable ? 'ok' : 'pending') + '">' + _urHoursLine(a) + '</span>';
     var region = _urShortRegion(a.addr);
     var feeHtml = a.fee != null ? ((a.fee/10000).toFixed(0) + '만원/월') : '수강료 미확인';
-    return '<div class="ur-academy-row">'
+    return '<div class="ur-academy-row' + (_urHighlightId === a.id ? ' highlight' : '') + '" id="urCard' + a.id + '" onclick="urFlyToAcademy(' + a.id + ')">'
       +   '<div class="ur-academy-row-main">'
       +     '<div class="ur-row-name-line">'
       +       '<span class="ur-subj-dot" style="background:' + a.color + '"></span>'
@@ -9446,7 +9460,7 @@ function urRenderAcademies() {
       +   '</div>'
       +   '<div class="ur-row-actions">'
       +     '<button class="ur-row-report" onclick="urReportAcademyPrompt(' + a.id + ',event)" title="정보가 잘못됐나요?">🚩</button>'
-      +     '<button class="ur-row-add' + (added ? ' added' : '') + '" onclick="urToggleSchedule(' + a.id + ',this)">'
+      +     '<button class="ur-row-add' + (added ? ' added' : '') + '" onclick="event.stopPropagation();urToggleSchedule(' + a.id + ',this)">'
       +       (added ? '✓' : '+')
       +     '</button>'
       +   '</div>'
@@ -10023,7 +10037,7 @@ function urToggleNotif(btn) {
           <div class="ur-home-search-wrap">
             <span>🔍</span>
             <input type="text" id="urSearchInput" placeholder="학원 이름, 과목, 지역을 검색해보세요" oninput="urOnSearch()"
-              onkeydown="if(event.key==='Enter' && _urView==='map') urSearchAddress()">
+              onkeydown="if(event.key==='Enter' && _urResultMode) urSearchAddress()">
           </div>
         </div>
         <div class="ur-result-title" id="urResultTitle" style="display:none"></div>
@@ -10055,26 +10069,10 @@ function urToggleNotif(btn) {
         <!-- JS 렌더링 -->
       </div>
 
-      <!-- 결과 화면(목록/지도) — 홈에서는 숨김, 과목 선택 시(결과모드)에만 표시 -->
+      <!-- 결과 화면 — 홈에서는 숨김, 과목 선택 시(결과모드)에만 표시.
+           지도와 목록을 탭으로 분리하지 않고, 지도 위에 학원 목록 바텀시트를 올려서
+           끌어올리면 목록이 펼쳐지고 내리면 지도 핀이 다시 보이는 한 화면 구성(참조 영상과 동일) -->
       <div id="urResultsArea" style="display:none">
-      <div style="display:flex;justify-content:flex-end;padding:8px 16px 0;background:#fff;">
-        <div class="ur-view-toggle">
-          <button class="ur-view-btn active" id="urViewListBtn" onclick="urSetView('list')">목록</button>
-          <button class="ur-view-btn" id="urViewMapBtn" onclick="urSetView('map')">지도</button>
-        </div>
-      </div>
-      <!-- 목록 뷰 -->
-      <div id="urListView">
-        <div style="display:flex;gap:6px;padding:10px 16px 4px;background:#fff;border-bottom:1px solid #F0F0F0;">
-          <button class="ur-sort-btn active" data-sort="dist" onclick="urSetSort(this)">📍 거리순</button>
-          <button class="ur-sort-btn" data-sort="rating" onclick="urSetSort(this)">⭐ 평점순</button>
-          <button class="ur-sort-btn" data-sort="fee" onclick="urSetSort(this)">💰 요금순</button>
-        </div>
-        <div class="ur-academy-list" id="urAcademyList"><!-- JS 렌더링 --></div>
-      </div>
-
-      <!-- 지도 뷰 -->
-      <div id="urMapContainer">
         <!-- 반경 선택 -->
         <div class="ur-radius-row">
           <span style="font-size:12px;font-weight:700;color:#6B7280;align-self:center;flex-shrink:0">반경</span>
@@ -10084,18 +10082,32 @@ function urToggleNotif(btn) {
           <button class="ur-radius-btn" data-r="3000" onclick="urSetRadius(this)">3km</button>
           <button class="ur-radius-btn" data-r="5000" onclick="urSetRadius(this)">5km</button>
         </div>
-        <!-- 네이버 지도 -->
-        <div id="urMapEl"></div>
-        <!-- 현재 위치 주소 표시 (지도 위 플로팅) -->
-        <div id="urAddrBadge" style="position:absolute;top:130px;left:50%;transform:translateX(-50%);z-index:500;background:rgba(255,255,255,0.95);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#374151;box-shadow:0 2px 8px rgba(0,0,0,0.15);pointer-events:none;white-space:nowrap;display:none"></div>
-        <!-- 내 위치 버튼 -->
-        <button id="urLocBtn" onclick="urMoveToMyLocation()" title="내 위치로">📍</button>
-        <!-- 하단 학원 카드 슬라이더 -->
-        <div id="urMapBottomSheet">
-          <div style="font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:8px" id="urMapCount"></div>
-          <div class="ur-map-cards" id="urMapCards"><!-- JS 렌더링 --></div>
+
+        <!-- 지도 + 바텀시트 -->
+        <div class="ur-map-sheet-wrap" id="urMapSheetWrap">
+          <!-- 네이버 지도 -->
+          <div id="urMapEl"></div>
+          <!-- 현재 위치 주소 표시 (지도 위 플로팅) -->
+          <div id="urAddrBadge" style="position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:500;background:rgba(255,255,255,0.95);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#374151;box-shadow:0 2px 8px rgba(0,0,0,0.15);pointer-events:none;white-space:nowrap;display:none"></div>
+          <!-- 내 위치 버튼 -->
+          <button id="urLocBtn" onclick="urMoveToMyLocation()" title="내 위치로">📍</button>
+
+          <!-- 학원 목록 바텀시트 — 손잡이를 끌어올리면 펼쳐지고 내리면 접혀서 지도 핀이 다시 보임 -->
+          <div class="ur-sheet" id="urSheet" data-state="half">
+            <div class="ur-sheet-handle" id="urSheetHandle"
+              onpointerdown="urSheetPointerDown(event)" onpointermove="urSheetPointerMove(event)"
+              onpointerup="urSheetPointerUp(event)" onpointercancel="urSheetPointerUp(event)">
+              <div class="ur-sheet-grip"></div>
+              <div class="ur-sheet-count" id="urMapCount"></div>
+            </div>
+            <div class="ur-sheet-sort-row">
+              <button class="ur-sort-btn active" data-sort="dist" onclick="urSetSort(this)">📍 거리순</button>
+              <button class="ur-sort-btn" data-sort="rating" onclick="urSetSort(this)">⭐ 평점순</button>
+              <button class="ur-sort-btn" data-sort="fee" onclick="urSetSort(this)">💰 요금순</button>
+            </div>
+            <div class="ur-academy-list" id="urAcademyList"><!-- JS 렌더링 --></div>
+          </div>
         </div>
-      </div>
       </div><!-- /urResultsArea -->
     </div>
 
