@@ -2454,13 +2454,13 @@
   gap: 3px; cursor: pointer; padding: 8px 0; background: none; border: none;
   color: #9CA3AF; transition: color .15s;
 }
-.ur-tab.active { color: var(--primary); }
-.ur-tab.active .ur-tab-icon svg { stroke: var(--primary); stroke-width: 2.5; }
+.ur-tab.active { color: #111; }
+.ur-tab.active .ur-tab-icon svg { stroke: #111; stroke-width: 2.5; }
 .ur-tab-icon {
   font-size: 20px; line-height: 1; display:flex; align-items:center; justify-content:center;
   width: 36px; height: 28px; border-radius: 12px; transition: background .15s;
 }
-.ur-tab.active .ur-tab-icon { background: rgba(249,115,22,0.12); }
+.ur-tab.active .ur-tab-icon { background: rgba(17,17,17,0.08); }
 .ur-tab-icon svg { stroke: #9CA3AF; transition: stroke .15s; }
 .ur-tab-label { font-size: 11px; font-weight: 600; }
 /* 학원 검색 */
@@ -2580,7 +2580,7 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .ur-subject-item:active .ur-subject-icon { transform: scale(0.94); }
-.ur-subject-item.active .ur-subject-icon { box-shadow: 0 4px 10px rgba(0,0,0,0.16); }
+.ur-subject-item.active .ur-subject-icon { background: rgba(17,17,17,0.08); box-shadow: 0 4px 10px rgba(0,0,0,0.16); }
 .ur-subject-item.active .ur-subject-label { color: var(--text-main); font-weight: 800; }
 .ur-subject-label { font-size: 11.5px; font-weight: 600; color: #6B7280; }
 
@@ -8840,24 +8840,17 @@ var UR_SUBJECT_GRID = [
   { subj:'coding',    icon:'💻', label:'코딩' },
   { subj:'sports',    icon:'⚽', label:'체육' }
 ];
-// hex 색상 → rgba 변환 (아이콘 비활성 톤은 브랜드 색의 옅은 틴트로, 선택 시엔 원색으로)
-function _urHexToRgba(hex, alpha) {
-  var h = hex.replace('#', '');
-  var r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
-  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
-}
 function urRenderSubjectGrid() {
   var gridEl = document.getElementById('urSubjectGrid');
   if (!gridEl) return;
   var allActive = _urFilter === 'all';
+  // 과목별 배경색을 다르게 쓰지 않고, 모든 아이콘이 같은 톤(옅은 그레이)을 쓰도록 통일 — 선택 상태는 box-shadow/굵은 글씨로 표시
   var html = '<button class="ur-subject-item' + (allActive ? ' active' : '') + '" data-subj="all" onclick="urSetFilter(this)">'
-    + '<div class="ur-subject-icon" style="background:' + (allActive ? '#F97316' : _urHexToRgba('#F97316', 0.12)) + '">🏠</div><div class="ur-subject-label">전체</div></button>';
+    + '<div class="ur-subject-icon">🏠</div><div class="ur-subject-label">전체</div></button>';
   html += UR_SUBJECT_GRID.map(function(s) {
     var active = _urFilter === s.subj;
-    var color = (AC_SUBJECT_META[s.subj] || {}).color || '#F97316';
-    var bg = active ? color : _urHexToRgba(color, 0.12);
     return '<button class="ur-subject-item' + (active ? ' active' : '') + '" data-subj="' + s.subj + '" onclick="urSetFilter(this)">'
-      + '<div class="ur-subject-icon" style="background:' + bg + '">' + s.icon + '</div><div class="ur-subject-label">' + s.label + '</div></button>';
+      + '<div class="ur-subject-icon">' + s.icon + '</div><div class="ur-subject-label">' + s.label + '</div></button>';
   }).join('');
   gridEl.innerHTML = html;
 }
@@ -8886,7 +8879,8 @@ function urRenderHomePromo() {
   });
 
   el.className = 'ur-home-promo is-today';
-  var header = '<div class="ur-promo-top"><div class="ur-promo-title">📅 오늘(' + dayNames[today] + ') 타임테이블</div><div class="ur-promo-cta">전체 보기 →</div></div>';
+  var calIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="5"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="M12 13.3c-.9-1-2.6-.8-2.6.6 0 1.4 2.6 3 2.6 3s2.6-1.6 2.6-3c0-1.4-1.7-1.6-2.6-.6Z" fill="var(--primary)" stroke="none"/></svg>';
+  var header = '<div class="ur-promo-top"><div class="ur-promo-title">' + calIcon + ' 오늘(' + dayNames[today] + ') 타임테이블</div><div class="ur-promo-cta">전체 보기 →</div></div>';
   if (!todayItems.length) {
     el.innerHTML = header + '<div class="ur-promo-sub">오늘은 등록된 학원 일정이 없어요</div>';
     return;
@@ -9207,20 +9201,22 @@ function urReverseGeocode(lat, lng) {
       if (badge) badge.style.display = 'none';
       return;
     }
-    var addr = '';
+    var addr = '', jibunAddr = '';
     try {
       addr = response.v2.address.roadAddress || response.v2.address.jibunAddress || '';
+      jibunAddr = response.v2.address.jibunAddress || '';
       // 시/도 제거하고 구/동 부터만 표시
       addr = addr.replace(/^(서울특별시|서울시|경기도|부산광역시)\s*/, '');
+      jibunAddr = jibunAddr.replace(/^(서울특별시|서울시|경기도|부산광역시)\s*/, '');
     } catch(e) { addr = ''; }
     if (badge) {
       if (addr) { badge.textContent = '📍 ' + addr; badge.style.display = 'block'; }
       else { badge.style.display = 'none'; }
     }
     if (homeLocEl) {
-      // 동/읍/면 단위만 짧게 표시 (예: "서초구 서초동" → "서초동")
+      // 동/읍/면 단위만 짧게 표시 — 도로명주소엔 동이 없으므로 지번주소에서 추출 (예: "서초구 서초동 1330-5" → "서초동")
       var shortAddr = addr;
-      var m = addr.match(/([가-힣0-9]+(동|읍|면))(?!\S)/);
+      var m = jibunAddr.match(/([가-힣0-9]+(동|읍|면))(?!\S)/) || addr.match(/([가-힣0-9]+(동|읍|면))(?!\S)/);
       if (m) shortAddr = m[1];
       homeLocEl.textContent = shortAddr || addr || '위치 설정';
     }
@@ -9918,10 +9914,6 @@ function urToggleNotif(btn) {
             <span>🔍</span>
             <input type="text" id="urSearchInput" placeholder="학원 이름, 과목을 검색해보세요" oninput="urOnSearch()">
           </div>
-          <div class="ur-view-toggle">
-            <button class="ur-view-btn active" id="urViewListBtn" onclick="urSetView('list')">목록</button>
-            <button class="ur-view-btn" id="urViewMapBtn" onclick="urSetView('map')">지도</button>
-          </div>
         </div>
         <div class="ur-result-title" id="urResultTitle" style="display:none"></div>
       </div>
@@ -9947,6 +9939,12 @@ function urToggleNotif(btn) {
 
       <!-- 결과 화면(목록/지도) — 홈에서는 숨김, 과목 선택 시(결과모드)에만 표시 -->
       <div id="urResultsArea" style="display:none">
+      <div style="display:flex;justify-content:flex-end;padding:8px 16px 0;background:#fff;">
+        <div class="ur-view-toggle">
+          <button class="ur-view-btn active" id="urViewListBtn" onclick="urSetView('list')">목록</button>
+          <button class="ur-view-btn" id="urViewMapBtn" onclick="urSetView('map')">지도</button>
+        </div>
+      </div>
       <!-- 목록 뷰 -->
       <div id="urListView">
         <div style="display:flex;gap:6px;padding:10px 16px 4px;background:#fff;border-bottom:1px solid #F0F0F0;">
