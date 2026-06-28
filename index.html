@@ -5225,6 +5225,11 @@ function urParseFreeTextQuery(q) {
   for (var i = 0; i < _UR_REGION_WORDS.length; i++) {
     if (q.indexOf(_UR_REGION_WORDS[i]) >= 0) { region = _UR_REGION_WORDS[i]; break; }
   }
+  // 구 단위로 못 찾았으면 "압구정동", "역삼동" 같은 동/읍/면 단위 지명도 지오코딩 대상으로 추출
+  if (!region) {
+    var dongMatch = q.match(/[가-힣]{1,6}(동|읍|면)(?=[\s]|$)/);
+    if (dongMatch) region = dongMatch[0];
+  }
   var radiusMeters = 1000;
   var m = q.match(/(\d+(?:\.\d+)?)\s*(km|k|m)\b/i);
   if (m) {
