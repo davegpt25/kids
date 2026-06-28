@@ -2749,15 +2749,24 @@
   font-size: 18px; font-weight: 800; color: #fff;
 }
 .sc-child-name { font-size: 17px; font-weight: 800; color: #fff; }
+.sc-child-grade {
+  display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 100px;
+  background: rgba(255,255,255,.25); font-size: 10px; font-weight: 700; vertical-align: 1px;
+}
 .sc-child-sub  { font-size: 11px; color: rgba(255,255,255,.8); margin-top: 1px; }
 
 .sc-body { background: #fff; padding: 18px 20px; }
 
 /* 과목 칩 */
-.sc-subjects { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.sc-subjects { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .sc-subj-chip {
   padding: 4px 12px; border-radius: 100px; font-size: 11px; font-weight: 700;
   color: #fff;
+}
+/* 실제 학원명 목록 */
+.sc-academy-names {
+  font-size: 11.5px; color: #6B7280; line-height: 1.5; margin-bottom: 14px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 
 /* 주간 그리드 */
@@ -10845,7 +10854,7 @@ textarea.krap-input { resize:vertical;min-height:72px; }
         <div class="sc-child-avatar" id="scChildAvatar">👦</div>
         <div>
           <div class="sc-child-name" id="scChildName">우리 아이</div>
-          <div class="sc-child-sub">이번 학기 학원 스케줄 ✅</div>
+          <div class="sc-child-sub" id="scChildSub">이번 학기 학원 스케줄 ✅</div>
         </div>
       </div>
     </div>
@@ -10855,13 +10864,16 @@ textarea.krap-input { resize:vertical;min-height:72px; }
       <!-- 과목 칩 -->
       <div class="sc-subjects" id="scSubjects"></div>
 
+      <!-- 실제 등록 학원명 — 다른 학부모가 "어디 다니길래?" 비교/공감할 수 있는 핵심 정보 -->
+      <div class="sc-academy-names" id="scAcademyNames"></div>
+
       <!-- 주간 그리드 -->
       <div class="sc-grid" id="scGrid"></div>
 
       <!-- 배지 -->
       <div class="sc-badge-row" id="scBadges">
         <span class="sc-badge green">✓ 시간 충돌 없음</span>
-        <span class="sc-badge blue">🔍 GPS 반경 추천</span>
+        <span class="sc-badge blue">🔔 하원알림 자동</span>
       </div>
 
       <!-- CTA -->
@@ -10907,12 +10919,29 @@ function closeShareCard() {
 }
 
 function _buildShareCard(schedule) {
-  // 아이 아바타/이름
+  // 아이 아바타/이름 — 자녀 프로필이 없으면 절대 부모 실명(_urUser.name)을 쓰지 않고
+  // "우리 아이"로 둔다. 외부에 공유되는 카드라 실명 노출은 안 됨 + 의미상으로도
+  // "부모이름의 스케줄"은 어색함(스케줄의 주인은 아이지 부모가 아님).
   var children = urGetChildren();
-  var childName = children.length ? children[0].name : (_urUser.name || '우리 아이');
-  var childEmoji = children.length ? (children[0].emoji || '👦') : '👦';
+  var child = children.length ? children[0] : null;
+  var childName = child ? child.name : '우리 아이';
+  var childEmoji = child ? (child.emoji || '👦') : '👦';
+  var gradeText = child && child.grade ? child.grade : '';
   document.getElementById('scChildAvatar').textContent = childEmoji;
-  document.getElementById('scChildName').textContent = childName + '의 스케줄';
+  document.getElementById('scChildName').innerHTML = _escHtml(childName + '의 스케줄')
+    + (gradeText ? '<span class="sc-child-grade">' + _escHtml(gradeText) + '</span>' : '');
+
+  // 동네 정보 — 다른 학부모가 "우리 동네 얘기네" 공감할 수 있는 핵심 정보.
+  // 홈 화면에서 이미 동 단위로 짧게 표시해둔 텍스트를 그대로 재사용(아직 못 불러왔으면 생략).
+  var regionText = '';
+  var locEl = document.getElementById('urHomeLocationText');
+  if (locEl && /[가-힣0-9]+(동|읍|면)$/.test(locEl.textContent.trim())) {
+    regionText = locEl.textContent.trim() + ' · ';
+  }
+  document.getElementById('scChildSub').textContent = regionText + '이번 학기 학원 스케줄 ✅';
+
+  // 실제 등록 학원명 목록
+  document.getElementById('scAcademyNames').textContent = '📍 ' + schedule.map(function(s) { return s.name; }).join(' · ');
 
   // 과목 칩
   var subjectsEl = document.getElementById('scSubjects');
@@ -10972,7 +11001,7 @@ function _buildShareCard(schedule) {
   var badgesEl = document.getElementById('scBadges');
   badgesEl.innerHTML = '<span class="sc-badge green">✓ 시간 충돌 없음</span>'
     + '<span class="sc-badge orange">🏫 ' + schedule.length + '개 학원</span>'
-    + '<span class="sc-badge blue">🔍 GPS 반경 추천</span>';
+    + '<span class="sc-badge blue">🔔 하원알림 자동</span>';
 }
 
 function shareKakao() {
