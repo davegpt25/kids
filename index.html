@@ -8928,6 +8928,7 @@ function urExitResultMode() {
 
 // 과목 아이콘을 직접 누르지 않고도(예: AI 추천 결과에서) 결과모드로 바로 진입시키기 위한 버전
 function urGoToSubjectResults(subjKey, label) {
+  userShowTab(0); // 홈 탭으로 먼저 이동해야 결과화면(지도+바텀시트)이 실제로 보임 — 스케줄 탭 등 다른 탭에 있을 때 호출될 수 있음
   _urFilter = subjKey;
   if (document.getElementById('urSubjectGrid')) urRenderSubjectGrid();
   urEnterResultMode(label);
@@ -9307,6 +9308,9 @@ function urHighlightCard(id) {
 function urFlyToAcademy(id) {
   _urHighlightId = id;
   urHighlightCard(id);
+  // 목록을 펼쳐서(expanded) 보다가 학원을 고르면, 그 핀을 보여주려고 다시 지도가 보이는
+  // half 상태로 내려준다 — 목록만 계속 보이면 "지도로 이동했다"는 느낌이 안 남.
+  urSetSheetState('half');
   var a = UR_ACADEMIES.filter(function(x) { return x.id === id; })[0];
   if (!a || !_urMap) return;
   _urMap.morph(new naver.maps.LatLng(a.lat, a.lng), 16);
