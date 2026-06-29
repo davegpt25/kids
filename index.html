@@ -4632,7 +4632,10 @@
 
 // ─── 소셜 로그인 설정 ───
 const GOOGLE_CLIENT_ID = '1087107664248-clfpqesl8bo140k5bu4uc080u84ae6vk.apps.googleusercontent.com';
-const KAKAO_APP_KEY    = '1550b9b3a098d276139c9f66eabb7a64';
+const KAKAO_APP_KEY    = '1550b9b3a098d276139c9f66eabb7a64'; // JavaScript 키 — Kakao.init()에만 씀
+// REST API 키 — kauth.kakao.com/oauth/authorize, /oauth/token에는 JS 키가 아니라 이 키를 client_id로 써야 함
+// (kidsroute-backend의 KAKAO_CLIENT_ID와 같은 앱·같은 값)
+const KAKAO_REST_API_KEY = 'a81ed977e96cd6055a425c792ea6a4ef';
 const NAVER_CLIENT_ID  = '5dq02tmsku';
 
 // ── EmailJS 설정 ──────────────────────────────────────────────────
@@ -4761,7 +4764,7 @@ function _oauthRedirectKakao(mode) {
   sessionStorage.setItem('_oauthMode', 'kakao_' + (mode || 'login'));
   const base = location.origin + location.pathname;
   const params = new URLSearchParams({
-    client_id: KAKAO_APP_KEY,
+    client_id: KAKAO_REST_API_KEY,
     redirect_uri: base,
     response_type: 'code',
     scope: 'profile_nickname,account_email',
@@ -4821,7 +4824,7 @@ async function _handleOAuthCallback() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
         body: new URLSearchParams({
           grant_type:   'authorization_code',
-          client_id:    KAKAO_APP_KEY,
+          client_id:    KAKAO_REST_API_KEY,
           redirect_uri: base,
           code
         })
@@ -4950,58 +4953,22 @@ function selectProvider(provider) {
   } else if (provider === 'kakao') {
     const hasKakaoKey = KAKAO_APP_KEY !== 'YOUR_KAKAO_APP_KEY_HERE';
 
-    // 카카오톡 인앱 브라우저: SDK popup 시도 (KakaoTalk 네이티브 처리)
-    if (inApp === 'kakaotalk' && hasKakaoKey && typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
-      Kakao.Auth.login({
-        success: () => {
-          Kakao.API.request({
-            url: '/v2/user/me',
-            success: (res) => {
-              const name  = res.kakao_account?.profile?.nickname || '카카오사용자';
-              const email = res.kakao_account?.email || name + '@kakao.com';
-              closeGoogleModal();
-              onLoginSuccess(name, email, '#FEE500', 'kakao');
-            },
-            fail: () => { closeGoogleModal(); _showInAppWarning('kakao'); }
-          });
-        },
-        fail: () => { closeGoogleModal(); _showInAppWarning('kakao'); }
-      });
-      return;
-    }
-
-    // 기타 인앱 브라우저: 안내 시트
-    if (inApp) {
+    // [버그 수정] Kakao JS SDK 2.x부터 Kakao.Auth.login()이 제거되어 호출 시
+    // "Kakao.Auth.login is not a function"이 그 자리에서 던져지고, onclick 핸들러가
+    // 통째로 멈춰서 "버튼을 눌러도 반응 없음"으로 보였음(2026-06-29 실제로 재현·확인).
+    // 데스크탑/모바일/카카오톡 인앱 브라우저 모두 location.href 리다이렉트 방식
+    // (_oauthRedirectKakao, 이미 정상 동작 확인됨)으로 통일해서 깨진 팝업 API를 없앤다.
+    // 카카오톡 외 다른 인앱 브라우저(인스타그램 등)는 보안 정책상 OAuth 리다이렉트가
+    // 막히는 경우가 많아 그 경우만 안내 시트로 유도.
+    if (inApp && inApp !== 'kakaotalk') {
       closeGoogleModal();
       _showInAppWarning('kakao');
       return;
     }
 
     if (hasKakaoKey) {
-      if (_isMobile()) {
-        closeGoogleModal();
-        _oauthRedirectKakao('login');
-      } else if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
-        Kakao.Auth.login({
-          success: () => {
-            Kakao.API.request({
-              url: '/v2/user/me',
-              success: (res) => {
-                const name  = res.kakao_account?.profile?.nickname || '카카오사용자';
-                const email = res.kakao_account?.email || name + '@kakao.com';
-                closeGoogleModal();
-                onLoginSuccess(name, email, '#FEE500', 'kakao');
-              },
-              fail: (err) => console.error('카카오 사용자 정보 오류:', err)
-            });
-          },
-          fail: (err) => console.error('카카오 로그인 실패:', err)
-        });
-      } else {
-        showView('gViewLoading');
-        document.getElementById('gLoadingText').textContent = '카카오 로그인 중...';
-        setTimeout(() => { closeGoogleModal(); onLoginSuccess('카카오사용자', 'kakao_user@kakao.com', '#FEE500', 'kakao'); }, 1400);
-      }
+      closeGoogleModal();
+      _oauthRedirectKakao('login');
     } else {
       showView('gViewLoading');
       document.getElementById('gLoadingText').textContent = '카카오 로그인 중...';
