@@ -4636,6 +4636,9 @@ const KAKAO_APP_KEY    = '1550b9b3a098d276139c9f66eabb7a64'; // JavaScript 키 �
 // REST API 키 — kauth.kakao.com/oauth/authorize, /oauth/token에는 JS 키가 아니라 이 키를 client_id로 써야 함
 // (kidsroute-backend의 KAKAO_CLIENT_ID와 같은 앱·같은 값)
 const KAKAO_REST_API_KEY = 'a81ed977e96cd6055a425c792ea6a4ef';
+// "카카오 로그인" 클라이언트 시크릿이 이 앱에서 기본 활성화돼 있어서, 토큰 발급(/oauth/token) 시
+// 이 값이 없으면 "Bad client credentials"로 거부됨 — 2026-06-29 실제로 재현·확인.
+const KAKAO_CLIENT_SECRET = '2Zz0YQAePSjeHffnaUSpXXuQtpZMg0jN';
 const NAVER_CLIENT_ID  = '5dq02tmsku';
 
 // ── EmailJS 설정 ──────────────────────────────────────────────────
@@ -4827,9 +4830,10 @@ async function _handleOAuthCallback() {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
         body: new URLSearchParams({
-          grant_type:   'authorization_code',
-          client_id:    KAKAO_REST_API_KEY,
-          redirect_uri: base,
+          grant_type:    'authorization_code',
+          client_id:     KAKAO_REST_API_KEY,
+          client_secret: KAKAO_CLIENT_SECRET,
+          redirect_uri:  base,
           code
         })
       });
