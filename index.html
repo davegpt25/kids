@@ -2694,6 +2694,18 @@
 .ur-notif-time { font-size: 11px; color: #9CA3AF; }
 .ur-notif-item-title { font-size: 13.5px; font-weight: 800; color: var(--text-main); margin-bottom: 3px; }
 .ur-notif-item-body { font-size: 12.5px; color: #6B7280; line-height: 1.5; }
+/* AI 추천 — 동네 학원 분포(공급 비율) 기반, "또래 인기"가 아니라 정직하게 "동네 현황"으로 표기 */
+.ur-ai-reco-intro { font-size: 12px; color: #6B7280; line-height: 1.5; padding: 14px 16px; border-bottom: 1px solid #F0F0F0; }
+.ur-ai-reco-item { padding: 16px; border-bottom: 1px solid #F0F0F0; }
+.ur-ai-reco-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.ur-ai-reco-subj { font-size: 15px; font-weight: 800; color: var(--text-main); }
+.ur-ai-reco-pct { font-size: 18px; font-weight: 900; color: var(--primary); }
+.ur-ai-reco-desc { font-size: 12px; color: #9CA3AF; line-height: 1.5; margin-bottom: 10px; }
+.ur-ai-reco-btn {
+  width: 100%; padding: 10px; border-radius: 10px; border: none;
+  background: var(--primary); color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
 /* 스케줄 */
 .ur-sched-header {
   padding: 16px; background: #fff; border-bottom: 1px solid #F0F0F0;
@@ -8914,6 +8926,87 @@ function urExitResultMode() {
   if (titleEl) titleEl.style.display = 'none';
 }
 
+// 과목 아이콘을 직접 누르지 않고도(예: AI 추천 결과에서) 결과모드로 바로 진입시키기 위한 버전
+function urGoToSubjectResults(subjKey, label) {
+  _urFilter = subjKey;
+  if (document.getElementById('urSubjectGrid')) urRenderSubjectGrid();
+  urEnterResultMode(label);
+  urRenderResults();
+}
+
+// ── AI 추천 (1단계: 동네 학원 분포 기반) ──
+// "또래가 많이 듣는 과목"이라 부르려면 실제 등록 데이터(수요)가 필요한데 아직 없음.
+// 지금 가진 건 학원 공급 데이터뿐이라, 정직하게 "동네 학원 현황"으로 표기하고
+// 인과관계("그래서 또래도 듣는다")는 주장하지 않는다 — 표본이 쌓이면 2단계로 교체.
+function _urGradeToAgeBand(grade) {
+  if (!grade) return 'all';
+  if (grade.indexOf('미취학') === 0) return 'toddler';
+  if (grade.indexOf('초') === 0) return 'elementary';
+  if (grade.indexOf('중') === 0) return 'middle';
+  if (grade.indexOf('고') === 0) return 'high';
+  return 'all';
+}
+var UR_AGE_BAND_LABELS = { toddler: '유아', elementary: '초등', middle: '중등', high: '고등', all: '' };
+function urComputeRegionSubjectStats() {
+  urUpdateDistances();
+  var radius = _urRadius || 1000;
+  var children = urGetChildren();
+  var ageBand = children.length ? _urGradeToAgeBand(children[0].grade) : 'all';
+  var pool = KR_SYNC.getMergedAcademies().filter(function(a) {
+    if (a.dist == null || a.dist * 1000 > radius) return false;
+    if (ageBand !== 'all' && (a.ageBand || 'all') !== 'all' && a.ageBand !== ageBand) return false;
+    return true;
+  });
+  var counts = {};
+  pool.forEach(function(a) { counts[a.subj] = (counts[a.subj] || 0) + 1; });
+  var total = pool.length;
+  var stats = Object.keys(counts).map(function(subj) {
+    return { subj: subj, count: counts[subj], pct: total ? Math.round(counts[subj] / total * 100) : 0 };
+  });
+  stats.sort(function(a, b) { return b.count - a.count; });
+  return { stats: stats, total: total, ageBand: ageBand };
+}
+function urOpenAiRecommend() {
+  var screen = document.getElementById('urAiRecoScreen');
+  if (screen) screen.style.display = 'flex';
+  urRenderAiRecommend();
+}
+function urCloseAiRecommend() {
+  var screen = document.getElementById('urAiRecoScreen');
+  if (screen) screen.style.display = 'none';
+}
+function urRenderAiRecommend() {
+  var bodyEl = document.getElementById('urAiRecoBody');
+  if (!bodyEl) return;
+  var locEl = document.getElementById('urHomeLocationText');
+  var region = (locEl && /[가-힣0-9]+(동|읍|면)$/.test(locEl.textContent.trim())) ? locEl.textContent.trim() : '주변';
+  var data = urComputeRegionSubjectStats();
+  if (!data.total) {
+    bodyEl.innerHTML = '<div class="ur-notif-empty"><div class="ur-notif-empty-icon">📍</div>'
+      + '주변 학원 데이터가 아직 부족해요<br><span style="font-size:12px">반경을 넓히거나 다른 지역에서 다시 시도해보세요</span></div>';
+    return;
+  }
+  var schedule = urGetSchedule();
+  var haveSubj = {};
+  schedule.forEach(function(s) { haveSubj[s.subj] = true; });
+  var labels = {};
+  UR_SUBJECT_GRID.forEach(function(s) { labels[s.subj] = s.label; });
+  var missing = data.stats.filter(function(s) { return !haveSubj[s.subj]; }).slice(0, 3);
+  if (!missing.length) {
+    bodyEl.innerHTML = '<div class="ur-notif-empty"><div class="ur-notif-empty-icon">🎉</div>이미 동네 주요 과목을 다 등록하셨어요!</div>';
+    return;
+  }
+  var ageLabel = UR_AGE_BAND_LABELS[data.ageBand] || '';
+  bodyEl.innerHTML = missing.map(function(s) {
+    var label = labels[s.subj] || s.subj;
+    return '<div class="ur-ai-reco-item">'
+      + '<div class="ur-ai-reco-top"><span class="ur-ai-reco-subj">' + _escHtml(label) + '</span><span class="ur-ai-reco-pct">' + s.pct + '%</span></div>'
+      + '<div class="ur-ai-reco-desc">' + _escHtml(region) + (ageLabel ? ' · ' + ageLabel : '') + ' 학원 ' + data.total + '개 중 ' + s.count + '개가 ' + _escHtml(label) + '이에요</div>'
+      + '<button class="ur-ai-reco-btn" onclick="urCloseAiRecommend();urGoToSubjectResults(\'' + s.subj + '\',\'' + label + '\')">' + _escHtml(label) + ' 학원 보기 →</button>'
+      + '</div>';
+  }).join('');
+}
+
 // ── ③ 과목 아이콘 그리드 — 새 과목이 생기면 이 배열만 추가하면 됨 ──
 var UR_SUBJECT_GRID = [
   { subj:'math',      icon:'📐', label:'수학' },
@@ -10180,7 +10273,7 @@ function urToggleNotif(btn) {
         <div class="ur-sched-title">스케줄</div>
         <div style="display:flex;gap:8px;">
           <button class="ur-share-btn" onclick="openShareCard()">🔗 공유하기</button>
-          <button class="ur-sched-sim-btn" onclick="hideUserDashboard(); openDemoModal()">✨ AI 추천</button>
+          <button class="ur-sched-sim-btn" onclick="urOpenAiRecommend()">✨ AI 추천</button>
         </div>
       </div>
       <div class="ur-week-scroll" id="urWeekScroll"><!-- JS 렌더링 --></div>
@@ -10387,6 +10480,20 @@ function urToggleNotif(btn) {
       <button class="ur-notif-tab" data-tab="consult" onclick="urSetNotifTab(this)">상담톡</button>
     </div>
     <div class="ur-notif-list" id="urNotifList"><!-- JS 렌더링 --></div>
+  </div>
+
+  <!-- AI 추천 화면 — 스케줄 탭의 "✨ AI 추천" 탭 시 전체 화면으로 덮음.
+       1단계: 처음부터 다시 묻는 마케팅 데모가 아니라, 지금 등록된 스케줄에 "빠진 과목"을
+       우리 동네 학원 분포(공급 비율) 기준으로 추천. 또래의 실제 선택(수요) 데이터가 아직
+       없어서, "인기 과목"이라 부르지 않고 "동네 학원 현황"으로 정직하게 표기한다. -->
+  <div class="ur-notif-screen" id="urAiRecoScreen" style="display:none">
+    <div class="ur-notif-header">
+      <button class="ur-notif-back" onclick="urCloseAiRecommend()">←</button>
+      <div class="ur-notif-title">✨ AI 추천</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="ur-ai-reco-intro">지금 스케줄에 없는 과목 중, 우리 동네에 자리잡은 학원 비율을 보여드려요</div>
+    <div class="ur-notif-list" id="urAiRecoBody"><!-- JS 렌더링 --></div>
   </div>
 
 </div><!-- /ur-app-shell -->
