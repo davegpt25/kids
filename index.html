@@ -4587,10 +4587,10 @@
     키즈루트
   </div>
   <div class="footer-links">
-    <a href="#">서비스 소개</a>
-    <a href="#">이용약관</a>
-    <a href="#">개인정보처리방침</a>
-    <a href="#">문의하기</a>
+    <a href="#home">서비스 소개</a>
+    <a href="terms.html" target="_blank">이용약관</a>
+    <a href="privacy.html" target="_blank">개인정보처리방침</a>
+    <a href="mailto:davegpt25@gmail.com">문의하기</a>
   </div>
   <div class="footer-copy">© 2026 KidsRoute. MVP v1.0</div>
   <a class="footer-admin-link" onclick="openAdminLogin()">관리자</a>
@@ -5822,9 +5822,9 @@ function _buildEmailHTML(name, email, location, radius, subjects, cards) {
 
     // ⑦ 푸터
     +'<tr><td style="padding:20px 32px 28px;text-align:center;border-top:1px solid #F3F4F6;">'
-    +'<p style="margin:0 0 8px;font-size:11px;color:#9CA3AF;">키즈루트 · 서울특별시 강남구 · contact@kidsroute.kr</p>'
+    +'<p style="margin:0 0 8px;font-size:11px;color:#9CA3AF;">키즈루트 · 서울특별시 강남구 · davegpt25@gmail.com</p>'
     +'<p style="margin:0 0 12px;font-size:11px;color:#9CA3AF;">© 2026 KidsRoute. All rights reserved.</p>'
-    +'<p style="margin:0;font-size:11px;"><a href="#" style="color:#9CA3AF;text-decoration:underline;margin:0 8px;">수신 거부</a> | <a href="#" style="color:#9CA3AF;text-decoration:underline;margin:0 8px;">개인정보처리방침</a></p>'
+    +'<p style="margin:0;font-size:11px;"><a href="mailto:davegpt25@gmail.com?subject=%EC%88%98%EC%8B%A0%EA%B1%B0%EB%B6%80%20%EC%9A%94%EC%B2%AD" style="color:#9CA3AF;text-decoration:underline;margin:0 8px;">수신 거부</a> | <a href="https://davegpt25.github.io/kids/privacy.html" style="color:#9CA3AF;text-decoration:underline;margin:0 8px;">개인정보처리방침</a></p>'
     +'</td></tr>'
 
     +'</table></td></tr></table></body></html>';
@@ -6349,14 +6349,14 @@ window.addEventListener('scroll', _updateBackToTop, { passive: true });
 
 // Kakao share + link copy
 function _shareKakao() {
-  var url = 'https://davegpt25.github.io/kidsroute';
+  var url = 'https://davegpt25.github.io/kids/';
   if (typeof Kakao !== 'undefined' && Kakao.isInitialized && Kakao.isInitialized()) {
     Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
         title: '키즈루트 — 3초면 완성되는 우리 아이 학원 스케줄',
         description: 'AI가 위치·시간·과목을 분석해 최적 스케줄을 추천해드립니다.',
-        imageUrl: 'https://davegpt25.github.io/kidsroute/og-image.png',
+        imageUrl: 'https://davegpt25.github.io/kids/og-image.png',
         link: { mobileWebUrl: url, webUrl: url }
       },
       buttons: [{ title: '사전예약하기', link: { mobileWebUrl: url, webUrl: url } }]
