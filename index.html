@@ -4763,11 +4763,15 @@ function _oauthRedirectGoogle(mode) {
 function _oauthRedirectKakao(mode) {
   sessionStorage.setItem('_oauthMode', 'kakao_' + (mode || 'login'));
   const base = location.origin + location.pathname;
+  // [버그 수정] account_email 동의항목은 비즈앱 전환 없이는 기본적으로 비활성화돼 있어서
+  // 요청에 포함시키면 카카오 쪽에서 KOE205("서비스 설정에 오류가 있어 이용할 수 없습니다")로
+  // 거부함 — 2026-06-29 실제로 재현·확인. 이메일이 없어도 _handleOAuthCallback이 이미
+  // 닉네임+가짜 이메일로 대체하는 로직이 있어서, profile_nickname만 요청해도 안전함.
   const params = new URLSearchParams({
     client_id: KAKAO_REST_API_KEY,
     redirect_uri: base,
     response_type: 'code',
-    scope: 'profile_nickname,account_email',
+    scope: 'profile_nickname',
     state: 'kk'
   });
   location.href = 'https://kauth.kakao.com/oauth/authorize?' + params.toString();
