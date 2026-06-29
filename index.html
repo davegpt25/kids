@@ -4835,7 +4835,10 @@ async function _handleOAuthCallback() {
       });
       const tokenData = await tokenResp.json();
       if (!tokenData.access_token) {
+        // [버그 수정] 토큰 발급 실패 시 콘솔에만 찍고 화면엔 아무 표시가 없어서
+        // "동의 화면은 나오는데 그 뒤로 조용히 안 됨"으로 보였음 — 토스트로 노출.
         console.error('카카오 토큰 오류:', tokenData);
+        showToast('카카오 로그인 실패: ' + (tokenData.error_description || tokenData.error || '알 수 없는 오류'));
         return;
       }
       const meResp = await fetch('https://kapi.kakao.com/v2/user/me', {
@@ -4855,7 +4858,10 @@ async function _handleOAuthCallback() {
       } else {
         onLoginSuccess(name, email || name + '@kakao.com', '#FEE500', 'kakao');
       }
-    } catch(e) { console.error('카카오 사용자 정보 오류:', e); }
+    } catch(e) {
+      console.error('카카오 사용자 정보 오류:', e);
+      showToast('카카오 로그인 중 오류가 발생했어요');
+    }
     return;
   }
 }
