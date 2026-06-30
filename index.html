@@ -8857,6 +8857,7 @@ var KR_SYNC = {
         // 시간표 오버라이드 → times 배열 재생성 (원장이 직접 입력한 경우에만 존재)
         times:        over.timetable ? KR_SYNC._ttToTimes(over.timetable) : base.times,
         hasTimetable: over.timetable ? Object.keys(over.timetable).some(function(k){ return over.timetable[k]; }) : base.hasTimetable,
+        teachers: over.teachers || base.teachers || [],
         reportPending: reportPending,
         // 노출 설정: 검색 노출 꺼져 있거나, 정보 신고가 접수돼 검토 대기 중이면 공개 목록에서 숨김
         _hidden:  (over.visibility && over.visibility.search === false) || reportPending
@@ -9972,6 +9973,9 @@ function urRenderAcademies() {
     var hoursHtml = '<span class="ur-row-hours-' + (a.hasTimetable ? 'ok' : 'pending') + '">' + _urHoursLine(a) + '</span>';
     var region = _urShortRegion(a.addr);
     var feeHtml = a.fee != null ? ((a.fee/10000).toFixed(0) + '만원/월') : '수강료 미확인';
+    var teacherHtml = (a.teachers && a.teachers.length)
+      ? ' · 👩‍🏫 ' + _escHtml(a.teachers[0].name) + (a.teachers.length > 1 ? ' 외 ' + (a.teachers.length - 1) + '명' : '')
+      : '';
     return '<div class="ur-academy-row' + (_urHighlightId === a.id ? ' highlight' : '') + '" id="urCard' + a.id + '" onclick="urFlyToAcademy(' + a.id + ')">'
       +   '<div class="ur-academy-row-main">'
       +     '<div class="ur-row-name-line">'
@@ -9980,7 +9984,7 @@ function urRenderAcademies() {
       +       verifiedBadge + badgeHtml
       +     '</div>'
       +     '<div class="ur-row-hours">' + hoursHtml + '</div>'
-      +     '<div class="ur-row-meta">📍 ' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + '</div>'
+      +     '<div class="ur-row-meta">📍 ' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + teacherHtml + '</div>'
       +   '</div>'
       +   '<div class="ur-row-actions">'
       +     '<button class="ur-row-report" onclick="urReportAcademyPrompt(' + a.id + ',event)" title="정보가 잘못됐나요?">🚩</button>'
@@ -11352,6 +11356,7 @@ textarea.krap-input { resize:vertical;min-height:72px; }
   <div class="krap-tabs">
     <div class="krap-tab active" onclick="krapTab('info',this)">📋 학원 정보</div>
     <div class="krap-tab" onclick="krapTab('timetable',this)">🕐 시간표</div>
+    <div class="krap-tab" onclick="krapTab('teachers',this)">👩‍🏫 선생님</div>
     <div class="krap-tab" onclick="krapTab('inquiry',this)">💬 문의 <span class="krap-new-badge">2</span></div>
     <div class="krap-tab" onclick="krapTab('visibility',this)">👁 노출 설정</div>
   </div>
@@ -11419,10 +11424,25 @@ textarea.krap-input { resize:vertical;min-height:72px; }
     <!-- 시간표 탭 -->
     <div id="krapTimetable" class="krap-tab-pane">
       <div class="krap-sec-title">🕐 수업 시간표</div>
-      <p style="font-size:12px;color:#64748B;margin-bottom:16px;">셀을 클릭해 수업 시간을 추가하거나 제거하세요.</p>
+      <p style="font-size:12px;color:#64748B;margin-bottom:10px;">셀을 클릭해 수업 시간을 추가하거나 제거하세요. 아래에서 담당 선생님을 고르면 새로 추가하는 칸에 표시돼요.</p>
+      <div class="krap-field" style="margin-bottom:14px;"><div class="krap-label">담당 선생님 (선택)</div><select class="krap-input" id="krapTtTeacherSelect"><option value="">미배정</option></select></div>
       <div class="krap-tt" id="krapTtGrid"></div>
       <button class="krap-save-btn" onclick="krapSaveTt()">시간표 저장</button>
       <div class="krap-toast" id="krapTtToast">✅ 시간표가 저장되었습니다.</div>
+    </div>
+
+    <!-- 선생님 관리 탭 -->
+    <div id="krapTeachers" class="krap-tab-pane">
+      <div class="krap-sec-title">👩‍🏫 소속 선생님</div>
+      <p style="font-size:12px;color:#64748B;margin-bottom:16px;">등록한 선생님은 학부모 화면의 학원 정보에도 노출되고, 시간표에 담당 선생님을 배정할 수 있어요.</p>
+      <div id="krapTeacherList"><!-- JS 렌더링 --></div>
+      <div class="krap-grid" style="margin-top:14px;">
+        <div class="krap-field"><div class="krap-label">이름</div><input class="krap-input" id="krapTeacherName" placeholder="예: 김민수"></div>
+        <div class="krap-field"><div class="krap-label">담당 과목</div><input class="krap-input" id="krapTeacherSubject" placeholder="예: 수학"></div>
+        <div class="krap-field full"><div class="krap-label">연락처 (선택)</div><input class="krap-input" id="krapTeacherPhone" placeholder="예: 010-1234-5678"></div>
+      </div>
+      <button class="krap-save-btn" onclick="krapAddTeacher()">+ 선생님 등록</button>
+      <div class="krap-toast" id="krapTeacherToast">✅ 선생님이 등록되었습니다.</div>
     </div>
 
     <!-- 문의 탭 -->
@@ -11733,6 +11753,7 @@ function krapOpen() {
   document.getElementById('krAcadPortal').classList.add('open');
   document.body.style.overflow = 'hidden';
   krapBuildTt();
+  krapFillTeacherSelect();
 }
 function krapClose() {
   document.getElementById('krAcadPortal').classList.remove('open');
@@ -11743,7 +11764,62 @@ function krapTab(id, el) {
   document.querySelectorAll('.krap-tab').forEach(function(t){ t.classList.remove('active'); });
   document.getElementById('krap' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active');
   el.classList.add('active');
-  if (id === 'timetable') krapBuildTt();
+  if (id === 'timetable') { krapBuildTt(); krapFillTeacherSelect(); }
+  if (id === 'teachers') krapRenderTeachers();
+}
+
+// ── 선생님 관리 ──
+function krapGetTeachers() {
+  if (!_krapAcadId) return [];
+  var over = KR_SYNC.get(_krapAcadId) || {};
+  return over.teachers || [];
+}
+function krapRenderTeachers() {
+  var list = document.getElementById('krapTeacherList');
+  if (!list) return;
+  var teachers = krapGetTeachers();
+  if (!teachers.length) {
+    list.innerHTML = '<div style="font-size:12px;color:#94A3B8;padding:10px 0;">아직 등록된 선생님이 없어요.</div>';
+    return;
+  }
+  list.innerHTML = teachers.map(function(t) {
+    return '<div style="background:#F8FAFC;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">'
+      + '<div><div style="font-size:13px;font-weight:700;color:#1E293B;">' + _escHtml(t.name) + ' <span style="font-size:11px;font-weight:400;color:#6366F1;">· ' + _escHtml(t.subject || '') + '</span></div>'
+      + (t.phone ? '<div style="font-size:11px;color:#94A3B8;margin-top:2px;">' + _escHtml(t.phone) + '</div>' : '')
+      + '</div>'
+      + '<button onclick="krapRemoveTeacher(\'' + t.id + '\')" style="border:none;background:none;color:#94A3B8;font-size:12px;cursor:pointer;">삭제</button>'
+      + '</div>';
+  }).join('');
+}
+function krapAddTeacher() {
+  var name = (document.getElementById('krapTeacherName').value || '').trim();
+  var subject = (document.getElementById('krapTeacherSubject').value || '').trim();
+  var phone = (document.getElementById('krapTeacherPhone').value || '').trim();
+  if (!name || !subject) { showToast('이름과 담당 과목을 입력해주세요'); return; }
+  if (!_krapAcadId) return;
+  var teachers = krapGetTeachers();
+  teachers.push({ id: 'kt' + Date.now(), name: name, subject: subject, phone: phone });
+  KR_SYNC.set(_krapAcadId, { teachers: teachers });
+  document.getElementById('krapTeacherName').value = '';
+  document.getElementById('krapTeacherSubject').value = '';
+  document.getElementById('krapTeacherPhone').value = '';
+  krapRenderTeachers();
+  var t = document.getElementById('krapTeacherToast');
+  t.style.display = 'block'; setTimeout(function(){ t.style.display = 'none'; }, 2500);
+}
+function krapRemoveTeacher(id) {
+  if (!_krapAcadId) return;
+  var teachers = krapGetTeachers().filter(function(t) { return t.id !== id; });
+  KR_SYNC.set(_krapAcadId, { teachers: teachers });
+  krapRenderTeachers();
+}
+function krapFillTeacherSelect() {
+  var sel = document.getElementById('krapTtTeacherSelect');
+  if (!sel) return;
+  var teachers = krapGetTeachers();
+  sel.innerHTML = '<option value="">미배정</option>' + teachers.map(function(t) {
+    return '<option value="' + _escHtml(t.name) + '">' + _escHtml(t.name) + ' (' + _escHtml(t.subject) + ')</option>';
+  }).join('');
 }
 function krapSaveInfo() {
   var d = {
@@ -11771,7 +11847,12 @@ function krapBuildTt() {
   if (!grid || grid.childElementCount > 0) return;
   var days = ['월','화','수','목','금'];
   var hours = [14,15,16,17,18,19,20];
+  var ttTeachers = {};
   try { _krapSlots = JSON.parse(localStorage.getItem('krap_tt') || '{}'); } catch(e){}
+  if (_krapAcadId) {
+    var over = KR_SYNC.get(_krapAcadId) || {};
+    ttTeachers = over.ttTeachers || {};
+  }
   grid.innerHTML = '<div></div>';
   days.forEach(function(d){ grid.innerHTML += '<div class="krap-tt-head">'+d+'</div>'; });
   hours.forEach(function(h) {
@@ -11779,24 +11860,37 @@ function krapBuildTt() {
     days.forEach(function(d, di) {
       var key = di+'_'+h;
       var filled = _krapSlots[key] ? ' filled' : '';
-      var lbl = _krapSlots[key] ? '수업' : '+';
-      grid.innerHTML += '<div class="krap-tt-cell'+filled+'" onclick="krapToggleTt(\''+key+'\',this)">'+lbl+'</div>';
+      var teacher = ttTeachers[key] || '';
+      var lbl = _krapSlots[key] ? (teacher || '수업') : '+';
+      grid.innerHTML += '<div class="krap-tt-cell'+filled+'" data-teacher="'+_escHtml(teacher)+'" onclick="krapToggleTt(\''+key+'\',this)">'+_escHtml(lbl)+'</div>';
     });
   });
 }
 function krapToggleTt(key, el) {
   el.classList.toggle('filled');
-  el.textContent = el.classList.contains('filled') ? '수업' : '+';
+  if (el.classList.contains('filled')) {
+    var sel = document.getElementById('krapTtTeacherSelect');
+    var teacher = sel ? sel.value : '';
+    el.dataset.teacher = teacher;
+    el.textContent = teacher || '수업';
+  } else {
+    el.dataset.teacher = '';
+    el.textContent = '+';
+  }
 }
 function krapSaveTt() {
   var cells = document.querySelectorAll('#krapTtGrid .krap-tt-cell');
   var slots = {};
+  var ttTeachers = {};
   cells.forEach(function(c) {
     var m = c.getAttribute('onclick').match(/'([^']+)'/);
-    if (m && c.classList.contains('filled')) slots[m[1]] = true;
+    if (m && c.classList.contains('filled')) {
+      slots[m[1]] = true;
+      if (c.dataset.teacher) ttTeachers[m[1]] = c.dataset.teacher;
+    }
   });
   if (_krapAcadId) {
-    KR_SYNC.set(_krapAcadId, { timetable: slots });
+    KR_SYNC.set(_krapAcadId, { timetable: slots, ttTeachers: ttTeachers });
   }
   var t = document.getElementById('krapTtToast');
   t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 2500);
