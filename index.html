@@ -9236,6 +9236,7 @@ function urCloseAiRecommend() {
 // 시간표가 없는 학원은 가짜 데이터를 만들지 않고 애초에 후보에서 제외한다.
 var _urAiRadius = 1000;
 var _urAiSubjects = []; // 비어있으면 전체 과목
+var _urAiBudget = null; // null이면 제한 없음 (원 단위)
 function urToggleAiOptions() {
   urRenderAiSubjectChips();
   var ov = document.getElementById('urAiSheetOverlay');
@@ -9250,6 +9251,13 @@ function urCloseAiOptions(e) {
 function urAiSetRadius(btn) {
   _urAiRadius = parseInt(btn.dataset.r, 10);
   Array.prototype.forEach.call(document.querySelectorAll('#urAiRadiusChips .ur-ai-chip'), function(b) {
+    b.classList.toggle('active', b === btn);
+  });
+}
+function urAiSetBudget(btn) {
+  var v = btn.dataset.budget;
+  _urAiBudget = v ? parseInt(v, 10) : null;
+  Array.prototype.forEach.call(document.querySelectorAll('#urAiBudgetChips .ur-ai-chip'), function(b) {
     b.classList.toggle('active', b === btn);
   });
 }
@@ -9311,6 +9319,7 @@ function urRenderAiRecommend() {
     if (!a.verified || !a.hasTimetable || !a.rawTimetable) return false;
     if (a.dist == null || a.dist * 1000 > _urAiRadius) return false;
     if (_urAiSubjects.length && _urAiSubjects.indexOf(a.subj) < 0) return false;
+    if (_urAiBudget != null && (a.fee == null || a.fee > _urAiBudget)) return false;
     return true;
   }).map(function(a) {
     a._slots = _urRawSlots(a.rawTimetable);
@@ -9356,6 +9365,7 @@ function urAddAiCombination() {
     if (!a.verified || !a.hasTimetable || !a.rawTimetable) return false;
     if (a.dist == null || a.dist * 1000 > _urAiRadius) return false;
     if (_urAiSubjects.length && _urAiSubjects.indexOf(a.subj) < 0) return false;
+    if (_urAiBudget != null && (a.fee == null || a.fee > _urAiBudget)) return false;
     return true;
   }).map(function(a) { a._slots = _urRawSlots(a.rawTimetable); return a; }).filter(function(a) { return a._slots.length > 0; });
   var combo = _urBuildAiCombination(pool);
@@ -11073,6 +11083,13 @@ function urToggleNotif(btn) {
         </div>
         <div class="ur-ai-sheet-label">과목 (선택 안 하면 전체)</div>
         <div class="ur-ai-sheet-row" id="urAiSubjectChips"><!-- JS 렌더링 --></div>
+        <div class="ur-ai-sheet-label">월 예산</div>
+        <div class="ur-ai-sheet-row" id="urAiBudgetChips">
+          <button class="ur-ai-chip active" data-budget="" onclick="urAiSetBudget(this)">제한없음</button>
+          <button class="ur-ai-chip" data-budget="200000" onclick="urAiSetBudget(this)">20만원 이하</button>
+          <button class="ur-ai-chip" data-budget="300000" onclick="urAiSetBudget(this)">30만원 이하</button>
+          <button class="ur-ai-chip" data-budget="500000" onclick="urAiSetBudget(this)">50만원 이하</button>
+        </div>
         <button class="ur-ai-sheet-apply" onclick="urCloseAiOptions()">적용</button>
       </div>
     </div>
