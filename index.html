@@ -5808,7 +5808,7 @@ function submitLeadForm() {
   function _doSend(loc) {
     // 화면에 표시된 실제 학원 카드(_lastSimResult)를 그대로 이메일에 재사용 — 1위만 공개, 2·3위는 블라인드 처리
     sendKidsrouteEmail(email, name || '학부모', loc, radius, subjects, _lastSimResult)
-      .then(function() { showToast('✉️ 맞춤 결과를 이메일로 보냈어요!'); })
+      .then(function() { showToast('맞춤 결과를 이메일로 보냈어요!'); })
       .catch(function(err) { console.warn('[KidsRoute] 이메일 발송 오류:', err); });
   }
   if (window.naver && naver.maps && naver.maps.Service && _demoGPSLat !== 37.5665) {
@@ -6272,7 +6272,7 @@ function _lsIncrementRoute(routeId) {
   if (r.count >= r.max && !r.complete) {
     r.complete = true;
     _lsPrependFeed('🎉', `${r.acName}이 ${r.dir} 정류장을 생성했어요!`);
-    showToast(`🎉 ${r.acName}이 정류장을 생성했어요!`);
+    showToast(`${r.acName}이 정류장을 생성했어요!`);
     _lsRenderStopGrid(); _lsRenderMap(); _lsRenderAcademy();
     setTimeout(() => {
       r.count = 0; r.complete = false; r.names = []; r.avatarColors = [];
@@ -6291,7 +6291,7 @@ function _lsIncrementPickup(pickupId) {
   if (p.count >= p.max && !p.complete) {
     p.complete = true;
     _lsPrependFeed('🚐', `${p.acName} → ${p.kinName} 픽업 확정!`);
-    showToast(`🚐 ${p.acName} → ${p.kinName} 픽업 확정!`);
+    showToast(`${p.acName} → ${p.kinName} 픽업 확정!`);
     _lsRenderAcademy();
     setTimeout(() => { p.count = 1; p.complete = false; _lsRenderAcademy(); }, 8000);
   } else {
@@ -7105,7 +7105,7 @@ function submitVacancyAlert() {
     KR.addAlert(cb.value, 1, _sessionEmail);
   });
   closeAlertRegModal();
-  showToast('🔔 공석 알림이 등록됐어요!');
+  showToast('공석 알림이 등록됐어요!');
 }
 
 // ─── 로고 5번 클릭 → 학원 원장 로그인 모달 ───
@@ -9376,7 +9376,7 @@ function urHandleHomePromoClick() {
   else { userShowTab(1); }
 }
 function urOpenLocationPicker() {
-  showToast('📍 현재 위치를 다시 확인하고 있어요…');
+  showToast('현재 위치를 다시 확인하고 있어요…');
   urAutoLocate(true);
 }
 function urSetSort(el) {
@@ -9758,7 +9758,7 @@ function urAutoLocate(forceFresh) {
         _urMap.morph(new naver.maps.LatLng(_urUserLat, _urUserLng), 15);
       }
       urReverseGeocode(_urUserLat, _urUserLng);
-      if (forceFresh) showToast('📍 현재 위치로 갱신했어요');
+      if (forceFresh) showToast('현재 위치로 갱신했어요');
     },
     function() {
       // 권한 거부/실패 — 기존 기준 위치 유지, 주소 표시만 갱신
@@ -9847,7 +9847,7 @@ function urSearchAddress() {
     urUpdateCircle();
     urUpdateDistances();
     urRenderMapMarkers();
-    showToast('📍 ' + (result.roadAddress || result.jibunAddress));
+    showToast(result.roadAddress || result.jibunAddress);
     if (input) input.value = '';
   });
 }
@@ -9998,7 +9998,7 @@ function urReportAcademyPrompt(academyId, event) {
   var reason = window.prompt('이 학원 정보에서 어떤 부분이 잘못됐나요? (예: 폐업함, 과목이 다름, 주소가 다름)');
   if (reason === null) return; // 취소
   KR_SYNC.reportAcademy(academyId, reason);
-  showToast('🚩 신고 접수했어요 — 확인 전까지 검색 결과에서 숨길게요');
+  showToast('신고 접수했어요 — 확인 전까지 검색 결과에서 숨길게요');
   if (document.getElementById('urAcademyList')) urRenderAcademies();
   if (_urMap) urRenderMapMarkers();
   if (document.getElementById('simCards') && document.getElementById('simCards').innerHTML) _renderSimCards();
@@ -10186,7 +10186,7 @@ function urTogglePush(id) {
   prefs[id] = prefs[id] === false ? true : false;
   urSavePushPrefs(prefs);
   urRenderJourney(urGetSchedule());
-  showToast(prefs[id] ? '🔔 알림을 켰어요' : '🔕 알림을 껐어요');
+  showToast(prefs[id] ? '알림을 켰어요' : '알림을 껐어요');
 }
 
 function urToggleAllPush() {
@@ -10198,7 +10198,7 @@ function urToggleAllPush() {
   allIds.forEach(function(id) { prefs[id] = next; });
   urSavePushPrefs(prefs);
   urRenderJourney(schedule);
-  showToast(next ? '🔔 모든 알림을 켰어요' : '🔕 모든 알림을 껐어요');
+  showToast(next ? '모든 알림을 켰어요' : '모든 알림을 껐어요');
 }
 
 function urRemoveSchedule(academyId) {
