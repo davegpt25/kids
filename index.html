@@ -2778,6 +2778,9 @@
 .ur-notif-item-body { font-size: 12.5px; color: #6B7280; line-height: 1.5; }
 /* AI 추천 — 동네 학원 분포(공급 비율) 기반, "또래 인기"가 아니라 정직하게 "동네 현황"으로 표기 */
 .ur-ai-reco-intro { font-size: 12px; color: #6B7280; line-height: 1.5; padding: 14px 16px; border-bottom: 1px solid #F0F0F0; }
+.ur-membership-row { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #F5F5F5; }
+.ur-membership-check { width: 20px; height: 20px; border-radius: 50%; background: #FFF3EC; color: #F97316; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+.ur-membership-text { font-size: 13px; color: #1A1A1A; font-weight: 500; }
 .ur-ai-reco-item { padding: 16px; border-bottom: 1px solid #F0F0F0; }
 .ur-ai-reco-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
 .ur-ai-reco-subj { font-size: 15px; font-weight: 800; color: var(--text-main); }
@@ -9222,6 +9225,30 @@ function urComputeRegionSubjectStats() {
   stats.sort(function(a, b) { return b.count - a.count; });
   return { stats: stats, total: total, ageBand: ageBand };
 }
+// ── 멤버십 (가격/CTA 없이 혜택 소개만 — 아직 준비 중 단계) ──
+var UR_MEMBERSHIP_BENEFITS = [
+  '스케줄 조합 추천 무제한',
+  '시간 겹침 자동 알림',
+  '복수 자녀 무제한 관리',
+  '예산 필터',
+  '학원 시간표 변경 알림',
+  '주간 캘린더 무제한',
+  '우선 고객 지원'
+];
+function urShowMembership() {
+  var screen = document.getElementById('urMembershipScreen');
+  var body = document.getElementById('urMembershipBody');
+  if (body) {
+    body.innerHTML = UR_MEMBERSHIP_BENEFITS.map(function(b) {
+      return '<div class="ur-membership-row"><div class="ur-membership-check">✓</div><div class="ur-membership-text">' + _escHtml(b) + '</div></div>';
+    }).join('');
+  }
+  if (screen) screen.style.display = 'flex';
+}
+function urCloseMembership() {
+  var screen = document.getElementById('urMembershipScreen');
+  if (screen) screen.style.display = 'none';
+}
 function urOpenAiRecommend() {
   var screen = document.getElementById('urAiRecoScreen');
   if (screen) screen.style.display = 'flex';
@@ -10201,6 +10228,7 @@ function urRenderMyInfo() {
     if (el) { el.classList.toggle('on', !!prefs[keys[i]]); el.classList.toggle('off', !prefs[keys[i]]); }
   });
   urRenderChildren();
+  urRenderFamilyList();
 }
 function urRenderChildren() {
   var children = urGetChildren();
@@ -10325,6 +10353,84 @@ function urDeleteChild(id) {
   urSaveChildren(children.filter(function(c) { return c.id !== id; }));
   urRenderChildren();
   showToast('삭제했어요');
+}
+
+// ── 가족 구성원 (본인 + 가족 1명까지) ──
+// 실서비스라면 서버 계정 간 연결이지만, 지금은 백엔드가 없어 localStorage 기반으로
+// "초대 코드 발급 → 코드 입력으로 연결" 흐름만 데모한다. 실시간 동기화는 준비 중.
+var UR_FAMILY_MAX_MEMBERS = 1;
+function _urFamilyKey() {
+  var email = _urUser && _urUser.email;
+  return email ? 'kr_family_' + email : 'kr_family';
+}
+function urGetFamily() {
+  try { return JSON.parse(localStorage.getItem(_urFamilyKey()) || '{}'); } catch(e) { return {}; }
+}
+function urSaveFamily(obj) { localStorage.setItem(_urFamilyKey(), JSON.stringify(obj)); }
+function _urGenFamilyCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+function urRenderFamilyList() {
+  var el = document.getElementById('urFamilyList');
+  if (!el) return;
+  var fam = urGetFamily();
+  var members = fam.members || [];
+  var html = '<div class="ur-parent-info-card" style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:10px"><div class="ur-p-avatar" style="width:36px;height:36px;font-size:14px">' + ((_urUser && _urUser.name ? _urUser.name.charAt(0) : '나')) + '</div><div><div style="font-size:13px;font-weight:700;color:#1A1A1A">' + _escHtml((_urUser && _urUser.name) || '나') + ' (나)</div><div style="font-size:11px;color:#9CA3AF">계정 소유자</div></div></div></div>';
+  members.forEach(function(m) {
+    html += '<div class="ur-parent-info-card" style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><div class="ur-p-avatar" style="width:36px;height:36px;font-size:14px">' + _escHtml(m.name.charAt(0)) + '</div><div><div style="font-size:13px;font-weight:700;color:#1A1A1A">' + _escHtml(m.name) + '</div><div style="font-size:11px;color:#16A34A">✓ 연결됨</div></div></div><button onclick="urRemoveFamilyMember(\'' + m.id + '\')" style="border:none;background:none;color:#9CA3AF;font-size:12px;cursor:pointer">내보내기</button></div></div>';
+  });
+  if (members.length < UR_FAMILY_MAX_MEMBERS) {
+    html += '<button class="ur-add-child-btn" onclick="urShowFamilyInvite()">+ 가족 초대하기</button>';
+  }
+  el.innerHTML = html;
+}
+function urShowFamilyInvite() {
+  var fam = urGetFamily();
+  if (!fam.code) { fam.code = _urGenFamilyCode(); urSaveFamily(fam); }
+  var codeEl = document.getElementById('urFamilyMyCode');
+  if (codeEl) codeEl.textContent = fam.code;
+  var joinInput = document.getElementById('urFamilyJoinCode');
+  if (joinInput) joinInput.value = '';
+  var screen = document.getElementById('urFamilyInviteScreen');
+  if (screen) screen.style.display = 'flex';
+}
+function urCloseFamilyInvite() {
+  var screen = document.getElementById('urFamilyInviteScreen');
+  if (screen) screen.style.display = 'none';
+}
+function urCopyFamilyCode() {
+  var fam = urGetFamily();
+  if (!fam.code) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(fam.code).then(function() { showToast('초대 코드를 복사했어요 📋'); });
+  } else {
+    showToast('코드: ' + fam.code);
+  }
+}
+function urJoinFamilyCode() {
+  var fam = urGetFamily();
+  if ((fam.members || []).length >= UR_FAMILY_MAX_MEMBERS) {
+    showToast('이미 가족 구성원이 가득 찼어요');
+    return;
+  }
+  var input = document.getElementById('urFamilyJoinCode');
+  var code = input ? input.value.trim() : '';
+  if (!code || code.length !== 6) { showToast('6자리 코드를 입력해주세요'); return; }
+  var name = window.prompt('연결할 가족 구성원의 이름을 입력해주세요 (예: 아빠, 할머니)');
+  if (!name || !name.trim()) return;
+  fam.members = fam.members || [];
+  fam.members.push({ id: 'fm' + Date.now(), name: name.trim(), code: code, joinedAt: Date.now() });
+  urSaveFamily(fam);
+  urCloseFamilyInvite();
+  urRenderFamilyList();
+  showToast(name.trim() + '님과 연결됐어요 👨‍👩‍👧');
+}
+function urRemoveFamilyMember(id) {
+  var fam = urGetFamily();
+  fam.members = (fam.members || []).filter(function(m) { return m.id !== id; });
+  urSaveFamily(fam);
+  urRenderFamilyList();
+  showToast('가족 구성원을 내보냈어요');
 }
 function urPickEmoji(el, emoji) {
   document.getElementById('urChildEmoji').value = emoji;
@@ -10552,7 +10658,7 @@ function urToggleNotif(btn) {
             <span class="ur-home-location-caret">⌄</span>
           </div>
           <div class="ur-home-top-actions" id="urHomeTopActions">
-            <button class="ur-membership-pill" onclick="userShowTab(2)" title="멤버십">멤버십</button>
+            <button class="ur-membership-pill" onclick="urShowMembership()" title="멤버십">멤버십</button>
             <button class="ur-bell-btn" id="urBellBtn" onclick="urOpenNotifications()" title="알림">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               <span class="ur-bell-dot" id="urBellDot" style="display:none"></span>
@@ -10767,6 +10873,12 @@ function urToggleNotif(btn) {
         <button class="ur-add-child-btn" id="urAddChildBtn" onclick="urShowChildForm()">+ 아이 추가하기</button>
       </div>
 
+      <!-- 가족 구성원 — 본인 + 가족 1명까지 함께 이용 -->
+      <div class="ur-info-section" style="padding-top:0">
+        <div class="ur-section-label">가족 구성원</div>
+        <div id="urFamilyList"><!-- JS 렌더링 --></div>
+      </div>
+
       <!-- 알림 설정 -->
       <div class="ur-info-section" style="padding-top:0">
         <div class="ur-section-label">알림 설정</div>
@@ -10866,6 +10978,44 @@ function urToggleNotif(btn) {
     </div>
     <div class="ur-ai-reco-intro">지금 스케줄에 없는 과목 중, 우리 동네에 자리잡은 학원 비율을 보여드려요</div>
     <div class="ur-notif-list" id="urAiRecoBody"><!-- JS 렌더링 --></div>
+  </div>
+
+  <!-- 가족 초대 모달 -->
+  <div class="ur-notif-screen" id="urFamilyInviteScreen" style="display:none">
+    <div class="ur-notif-header">
+      <button class="ur-notif-back" onclick="urCloseFamilyInvite()">←</button>
+      <div class="ur-notif-title">가족 초대하기</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="ur-ai-reco-intro">가족 1명까지 같은 아이 정보와 스케줄을 함께 볼 수 있어요</div>
+    <div style="padding:16px">
+      <div class="ur-section-label" style="padding:0 0 8px">내 초대 코드</div>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <div id="urFamilyMyCode" style="flex:1;background:#F8F9FA;border-radius:12px;padding:14px;font-size:20px;font-weight:800;letter-spacing:4px;text-align:center;color:#1A1A1A"></div>
+        <button onclick="urCopyFamilyCode()" style="border:1.5px solid #F97316;color:#F97316;background:#fff;border-radius:12px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer">복사</button>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:20px">가족에게 이 코드를 알려주면 아래에서 입력해 연결할 수 있어요</div>
+
+      <div class="ur-section-label" style="padding:0 0 8px">초대 코드로 연결하기</div>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <input id="urFamilyJoinCode" class="ur-form-input" placeholder="6자리 코드 입력" maxlength="6" style="flex:1">
+        <button onclick="urJoinFamilyCode()" style="border:none;background:#F97316;color:#fff;border-radius:12px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer">연결</button>
+      </div>
+      <div style="font-size:11px;color:#9CA3AF;margin-bottom:18px">테스트로 직접 코드를 입력해 연결 흐름을 체험해볼 수 있어요</div>
+
+      <div style="font-size:11px;color:#D97706;background:#FFFBEB;border-radius:10px;padding:10px 12px;line-height:1.5">🔧 실시간 동기화는 준비 중이에요. 지금은 같은 브라우저 안에서 연결 흐름만 확인하실 수 있어요.</div>
+    </div>
+  </div>
+
+  <!-- 멤버십 화면 — 가격/CTA 없이 혜택 목록만 소개 (준비 중 단계) -->
+  <div class="ur-notif-screen" id="urMembershipScreen" style="display:none">
+    <div class="ur-notif-header">
+      <button class="ur-notif-back" onclick="urCloseMembership()">←</button>
+      <div class="ur-notif-title">멤버십</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="ur-ai-reco-intro">멤버십이 되면 이런 게 가능해져요</div>
+    <div class="ur-notif-list" id="urMembershipBody"><!-- JS 렌더링 --></div>
   </div>
 
 </div><!-- /ur-app-shell -->
