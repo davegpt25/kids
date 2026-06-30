@@ -2732,6 +2732,9 @@
 .ur-row-hours-ok { color: #16A34A; font-weight: 600; }
 .ur-row-hours-pending { color: #C2410C; font-weight: 600; }
 .ur-row-meta { font-size: 12px; color: #6B7280; }
+.ur-row-vacancy { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #DC2626; margin-top: 6px; }
+.ur-row-vacancy-btn { font-size: 11px; font-weight: 700; color: #F97316; background: #FFF3EC; border: none; border-radius: 100px; padding: 4px 10px; cursor: pointer; }
+.ur-row-vacancy-btn.subscribed { color: #16A34A; background: #ECFDF5; }
 .ur-row-actions { display: flex; flex-direction: column; gap: 6px; align-items: center; flex-shrink: 0; }
 .ur-row-report {
   width: 26px; height: 26px; border-radius: 50%; border: none;
@@ -8869,6 +8872,7 @@ var KR_SYNC = {
         times:        over.timetable ? KR_SYNC._ttToTimes(over.timetable) : base.times,
         hasTimetable: over.timetable ? Object.keys(over.timetable).some(function(k){ return over.timetable[k]; }) : base.hasTimetable,
         rawTimetable: over.timetable || null,
+        closedSlots: over.closedSlots || null,
         teachers: over.teachers || base.teachers || [],
         reportPending: reportPending,
         // 노출 설정: 검색 노출 꺼져 있거나, 정보 신고가 접수돼 검토 대기 중이면 공개 목록에서 숨김
@@ -8957,10 +8961,16 @@ function urSaveNotifPrefs(p) { localStorage.setItem('kr_notif_prefs', JSON.strin
 // 알림 한 건의 모양: { id, scope: 'personal'|'notice'|'academy', academyId, academyName, title, body, createdAt, read }
 // scope로 라우팅 구분: 'personal'(나에게만 온 개인 알림 — 하원 알림 등), 'notice'(키즈루트 공지), 'academy'(특정 학원이 보낸 알림 — academyId 필수).
 // 실서비스에서 푸시/웹소켓으로 알림이 도착하면 urAddNotification()만 호출하면 벨 배지·목록에 바로 반영됨.
-function urGetNotifications() {
-  try { return JSON.parse(localStorage.getItem('kr_notifications') || '[]'); } catch(e) { return []; }
+// 계정별로 분리 저장 — kr_children/kr_family와 같은 이유로, 단일 키였다면
+// 같은 브라우저의 다른 계정에 온 알림이 섞여 보였을 것
+function _urNotifKey() {
+  var email = _urUser && _urUser.email;
+  return email ? 'kr_notifications_' + email : 'kr_notifications';
 }
-function urSaveNotifications(list) { localStorage.setItem('kr_notifications', JSON.stringify(list)); }
+function urGetNotifications() {
+  try { return JSON.parse(localStorage.getItem(_urNotifKey()) || '[]'); } catch(e) { return []; }
+}
+function urSaveNotifications(list) { localStorage.setItem(_urNotifKey(), JSON.stringify(list)); }
 function urUnreadNotifCount() { return urGetNotifications().filter(function(n) { return !n.read; }).length; }
 function urUpdateBellDot() {
   var dot = document.getElementById('urBellDot');
@@ -8974,6 +8984,19 @@ function urAddNotification(notif) {
   ));
   urSaveNotifications(list);
   urUpdateBellDot();
+}
+// 다른 계정(예: 공석 알림을 받을 학부모)의 알림함에 직접 써야 할 때 —
+// 원장이 시간표 마감을 해제할 때처럼, 발송 시점의 로그인 세션은 그 학부모가 아니기 때문에 필요
+function urAddNotificationForEmail(email, notif) {
+  if (!email) return;
+  var key = 'kr_notifications_' + email;
+  var list;
+  try { list = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { list = []; }
+  list.unshift(Object.assign(
+    { id: 'n' + Date.now() + Math.random().toString(36).slice(2), createdAt: Date.now(), read: false },
+    notif
+  ));
+  localStorage.setItem(key, JSON.stringify(list));
 }
 function urMarkAllNotifsRead() {
   urSaveNotifications(urGetNotifications().map(function(n) { n.read = true; return n; }));
@@ -10064,6 +10087,13 @@ function urRenderAcademies() {
     var hoursHtml = '<span class="ur-row-hours-' + (a.hasTimetable ? 'ok' : 'pending') + '">' + _urHoursLine(a) + '</span>';
     var region = _urShortRegion(a.addr);
     var feeHtml = a.fee != null ? ((a.fee/10000).toFixed(0) + '만원/월') : '수강료 미확인';
+    var hasClosed = a.closedSlots && Object.keys(a.closedSlots).some(function(k) { return a.closedSlots[k]; });
+    var subscribed = hasClosed && _urIsSubscribedToVacancy(a);
+    var vacancyRow = hasClosed
+      ? '<div class="ur-row-vacancy">🔒 마감된 시간이 있어요'
+        + '<button class="ur-row-vacancy-btn' + (subscribed ? ' subscribed' : '') + '" onclick="event.stopPropagation();urSubscribeVacancy(' + a.id + ')">'
+        + (subscribed ? '✓ 알림 신청됨' : '🔔 공석 알림 받기') + '</button></div>'
+      : '';
     return '<div class="ur-academy-row' + (_urHighlightId === a.id ? ' highlight' : '') + '" id="urCard' + a.id + '" onclick="urFlyToAcademy(' + a.id + ')">'
       +   '<div class="ur-academy-row-main">'
       +     '<div class="ur-row-name-line">'
@@ -10073,6 +10103,7 @@ function urRenderAcademies() {
       +     '</div>'
       +     '<div class="ur-row-hours">' + hoursHtml + '</div>'
       +     '<div class="ur-row-meta">📍 ' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + '</div>'
+      +     vacancyRow
       +   '</div>'
       +   '<div class="ur-row-actions">'
       +     '<button class="ur-row-report" onclick="urReportAcademyPrompt(' + a.id + ',event)" title="정보가 잘못됐나요?">🚩</button>'
@@ -10082,6 +10113,36 @@ function urRenderAcademies() {
       +   '</div>'
       + '</div>';
   }).join('') + '<div class="ur-data-attribution">학원 정보 출처: 네이버 지도 공개 정보 · 잘못된 정보는 🚩 신고로 알려주세요</div>';
+}
+// ── 공석 알림 신청 — 마감된 슬롯이 풀리면 알림을 받도록 구독.
+// 정원/인원수는 절대 묻지 않고, 학원의 "마감된 슬롯 전체"에 한 번에 신청한다.
+function _urIsSubscribedToVacancy(a) {
+  if (!_urUser || !_urUser.email || !a.closedSlots) return false;
+  var over = KR_SYNC.get(a.id) || {};
+  var subs = over.vacancySubs || {};
+  return Object.keys(a.closedSlots).some(function(key) {
+    if (!a.closedSlots[key]) return false;
+    return (subs[key] || []).some(function(s) { return s.email === _urUser.email; });
+  });
+}
+function urSubscribeVacancy(academyId) {
+  if (!_urUser || !_urUser.email) { showToast('로그인 후 이용해주세요!'); return; }
+  var over = KR_SYNC.get(academyId) || {};
+  var closed = over.closedSlots || {};
+  var subs = Object.assign({}, over.vacancySubs);
+  var addedAny = false;
+  Object.keys(closed).forEach(function(key) {
+    if (!closed[key]) return;
+    var list = (subs[key] || []).slice();
+    if (!list.some(function(s) { return s.email === _urUser.email; })) {
+      list.push({ email: _urUser.email, name: _urUser.name, requestedAt: Date.now() });
+      subs[key] = list;
+      addedAny = true;
+    }
+  });
+  KR_SYNC.set(academyId, { vacancySubs: subs });
+  showToast(addedAny ? '공석 알림을 신청했어요!' : '이미 신청했어요!');
+  urRenderAcademies();
 }
 // 학원 정보 신고 — 접수 즉시 공개 목록에서 숨기고(검토 대기), 신고 사유는 KR_SYNC에 기록
 function urReportAcademyPrompt(academyId, event) {
@@ -11415,6 +11476,7 @@ textarea.krap-input { resize:vertical;min-height:72px; }
 }
 .krap-tt-cell:hover  { border-color:#6366F1;color:#6366F1; }
 .krap-tt-cell.filled { background:#EEF2FF;border-color:rgba(99,102,241,.4);color:#6366F1;font-size:11px;font-weight:800; }
+.krap-tt-cell.closed { background:#FEF2F2;border-color:rgba(220,38,38,.4);color:#DC2626;font-size:11px;font-weight:800; }
 
 /* 문의 */
 .krap-inq-item { background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px 18px;margin-bottom:10px; }
@@ -11951,7 +12013,9 @@ function krapSaveInfo() {
   var t = document.getElementById('krapInfoToast');
   t.style.display = 'block'; setTimeout(function(){ t.style.display='none'; }, 2500);
 }
-// 시간표
+// 시간표 — 칸을 누를 때마다 빈칸 → 수업 → 마감 → 빈칸 순으로 순환.
+// "마감"은 정원/인원수를 묻지 않는 단순 상태값 — 마감을 해제하는 순간 그 슬롯에
+// 공석 알림을 신청해둔 학부모 전원에게 알림을 보낸다 (krapToggleTt 참고).
 var _krapSlots = {};
 function krapBuildTt() {
   var grid = document.getElementById('krapTtGrid');
@@ -11959,10 +12023,13 @@ function krapBuildTt() {
   var days = ['월','화','수','목','금'];
   var hours = [14,15,16,17,18,19,20];
   var ttTeachers = {};
-  try { _krapSlots = JSON.parse(localStorage.getItem('krap_tt') || '{}'); } catch(e){}
+  var closedSlots = {};
+  _krapSlots = {};
   if (_krapAcadId) {
     var over = KR_SYNC.get(_krapAcadId) || {};
+    _krapSlots = over.timetable || {};
     ttTeachers = over.ttTeachers || {};
+    closedSlots = over.closedSlots || {};
   }
   grid.innerHTML = '<div></div>';
   days.forEach(function(d){ grid.innerHTML += '<div class="krap-tt-head">'+d+'</div>'; });
@@ -11970,38 +12037,78 @@ function krapBuildTt() {
     grid.innerHTML += '<div class="krap-tt-time">'+h+'시</div>';
     days.forEach(function(d, di) {
       var key = di+'_'+h;
-      var filled = _krapSlots[key] ? ' filled' : '';
       var teacher = ttTeachers[key] || '';
-      var lbl = _krapSlots[key] ? (teacher || '수업') : '+';
-      grid.innerHTML += '<div class="krap-tt-cell'+filled+'" data-teacher="'+_escHtml(teacher)+'" onclick="krapToggleTt(\''+key+'\',this)">'+_escHtml(lbl)+'</div>';
+      var isClosed = !!(_krapSlots[key] && closedSlots[key]);
+      var isFilled = !!(_krapSlots[key] && !isClosed);
+      var cls = isClosed ? ' closed' : (isFilled ? ' filled' : '');
+      var lbl = isClosed ? '마감' : (isFilled ? (teacher || '수업') : '+');
+      grid.innerHTML += '<div class="krap-tt-cell'+cls+'" data-teacher="'+_escHtml(teacher)+'" onclick="krapToggleTt(\''+key+'\',this)">'+_escHtml(lbl)+'</div>';
     });
   });
 }
 function krapToggleTt(key, el) {
-  el.classList.toggle('filled');
-  if (el.classList.contains('filled')) {
+  var wasFilled = el.classList.contains('filled');
+  var wasClosed = el.classList.contains('closed');
+  el.classList.remove('filled', 'closed');
+  if (!wasFilled && !wasClosed) {
+    // 빈칸 → 수업
+    el.classList.add('filled');
     var sel = document.getElementById('krapTtTeacherSelect');
     var teacher = sel ? sel.value : '';
     el.dataset.teacher = teacher;
     el.textContent = teacher || '수업';
+  } else if (wasFilled) {
+    // 수업 → 마감
+    el.classList.add('closed');
+    el.textContent = '마감';
+    krapNotifyVacancySubscribers(key, false);
   } else {
+    // 마감 → 빈칸 (재오픈, 대기자에게 알림)
     el.dataset.teacher = '';
     el.textContent = '+';
+    krapNotifyVacancySubscribers(key, true);
   }
+}
+// reopened=true면 마감이 풀린 것 — 그 슬롯 대기자에게 공석 알림 발송
+function krapNotifyVacancySubscribers(key, reopened) {
+  if (!reopened || !_krapAcadId) return;
+  var over = KR_SYNC.get(_krapAcadId) || {};
+  var subs = (over.vacancySubs && over.vacancySubs[key]) || [];
+  if (!subs.length) return;
+  var acadName = (over.name) || (UR_ACADEMIES.filter(function(a){return a.id===_krapAcadId;})[0] || {}).name || '학원';
+  var parts = key.split('_');
+  var dayNames = ['월','화','수','목','금'];
+  var slotLabel = dayNames[parseInt(parts[0],10)] + ' ' + parts[1] + '시';
+  subs.forEach(function(sub) {
+    urAddNotificationForEmail(sub.email, {
+      scope: 'academy',
+      academyName: acadName,
+      title: acadName + ' 자리 났어요!',
+      body: slotLabel + ' 수업에 공석이 생겼어요. 서둘러 등록해보세요.',
+      academyId: _krapAcadId
+    });
+  });
+  var rest = Object.assign({}, over.vacancySubs);
+  delete rest[key];
+  KR_SYNC.set(_krapAcadId, { vacancySubs: rest });
+  showToast(subs.length + '명에게 공석 알림을 보냈어요!');
 }
 function krapSaveTt() {
   var cells = document.querySelectorAll('#krapTtGrid .krap-tt-cell');
   var slots = {};
   var ttTeachers = {};
+  var closedSlots = {};
   cells.forEach(function(c) {
     var m = c.getAttribute('onclick').match(/'([^']+)'/);
-    if (m && c.classList.contains('filled')) {
+    if (!m) return;
+    if (c.classList.contains('filled') || c.classList.contains('closed')) {
       slots[m[1]] = true;
       if (c.dataset.teacher) ttTeachers[m[1]] = c.dataset.teacher;
+      if (c.classList.contains('closed')) closedSlots[m[1]] = true;
     }
   });
   if (_krapAcadId) {
-    KR_SYNC.set(_krapAcadId, { timetable: slots, ttTeachers: ttTeachers });
+    KR_SYNC.set(_krapAcadId, { timetable: slots, ttTeachers: ttTeachers, closedSlots: closedSlots });
   }
   var t = document.getElementById('krapTtToast');
   t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 2500);
