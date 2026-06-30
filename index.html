@@ -2778,6 +2778,21 @@
 .ur-notif-item-body { font-size: 12.5px; color: #6B7280; line-height: 1.5; }
 /* AI 추천 — 동네 학원 분포(공급 비율) 기반, "또래 인기"가 아니라 정직하게 "동네 현황"으로 표기 */
 .ur-ai-reco-intro { font-size: 12px; color: #6B7280; line-height: 1.5; padding: 14px 16px; border-bottom: 1px solid #F0F0F0; }
+.ur-ai-options-btn { width: 32px; height: 32px; border-radius: 50%; border: none; background: #FFF3EC; color: #F97316; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ur-ai-sheet-overlay { display: none; position: absolute; inset: 0; z-index: 70; background: rgba(0,0,0,0.35); align-items: flex-end; }
+.ur-ai-sheet-overlay.open { display: flex; }
+.ur-ai-sheet-panel { background: #fff; width: 100%; border-radius: 18px 18px 0 0; padding: 18px 16px 22px; }
+.ur-ai-sheet-title { font-size: 14px; font-weight: 800; color: #1A1A1A; margin-bottom: 14px; }
+.ur-ai-sheet-label { font-size: 11px; font-weight: 700; color: #9CA3AF; margin-bottom: 8px; }
+.ur-ai-sheet-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
+.ur-ai-chip { font-size: 12px; font-weight: 700; color: #374151; background: #F4F4F5; border: none; border-radius: 100px; padding: 7px 13px; cursor: pointer; }
+.ur-ai-chip.active { background: #F97316; color: #fff; }
+.ur-ai-sheet-apply { width: 100%; background: #F97316; color: #fff; border: none; border-radius: 12px; padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.ur-ai-combo-card { margin: 12px 16px; background: linear-gradient(135deg,#FFF4E8,#FFE8D6); border: 1.5px solid #FFD9B3; border-radius: 16px; padding: 14px 16px; }
+.ur-ai-combo-title { font-size: 13px; font-weight: 800; color: #1A1A1A; margin-bottom: 8px; }
+.ur-ai-combo-addbtn { width: 100%; background: #F97316; color: #fff; border: none; border-radius: 12px; padding: 12px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+.ur-ai-list-label { font-size: 11px; font-weight: 700; color: #9CA3AF; padding: 12px 16px 4px; }
+.ur-ai-verified-badge { font-size: 9.5px; font-weight: 700; color: #16A34A; background: #ECFDF5; border-radius: 100px; padding: 2px 7px; margin-left: 6px; }
 .ur-membership-row { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #F5F5F5; }
 .ur-membership-check { width: 20px; height: 20px; border-radius: 50%; background: #FFF3EC; color: #F97316; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
 .ur-membership-text { font-size: 13px; color: #1A1A1A; font-weight: 500; }
@@ -8853,6 +8868,7 @@ var KR_SYNC = {
         // 시간표 오버라이드 → times 배열 재생성 (원장이 직접 입력한 경우에만 존재)
         times:        over.timetable ? KR_SYNC._ttToTimes(over.timetable) : base.times,
         hasTimetable: over.timetable ? Object.keys(over.timetable).some(function(k){ return over.timetable[k]; }) : base.hasTimetable,
+        rawTimetable: over.timetable || null,
         teachers: over.teachers || base.teachers || [],
         reportPending: reportPending,
         // 노출 설정: 검색 노출 꺼져 있거나, 정보 신고가 접수돼 검토 대기 중이면 공개 목록에서 숨김
@@ -9181,47 +9197,6 @@ function urExitResultMode() {
   if (titleEl) titleEl.style.display = 'none';
 }
 
-// 과목 아이콘을 직접 누르지 않고도(예: AI 추천 결과에서) 결과모드로 바로 진입시키기 위한 버전
-function urGoToSubjectResults(subjKey, label) {
-  userShowTab(0); // 홈 탭으로 먼저 이동해야 결과화면(지도+바텀시트)이 실제로 보임 — 스케줄 탭 등 다른 탭에 있을 때 호출될 수 있음
-  _urFilter = subjKey;
-  if (document.getElementById('urSubjectGrid')) urRenderSubjectGrid();
-  urEnterResultMode(label);
-  urRenderResults();
-}
-
-// ── AI 추천 (1단계: 동네 학원 분포 기반) ──
-// "또래가 많이 듣는 과목"이라 부르려면 실제 등록 데이터(수요)가 필요한데 아직 없음.
-// 지금 가진 건 학원 공급 데이터뿐이라, 정직하게 "동네 학원 현황"으로 표기하고
-// 인과관계("그래서 또래도 듣는다")는 주장하지 않는다 — 표본이 쌓이면 2단계로 교체.
-function _urGradeToAgeBand(grade) {
-  if (!grade) return 'all';
-  if (grade.indexOf('미취학') === 0) return 'toddler';
-  if (grade.indexOf('초') === 0) return 'elementary';
-  if (grade.indexOf('중') === 0) return 'middle';
-  if (grade.indexOf('고') === 0) return 'high';
-  return 'all';
-}
-var UR_AGE_BAND_LABELS = { toddler: '유아', elementary: '초등', middle: '중등', high: '고등', all: '' };
-function urComputeRegionSubjectStats() {
-  urUpdateDistances();
-  var radius = _urRadius || 1000;
-  var children = urGetChildren();
-  var ageBand = children.length ? _urGradeToAgeBand(children[0].grade) : 'all';
-  var pool = KR_SYNC.getMergedAcademies().filter(function(a) {
-    if (a.dist == null || a.dist * 1000 > radius) return false;
-    if (ageBand !== 'all' && (a.ageBand || 'all') !== 'all' && a.ageBand !== ageBand) return false;
-    return true;
-  });
-  var counts = {};
-  pool.forEach(function(a) { counts[a.subj] = (counts[a.subj] || 0) + 1; });
-  var total = pool.length;
-  var stats = Object.keys(counts).map(function(subj) {
-    return { subj: subj, count: counts[subj], pct: total ? Math.round(counts[subj] / total * 100) : 0 };
-  });
-  stats.sort(function(a, b) { return b.count - a.count; });
-  return { stats: stats, total: total, ageBand: ageBand };
-}
 // ── 멤버십 (가격/CTA 없이 혜택 소개만 — 아직 준비 중 단계) ──
 var UR_MEMBERSHIP_BENEFITS = [
   '스케줄 조합 추천 무제한',
@@ -9255,36 +9230,146 @@ function urCloseAiRecommend() {
   var screen = document.getElementById('urAiRecoScreen');
   if (screen) screen.style.display = 'none';
 }
+
+// ── AI 추천 엔진 — 원장이 직접 입력한 시간표(rawTimetable)가 있는 "원장 인증"
+// 학원만 후보로 삼아, 시간이 겹치지 않는 조합을 그리디하게 계산한다.
+// 시간표가 없는 학원은 가짜 데이터를 만들지 않고 애초에 후보에서 제외한다.
+var _urAiRadius = 1000;
+var _urAiSubjects = []; // 비어있으면 전체 과목
+function urToggleAiOptions() {
+  urRenderAiSubjectChips();
+  var ov = document.getElementById('urAiSheetOverlay');
+  if (ov) ov.classList.add('open');
+}
+function urCloseAiOptions(e) {
+  if (e && e.target !== document.getElementById('urAiSheetOverlay')) return;
+  var ov = document.getElementById('urAiSheetOverlay');
+  if (ov) ov.classList.remove('open');
+  urRenderAiRecommend();
+}
+function urAiSetRadius(btn) {
+  _urAiRadius = parseInt(btn.dataset.r, 10);
+  Array.prototype.forEach.call(document.querySelectorAll('#urAiRadiusChips .ur-ai-chip'), function(b) {
+    b.classList.toggle('active', b === btn);
+  });
+}
+function urAiToggleSubject(btn) {
+  var subj = btn.dataset.subj;
+  var idx = _urAiSubjects.indexOf(subj);
+  if (idx >= 0) { _urAiSubjects.splice(idx, 1); btn.classList.remove('active'); }
+  else { _urAiSubjects.push(subj); btn.classList.add('active'); }
+}
+function urRenderAiSubjectChips() {
+  var el = document.getElementById('urAiSubjectChips');
+  if (!el) return;
+  el.innerHTML = UR_SUBJECT_GRID.map(function(s) {
+    var active = _urAiSubjects.indexOf(s.subj) >= 0;
+    return '<button class="ur-ai-chip' + (active ? ' active' : '') + '" data-subj="' + s.subj + '" onclick="urAiToggleSubject(this)">' + s.icon + ' ' + s.label + '</button>';
+  }).join('');
+}
+// 'day_hour' 형식의 timetable map → [{day,hour}] 슬롯 배열
+function _urRawSlots(rawTimetable) {
+  if (!rawTimetable) return [];
+  return Object.keys(rawTimetable).filter(function(k) { return rawTimetable[k]; }).map(function(k) {
+    var parts = k.split('_');
+    return { day: parseInt(parts[0], 10), hour: parseInt(parts[1], 10) };
+  });
+}
+function _urSlotsConflict(a, b) {
+  for (var i = 0; i < a.length; i++) {
+    for (var j = 0; j < b.length; j++) {
+      if (a[i].day === b[j].day && a[i].hour === b[j].hour) return true;
+    }
+  }
+  return false;
+}
+function _urEarliestSlot(slots) {
+  if (!slots.length) return Infinity;
+  return Math.min.apply(null, slots.map(function(s) { return s.day * 100 + s.hour; }));
+}
+// 후보군에서 시간 겹침 없는 조합을 그리디하게 뽑는다 — 과목별 최대 1곳
+function _urBuildAiCombination(pool) {
+  var sorted = pool.slice().sort(function(a, b) { return _urEarliestSlot(a._slots) - _urEarliestSlot(b._slots); });
+  var combo = [];
+  var usedSubj = {};
+  var allSlots = [];
+  sorted.forEach(function(a) {
+    if (usedSubj[a.subj]) return;
+    if (_urSlotsConflict(allSlots, a._slots)) return;
+    combo.push(a);
+    usedSubj[a.subj] = true;
+    allSlots = allSlots.concat(a._slots);
+  });
+  return combo;
+}
 function urRenderAiRecommend() {
   var bodyEl = document.getElementById('urAiRecoBody');
+  var summaryEl = document.getElementById('urAiComboSummary');
   if (!bodyEl) return;
-  var locEl = document.getElementById('urHomeLocationText');
-  var region = (locEl && /[가-힣0-9]+(동|읍|면)$/.test(locEl.textContent.trim())) ? locEl.textContent.trim() : '주변';
-  var data = urComputeRegionSubjectStats();
-  if (!data.total) {
+  urUpdateDistances();
+  var pool = KR_SYNC.getMergedAcademies().filter(function(a) {
+    if (!a.verified || !a.hasTimetable || !a.rawTimetable) return false;
+    if (a.dist == null || a.dist * 1000 > _urAiRadius) return false;
+    if (_urAiSubjects.length && _urAiSubjects.indexOf(a.subj) < 0) return false;
+    return true;
+  }).map(function(a) {
+    a._slots = _urRawSlots(a.rawTimetable);
+    return a;
+  }).filter(function(a) { return a._slots.length > 0; });
+
+  if (!pool.length) {
+    summaryEl.innerHTML = '';
     bodyEl.innerHTML = '<div class="ur-notif-empty"><div class="ur-notif-empty-icon">📍</div>'
-      + '주변 학원 데이터가 아직 부족해요<br><span style="font-size:12px">반경을 넓히거나 다른 지역에서 다시 시도해보세요</span></div>';
+      + '조건에 맞는 원장 인증 학원이 아직 없어요<br><span style="font-size:12px">반경을 넓히거나 과목을 바꿔보세요</span></div>';
     return;
   }
-  var schedule = urGetSchedule();
-  var haveSubj = {};
-  schedule.forEach(function(s) { haveSubj[s.subj] = true; });
+
+  var combo = _urBuildAiCombination(pool);
+  var dayNames = ['월','화','수','목','금'];
   var labels = {};
   UR_SUBJECT_GRID.forEach(function(s) { labels[s.subj] = s.label; });
-  var missing = data.stats.filter(function(s) { return !haveSubj[s.subj]; }).slice(0, 3);
-  if (!missing.length) {
-    bodyEl.innerHTML = '<div class="ur-notif-empty"><div class="ur-notif-empty-icon">🎉</div>이미 동네 주요 과목을 다 등록하셨어요!</div>';
-    return;
-  }
-  var ageLabel = UR_AGE_BAND_LABELS[data.ageBand] || '';
-  bodyEl.innerHTML = missing.map(function(s) {
-    var label = labels[s.subj] || s.subj;
-    return '<div class="ur-ai-reco-item">'
-      + '<div class="ur-ai-reco-top"><span class="ur-ai-reco-subj">' + _escHtml(label) + '</span><span class="ur-ai-reco-pct">' + s.pct + '%</span></div>'
-      + '<div class="ur-ai-reco-desc">' + _escHtml(region) + (ageLabel ? ' · ' + ageLabel : '') + ' 학원 ' + data.total + '개 중 ' + s.count + '개가 ' + _escHtml(label) + '이에요</div>'
-      + '<button class="ur-ai-reco-btn" onclick="urCloseAiRecommend();urGoToSubjectResults(\'' + s.subj + '\',\'' + label + '\')">' + _escHtml(label) + ' 학원 보기 →</button>'
+
+  if (combo.length) {
+    summaryEl.innerHTML = '<div class="ur-ai-combo-card">'
+      + '<div class="ur-ai-combo-title">✨ 시간 겹침 없는 추천 조합 (' + combo.length + '곳)</div>'
+      + combo.map(function(a) {
+          var slotLabel = a._slots.slice(0, 2).map(function(s) { return dayNames[s.day] + ' ' + s.hour + '시'; }).join(', ');
+          return '<div style="font-size:12px;color:#374151;margin-bottom:4px;">· ' + _escHtml(a.name) + ' (' + (labels[a.subj] || a.subj) + ') — ' + slotLabel + '</div>';
+        }).join('')
+      + '<button class="ur-ai-combo-addbtn" onclick="urAddAiCombination()">이 조합 스케줄에 추가하기</button>'
       + '</div>';
-  }).join('');
+  } else {
+    summaryEl.innerHTML = '';
+  }
+
+  bodyEl.innerHTML = '<div class="ur-ai-list-label">조건에 맞는 원장 인증 학원 ' + pool.length + '곳</div>'
+    + pool.map(function(a) {
+      var slotLabel = a._slots.slice(0, 2).map(function(s) { return dayNames[s.day] + ' ' + s.hour + '시'; }).join(', ');
+      return '<div class="ur-ai-reco-item">'
+        + '<div class="ur-ai-reco-top"><span class="ur-ai-reco-subj">' + _escHtml(a.name) + '<span class="ur-ai-verified-badge">✓ 원장 인증</span></span></div>'
+        + '<div class="ur-ai-reco-desc">' + (labels[a.subj] || a.subj) + ' · ' + slotLabel + ' · ' + a.dist + 'km</div>'
+        + '</div>';
+    }).join('');
+}
+function urAddAiCombination() {
+  var pool = KR_SYNC.getMergedAcademies().filter(function(a) {
+    if (!a.verified || !a.hasTimetable || !a.rawTimetable) return false;
+    if (a.dist == null || a.dist * 1000 > _urAiRadius) return false;
+    if (_urAiSubjects.length && _urAiSubjects.indexOf(a.subj) < 0) return false;
+    return true;
+  }).map(function(a) { a._slots = _urRawSlots(a.rawTimetable); return a; }).filter(function(a) { return a._slots.length > 0; });
+  var combo = _urBuildAiCombination(pool);
+  if (!combo.length) return;
+  var schedule = urGetSchedule();
+  var existingIds = schedule.map(function(s) { return s.academyId; });
+  combo.forEach(function(a) {
+    if (existingIds.indexOf(a.id) >= 0) return;
+    schedule.push({ academyId: a.id, name: a.name, subj: a.subj, label: a.label, color: a.color, times: a.times, addedAt: Date.now() });
+  });
+  urSaveSchedule(schedule);
+  urCloseAiRecommend();
+  showToast('추천 조합 ' + combo.length + '곳을 스케줄에 추가했어요!');
+  urRenderHomePromo();
 }
 
 // ── ③ 과목 아이콘 그리드 — 새 과목이 생기면 이 배열만 추가하면 됨 ──
@@ -10963,18 +11048,34 @@ function urToggleNotif(btn) {
     <div class="ur-notif-list" id="urNotifList"><!-- JS 렌더링 --></div>
   </div>
 
-  <!-- AI 추천 화면 — 스케줄 탭의 "✨ AI 추천" 탭 시 전체 화면으로 덮음.
-       1단계: 처음부터 다시 묻는 마케팅 데모가 아니라, 지금 등록된 스케줄에 "빠진 과목"을
-       우리 동네 학원 분포(공급 비율) 기준으로 추천. 또래의 실제 선택(수요) 데이터가 아직
-       없어서, "인기 과목"이라 부르지 않고 "동네 학원 현황"으로 정직하게 표기한다. -->
+  <!-- AI 추천 화면 — 원장이 실제 시간표를 등록(인증)한 학원만 모아 시간 충돌 없는
+       조합을 계산해서 보여준다. 시간표가 없는 학원은 애초에 후보에서 제외 —
+       가짜 시간표를 만들지 않고, 데이터가 있는 만큼만 정직하게 추천한다. -->
   <div class="ur-notif-screen" id="urAiRecoScreen" style="display:none">
     <div class="ur-notif-header">
       <button class="ur-notif-back" onclick="urCloseAiRecommend()">←</button>
       <div class="ur-notif-title">✨ AI 추천</div>
-      <span style="width:40px"></span>
+      <button class="ur-ai-options-btn" onclick="urToggleAiOptions()">⚙️</button>
     </div>
-    <div class="ur-ai-reco-intro">지금 스케줄에 없는 과목 중, 우리 동네에 자리잡은 학원 비율을 보여드려요</div>
+    <div class="ur-ai-reco-intro">원장 인증을 받아 실제 시간표가 등록된 학원만 모아 시간 충돌 없는 조합을 보여드려요</div>
+    <div id="urAiComboSummary"><!-- JS 렌더링 --></div>
     <div class="ur-notif-list" id="urAiRecoBody"><!-- JS 렌더링 --></div>
+
+    <!-- 옵션 바텀시트 -->
+    <div class="ur-ai-sheet-overlay" id="urAiSheetOverlay" onclick="urCloseAiOptions(event)">
+      <div class="ur-ai-sheet-panel">
+        <div class="ur-ai-sheet-title">조건 설정</div>
+        <div class="ur-ai-sheet-label">반경</div>
+        <div class="ur-ai-sheet-row" id="urAiRadiusChips">
+          <button class="ur-ai-chip active" data-r="1000" onclick="urAiSetRadius(this)">1km</button>
+          <button class="ur-ai-chip" data-r="2000" onclick="urAiSetRadius(this)">2km</button>
+          <button class="ur-ai-chip" data-r="3000" onclick="urAiSetRadius(this)">3km</button>
+        </div>
+        <div class="ur-ai-sheet-label">과목 (선택 안 하면 전체)</div>
+        <div class="ur-ai-sheet-row" id="urAiSubjectChips"><!-- JS 렌더링 --></div>
+        <button class="ur-ai-sheet-apply" onclick="urCloseAiOptions()">적용</button>
+      </div>
+    </div>
   </div>
 
   <!-- 가족 초대 모달 -->
