@@ -9973,9 +9973,6 @@ function urRenderAcademies() {
     var hoursHtml = '<span class="ur-row-hours-' + (a.hasTimetable ? 'ok' : 'pending') + '">' + _urHoursLine(a) + '</span>';
     var region = _urShortRegion(a.addr);
     var feeHtml = a.fee != null ? ((a.fee/10000).toFixed(0) + '만원/월') : '수강료 미확인';
-    var teacherHtml = (a.teachers && a.teachers.length)
-      ? ' · 👩‍🏫 ' + _escHtml(a.teachers[0].name) + (a.teachers.length > 1 ? ' 외 ' + (a.teachers.length - 1) + '명' : '')
-      : '';
     return '<div class="ur-academy-row' + (_urHighlightId === a.id ? ' highlight' : '') + '" id="urCard' + a.id + '" onclick="urFlyToAcademy(' + a.id + ')">'
       +   '<div class="ur-academy-row-main">'
       +     '<div class="ur-row-name-line">'
@@ -9984,7 +9981,7 @@ function urRenderAcademies() {
       +       verifiedBadge + badgeHtml
       +     '</div>'
       +     '<div class="ur-row-hours">' + hoursHtml + '</div>'
-      +     '<div class="ur-row-meta">📍 ' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + teacherHtml + '</div>'
+      +     '<div class="ur-row-meta">📍 ' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + '</div>'
       +   '</div>'
       +   '<div class="ur-row-actions">'
       +     '<button class="ur-row-report" onclick="urReportAcademyPrompt(' + a.id + ',event)" title="정보가 잘못됐나요?">🚩</button>'
