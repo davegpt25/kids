@@ -7248,17 +7248,31 @@ function adminRenderAcademies() {
     var syncInfo = over.name || over.fee
       ? '<div style="font-size:11px;color:#6366F1;margin-top:2px;">🔗 원장 수정 반영됨 · 수강료 ' + Math.round((fee||0)/10000) + '만원</div>'
       : '';
-    return '<div style="background:white;border-radius:12px;padding:14px 18px;border:1px solid #E2E8F0;display:flex;align-items:center;gap:12px;justify-content:space-between;">'
+    var reportPending = !!(over.report && !over.report.resolved);
+    var reportInfo = reportPending
+      ? '<div style="font-size:11px;color:#DC2626;margin-top:2px;">🚩 신고 접수 · 검토 전까지 학부모 목록에서 숨김' + (over.report.reason ? (' · "' + over.report.reason + '"') : '') + '</div>'
+      : '';
+    var resolveBtn = reportPending
+      ? '<button onclick="adminResolveReport('+a.id+')" style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;border:1.5px solid #DC2626;color:#DC2626;background:transparent;cursor:pointer;font-family:inherit;">🚩 신고 해제</button>'
+      : '';
+    return '<div style="background:white;border-radius:12px;padding:14px 18px;border:1px solid ' + (reportPending ? '#FCA5A5' : '#E2E8F0') + ';display:flex;align-items:center;gap:12px;justify-content:space-between;">'
       + '<div style="display:flex;align-items:center;gap:10px;flex:1;">'
       +   '<div style="width:10px;height:10px;border-radius:50%;background:' + a.color + ';flex-shrink:0;"></div>'
       +   '<div>'
       +     '<div style="font-size:13px;font-weight:700;color:#1E293B;">' + name + ' <span style="font-size:11px;font-weight:400;color:#94A3B8;">(' + a.label + ')</span></div>'
-      +     principalInfo + syncInfo
+      +     principalInfo + syncInfo + reportInfo
       +   '</div>'
       + '</div>'
-      + '<div style="display:flex;align-items:center;gap:8px;">' + statusBadge + approveBtn + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;">' + statusBadge + resolveBtn + approveBtn + '</div>'
       + '</div>';
   }).join('');
+}
+function adminResolveReport(id) {
+  var over = KR_SYNC.get(id) || {};
+  if (!over.report) return;
+  KR_SYNC.set(id, { report: Object.assign({}, over.report, { resolved: true }) });
+  adminRenderAcademies();
+  showToast('신고를 처리했어요. 학부모 목록에 다시 노출됩니다 ✅');
 }
 
 function adminApproveAcademy(id) {
@@ -10003,7 +10017,8 @@ function urToggleSchedule(academyId, btn) {
     showToast('스케줄에서 제거했어요');
   } else {
     var a = null;
-    for (var j = 0; j < UR_ACADEMIES.length; j++) { if (UR_ACADEMIES[j].id === academyId) { a = UR_ACADEMIES[j]; break; } }
+    var merged = KR_SYNC.getMergedAcademies();
+    for (var j = 0; j < merged.length; j++) { if (merged[j].id === academyId) { a = merged[j]; break; } }
     if (!a) return;
     schedule.push({ academyId: a.id, name: a.name, subj: a.subj, label: a.label, color: a.color, times: a.times, addedAt: Date.now() });
     btn.textContent = '✓ 등록됨'; btn.classList.add('added');
@@ -11538,7 +11553,16 @@ function krapOpen() {
     try { return localStorage.getItem('krap_session_email') || ''; } catch(e) { return ''; }
   })();
   var inv = invites.filter(function(i) { return i.email === sessionEmail; })[0];
-  if (inv) _krapAcadId = inv.academyId;
+  if (inv) {
+    _krapAcadId = inv.academyId;
+  } else if (sessionEmail) {
+    // 세션 이메일은 있는데 매칭되는 초대가 없다 = 초대가 취소/삭제된 경우 — 포털을 열지 않고 세션 정리
+    // (sessionEmail이 비어있는 "master" 테스트 진입 경로는 예외로 둠)
+    localStorage.removeItem('krap_session_email');
+    _krapAcadId = null;
+    showToast('원장 계정 권한이 만료됐어요. 관리자에게 문의해주세요.');
+    return;
+  }
 
   // 저장된 정보 불러오기
   if (_krapAcadId) {
