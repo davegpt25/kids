@@ -2526,7 +2526,7 @@
 .ur-content { flex: 1; overflow-y: auto; overflow-x: hidden; }
 .ur-page { display: none; padding-bottom: 80px; min-height: calc(100vh - 116px); }
 /* 홈 탭은 카드들 사이로 회색 캔버스가 비치지 않도록 흰 배경으로 통일 (연령칩/과목그리드 영역 이질감 제거) */
-#urPageSearch { background: #fff; }
+#urPageSearch { background: #FBF7F1; }
 .ur-page.active { display: block; }
 /* 결과모드(지도+바텀시트)일 땐 페이지 전체를 flex column으로 바꿔서 #urResultsArea가
    남는 공간을 정확히 채우게 함 — calc() 추측 대신 flex로 헤더 높이 변화에도 안전하게 대응 */
@@ -2617,7 +2617,7 @@
 .ur-result-title { font-size: 15px; font-weight: 800; color: var(--text-main); margin-top: 10px; }
 .ur-home-search-wrap {
   flex: 1; display: flex; align-items: center; gap: 8px;
-  background: #F4F4F5; border-radius: 14px; padding: 12px 16px;
+  background: #fff; border: 1px solid #ECE3D6; border-radius: 14px; padding: 12px 16px;
 }
 .ur-home-search-wrap input {
   flex: 1; border: none; background: none; font-size: 14px; outline: none;
@@ -2636,7 +2636,7 @@
   border: 1.5px solid #FFD9B3;
 }
 .ur-home-promo.is-today {
-  background: #fff; border: 1.5px solid #E5E7EB;
+  background: #fff; border: 1px solid #ECE3D6;
 }
 .ur-promo-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .ur-promo-title { font-size: 14px; font-weight: 800; color: var(--text-main); display:flex; align-items:center; gap: 6px; }
@@ -2669,7 +2669,7 @@
 }
 .ur-subject-icon {
   width: 52px; height: 52px; border-radius: 17px; display: flex; align-items: center;
-  justify-content: center; font-size: 23px; background: #F4F4F5; transition: all .15s;
+  justify-content: center; font-size: 23px; background: #fff; border: 1px solid #ECE3D6; transition: all .15s;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .ur-subject-item:active .ur-subject-icon { transform: scale(0.94); }
