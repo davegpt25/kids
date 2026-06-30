@@ -3240,7 +3240,7 @@
     <a href="#howto">이용방법</a>
     <a href="#pricing">요금제</a>
     <a href="#demo">데모 체험</a>
-    <div class="nav-user" id="navUser" onclick="showUserMenu()">
+    <div class="nav-user" id="navUser">
       <div class="nav-user-avatar" id="navUserAvatar"></div>
       <span class="nav-user-name" id="navUserName"></span>
     </div>
@@ -4894,7 +4894,7 @@ async function inappCopyUrl() {
   const url = location.href;
   try {
     await navigator.clipboard.writeText(url);
-    showToast('링크를 복사했어요! Chrome에서 열어주세요 🔗');
+    showToast('링크를 복사했어요! Chrome에서 열어주세요!');
   } catch(e) {
     // clipboard API 차단 시 fallback
     const ta = document.createElement('textarea');
@@ -4902,7 +4902,7 @@ async function inappCopyUrl() {
     document.body.appendChild(ta); ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-    showToast('링크를 복사했어요! Chrome에서 열어주세요 🔗');
+    showToast('링크를 복사했어요! Chrome에서 열어주세요!');
   }
   document.getElementById('inappOverlay').classList.remove('open');
 }
@@ -4973,7 +4973,7 @@ async function _handleOAuthCallback() {
           document.body.style.overflow = 'hidden';
           _showDemoStep('demoStep4');
           _fillLeadForm(name, email);
-          showToast('Google 정보를 가져왔어요');
+          showToast('Google 정보를 가져왔어요!');
         }, 300);
       } else {
         onLoginSuccess(name, email, '#4285F4', 'google');
@@ -5017,14 +5017,14 @@ async function _handleOAuthCallback() {
           document.body.style.overflow = 'hidden';
           _showDemoStep('demoStep4');
           _fillLeadForm(name, email);
-          showToast('카카오 정보를 가져왔어요');
+          showToast('카카오 정보를 가져왔어요!');
         }, 300);
       } else {
         onLoginSuccess(name, email || name + '@kakao.com', '#FEE500', 'kakao');
       }
     } catch(e) {
       console.error('카카오 사용자 정보 오류:', e);
-      showToast('카카오 로그인 중 오류가 발생했어요');
+      showToast('카카오 로그인 중 오류가 발생했어요!');
     }
     return;
   }
@@ -5052,7 +5052,7 @@ window.addEventListener('load', () => {
               // Demo modal 리드 폼 자동입력 모드
               _demoGoogleFillPending = false;
               _fillLeadForm(user.name || user.email.split('@')[0], user.email);
-              showToast('Google 정보를 가져왔어요');
+              showToast('Google 정보를 가져왔어요!');
             } else {
               onLoginSuccess(user.name || user.email.split('@')[0], user.email, '#4285F4', 'google');
             }
@@ -5210,7 +5210,7 @@ function onLoginSuccess(name, email, color, provider) {
   if (typeof showUserDashboard === 'function') {
     showUserDashboard(name, email, color);
   } else {
-    showToast(name + '님, 환영해요! 🎉');
+    showToast(name + '님, 환영해요!');
   }
 }
 
@@ -5220,10 +5220,6 @@ function showToast(msg) {
   toast.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
-}
-
-function showUserMenu() {
-  showToast('로그인 상태입니다. 출시 시 알림을 드릴게요!');
 }
 
 // ─── Demo Modal ───
@@ -5717,11 +5713,11 @@ function demoFillFromGoogle() {
       _tokenClient.requestAccessToken({ prompt: 'select_account' });
     } else {
       _fillLeadForm('김지수', 'jisu.kim@gmail.com');
-      showToast('Google 정보를 가져왔어요');
+      showToast('Google 정보를 가져왔어요!');
     }
   } else {
     _fillLeadForm('김지수', 'jisu.kim@gmail.com');
-    showToast('Google 정보를 가져왔어요');
+    showToast('Google 정보를 가져왔어요!');
   }
 }
 
@@ -5737,7 +5733,7 @@ function demoFillFromKakao() {
           url: '/v2/user/me',
           success: (res) => {
             _fillLeadForm(res.kakao_account?.profile?.nickname || '카카오사용자', res.kakao_account?.email || '');
-            showToast('카카오 정보를 가져왔어요');
+            showToast('카카오 정보를 가져왔어요!');
           },
           fail: () => _showInAppWarning('kakao')
         });
@@ -5760,18 +5756,18 @@ function demoFillFromKakao() {
             url: '/v2/user/me',
             success: (res) => {
               _fillLeadForm(res.kakao_account?.profile?.nickname || '카카오사용자', res.kakao_account?.email || '');
-              showToast('카카오 정보를 가져왔어요');
+              showToast('카카오 정보를 가져왔어요!');
             },
-            fail: () => showToast('카카오 정보를 불러올 수 없어요')
+            fail: () => showToast('카카오 정보를 불러올 수 없어요!')
           });
         },
-        fail: () => showToast('카카오 로그인에 실패했어요')
+        fail: () => showToast('카카오 로그인에 실패했어요!')
       });
     } else {
-      _fillLeadForm('카카오사용자', ''); showToast('카카오 정보를 가져왔어요');
+      _fillLeadForm('카카오사용자', ''); showToast('카카오 정보를 가져왔어요!');
     }
   } else {
-    _fillLeadForm('카카오사용자', ''); showToast('카카오 정보를 가져왔어요');
+    _fillLeadForm('카카오사용자', ''); showToast('카카오 정보를 가져왔어요!');
   }
 }
 
@@ -5788,7 +5784,7 @@ function submitLeadForm() {
         emailEl.style.boxShadow = '';
       }, 2200);
     }
-    showToast('이메일 주소를 올바르게 입력해 주세요');
+    showToast('이메일 주소를 올바르게 입력해 주세요!');
     return;
   }
   // 멤버 등록
@@ -7057,7 +7053,7 @@ function saveCurrentSchedule() {
       btn.disabled = false;
     }, 2500);
   }
-  showToast('스케줄이 저장됐어요 💾');
+  showToast('스케줄이 저장됐어요!');
 }
 
 // ─── WTP 3: Vacancy Alert ───
@@ -7274,7 +7270,7 @@ function adminResolveReport(id) {
   if (!over.report) return;
   KR_SYNC.set(id, { report: Object.assign({}, over.report, { resolved: true }) });
   adminRenderAcademies();
-  showToast('신고를 처리했어요. 학부모 목록에 다시 노출됩니다 ✅');
+  showToast('신고를 처리했어요. 학부모 목록에 다시 노출됩니다!');
 }
 
 function adminApproveAcademy(id) {
@@ -7287,13 +7283,13 @@ function adminApproveAcademy(id) {
   });
   localStorage.setItem('kidsroute_invites', JSON.stringify(invites));
   adminRenderAcademies();
-  showToast('인증이 승인됐어요. 학부모 페이지에 바로 반영됩니다 ✅');
+  showToast('인증이 승인됐어요. 학부모 페이지에 바로 반영됩니다!');
 }
 
 function adminRevokeAcademy(id) {
   KR_SYNC.setVerified(id, false);
   adminRenderAcademies();
-  showToast('인증이 취소됐어요.');
+  showToast('인증이 취소됐어요!');
 }
 
 // ── KPI 카드 ──
@@ -7493,7 +7489,7 @@ function _adminRenderAlertList(elId, limit) {
 }
 function adminSendAlert(id, btn) {
   KR.sendAlert(id);
-  showToast('알림이 발송됐어요 ✅');
+  showToast('알림이 발송됐어요!');
   adminRenderAlerts();
   adminUpdateBadges();
 }
@@ -9084,9 +9080,9 @@ function obToggleSubject(btn) {
 function obNext() {
   if (_obStep === 1) {
     _obData.name = (document.getElementById('obName').value || '').trim();
-    if (!_obData.name) { showToast('아이 이름을 입력해주세요'); return; }
+    if (!_obData.name) { showToast('아이 이름을 입력해주세요!'); return; }
   }
-  if (_obStep === 2 && !_obData.grade) { showToast('학년을 선택해주세요'); return; }
+  if (_obStep === 2 && !_obData.grade) { showToast('학년을 선택해주세요!'); return; }
   if (_obStep === 3) {
     _obData.dismissalTime = document.getElementById('obDismissal').value || '15:00';
   }
@@ -9114,7 +9110,7 @@ function obFinish() {
   });
   urSaveChildren(children);
   obClose();
-  showToast(_obData.name + '님의 정보가 등록됐어요 🎉');
+  showToast(_obData.name + '님의 정보가 등록됐어요!');
   userShowTab(0);
 }
 function hideUserDashboard() {
@@ -9376,7 +9372,7 @@ function urHandleHomePromoClick() {
   else { userShowTab(1); }
 }
 function urOpenLocationPicker() {
-  showToast('현재 위치를 다시 확인하고 있어요…');
+  showToast('현재 위치를 다시 확인하고 있어요!');
   urAutoLocate(true);
 }
 function urSetSort(el) {
@@ -9758,19 +9754,19 @@ function urAutoLocate(forceFresh) {
         _urMap.morph(new naver.maps.LatLng(_urUserLat, _urUserLng), 15);
       }
       urReverseGeocode(_urUserLat, _urUserLng);
-      if (forceFresh) showToast('현재 위치로 갱신했어요');
+      if (forceFresh) showToast('현재 위치로 이동했어요!');
     },
     function() {
       // 권한 거부/실패 — 기존 기준 위치 유지, 주소 표시만 갱신
       urReverseGeocode(_urUserLat, _urUserLng);
-      if (forceFresh) showToast('위치 권한이 필요해요. 브라우저 설정을 확인해주세요');
+      if (forceFresh) showToast('위치 권한이 필요해요. 브라우저 설정을 확인해주세요!');
     },
     // 수동으로 다시 잡을 때(forceFresh)는 캐시된 좌표 대신 진짜 새 값을 받음
     { timeout: 8000, maximumAge: forceFresh ? 0 : 60000 }
   );
 }
 function urMoveToMyLocation() {
-  if (!navigator.geolocation) { showToast('위치 서비스를 지원하지 않는 브라우저예요'); return; }
+  if (!navigator.geolocation) { showToast('위치 서비스를 지원하지 않는 브라우저예요!'); return; }
   var btn = document.getElementById('urLocBtn');
   if (btn) btn.textContent = '⏳';
   navigator.geolocation.getCurrentPosition(
@@ -9784,11 +9780,11 @@ function urMoveToMyLocation() {
       urRenderMapMarkers();
       urReverseGeocode(_urUserLat, _urUserLng);
       if (btn) btn.textContent = '📍';
-      showToast('현재 위치로 이동했어요 📍');
+      showToast('현재 위치로 이동했어요!');
     },
     function() {
       if (btn) btn.textContent = '📍';
-      showToast('위치 권한이 필요해요. 브라우저 설정을 확인해주세요');
+      showToast('위치 권한이 필요해요. 브라우저 설정을 확인해주세요!');
     },
     { timeout: 8000 }
   );
@@ -9834,10 +9830,10 @@ function urSearchAddress() {
   if (!window.naver || !naver.maps || !naver.maps.Service) return;
   var input = document.getElementById('urSearchInput');
   var query = input ? input.value.trim() : '';
-  if (!query) { showToast('검색어를 입력해주세요'); return; }
+  if (!query) { showToast('검색어를 입력해주세요!'); return; }
   naver.maps.Service.geocode({ query: query }, function(status, response) {
     if (status !== naver.maps.Service.Status.OK || !response.v2.addresses.length) {
-      showToast('검색 결과가 없어요. 다른 주소로 시도해보세요'); return;
+      showToast('검색 결과가 없어요. 다른 주소로 시도해보세요!'); return;
     }
     var result = response.v2.addresses[0];
     _urUserLat = parseFloat(result.y);
@@ -9998,7 +9994,7 @@ function urReportAcademyPrompt(academyId, event) {
   var reason = window.prompt('이 학원 정보에서 어떤 부분이 잘못됐나요? (예: 폐업함, 과목이 다름, 주소가 다름)');
   if (reason === null) return; // 취소
   KR_SYNC.reportAcademy(academyId, reason);
-  showToast('신고 접수했어요 — 확인 전까지 검색 결과에서 숨길게요');
+  showToast('신고 접수했어요 — 확인 전까지 검색 결과에서 숨길게요!');
   if (document.getElementById('urAcademyList')) urRenderAcademies();
   if (_urMap) urRenderMapMarkers();
   if (document.getElementById('simCards') && document.getElementById('simCards').innerHTML) _renderSimCards();
@@ -10027,9 +10023,9 @@ function urAddDemoSchedule() {
   urSaveSchedule(schedule);
   urRenderHomePromo();
   if (addedCount > 0) {
-    showToast('데모 학원 ' + addedCount + '개를 스케줄에 추가했어요 ✨');
+    showToast('데모 학원 ' + addedCount + '개를 스케줄에 추가했어요!');
   } else {
-    showToast('데모 학원이 이미 스케줄에 있어요');
+    showToast('데모 학원이 이미 스케줄에 있어요!');
   }
   userShowTab(1); // 바로 스케줄 탭으로 이동해서 결과를 보여줌
 }
@@ -10041,7 +10037,7 @@ function urToggleSchedule(academyId, btn) {
   if (idx >= 0) {
     schedule.splice(idx, 1);
     btn.textContent = '+ 추가'; btn.classList.remove('added');
-    showToast('스케줄에서 제거했어요');
+    showToast('스케줄에서 제거했어요!');
   } else {
     var a = null;
     var merged = KR_SYNC.getMergedAcademies();
@@ -10049,7 +10045,7 @@ function urToggleSchedule(academyId, btn) {
     if (!a) return;
     schedule.push({ academyId: a.id, name: a.name, subj: a.subj, label: a.label, color: a.color, times: a.times, addedAt: Date.now() });
     btn.textContent = '✓ 등록됨'; btn.classList.add('added');
-    showToast(_escHtml(a.name) + ' 스케줄 추가! 📅');
+    showToast(_escHtml(a.name) + ' 스케줄 추가!');
   }
   urSaveSchedule(schedule);
   urRenderHomePromo();
@@ -10186,7 +10182,7 @@ function urTogglePush(id) {
   prefs[id] = prefs[id] === false ? true : false;
   urSavePushPrefs(prefs);
   urRenderJourney(urGetSchedule());
-  showToast(prefs[id] ? '알림을 켰어요' : '알림을 껐어요');
+  showToast(prefs[id] ? '알림을 켰어요!' : '알림을 껐어요!');
 }
 
 function urToggleAllPush() {
@@ -10198,7 +10194,7 @@ function urToggleAllPush() {
   allIds.forEach(function(id) { prefs[id] = next; });
   urSavePushPrefs(prefs);
   urRenderJourney(schedule);
-  showToast(next ? '모든 알림을 켰어요' : '모든 알림을 껐어요');
+  showToast(next ? '모든 알림을 켰어요!' : '모든 알림을 껐어요!');
 }
 
 function urRemoveSchedule(academyId) {
@@ -10207,7 +10203,7 @@ function urRemoveSchedule(academyId) {
   urRenderSchedule();
   urRenderAcademies();
   urRenderHomePromo();
-  showToast('스케줄에서 제거했어요');
+  showToast('스케줄에서 제거했어요!');
 }
 
 // ── 내 정보 탭 ──
@@ -10331,7 +10327,7 @@ function urSaveChild() {
   var gender = document.getElementById('urChildGender').value;
   var photo  = document.getElementById('urChildPhotoData').value;
   var editId = document.getElementById('urChildEditId').value;
-  if (!name || !birth || !grade) { showToast('닉네임, 출생연도, 학년을 입력해주세요'); return; }
+  if (!name || !birth || !grade) { showToast('닉네임, 출생연도, 학년을 입력해주세요!'); return; }
   var children = urGetChildren();
   if (editId) {
     for (var i = 0; i < children.length; i++) {
@@ -10340,10 +10336,10 @@ function urSaveChild() {
         break;
       }
     }
-    showToast('아이 정보가 수정됐어요 ✏️');
+    showToast('아이 정보가 수정됐어요!');
   } else {
     children.push({ id:'c'+Date.now(), name:name, birthYear:birth, grade:grade, emoji:emoji, gender:gender, photo:photo });
-    showToast(name + ' 추가 완료! 🎉');
+    showToast(name + ' 추가 완료!');
   }
   urSaveChildren(children);
   urCancelChildForm();
@@ -10353,7 +10349,7 @@ function urDeleteChild(id) {
   var children = urGetChildren();
   urSaveChildren(children.filter(function(c) { return c.id !== id; }));
   urRenderChildren();
-  showToast('삭제했어요');
+  showToast('삭제했어요!');
 }
 
 // ── 가족 구성원 (본인 + 가족 1명까지) ──
@@ -10403,7 +10399,7 @@ function urCopyFamilyCode() {
   var fam = urGetFamily();
   if (!fam.code) return;
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(fam.code).then(function() { showToast('초대 코드를 복사했어요 📋'); });
+    navigator.clipboard.writeText(fam.code).then(function() { showToast('초대 코드를 복사했어요!'); });
   } else {
     showToast('코드: ' + fam.code);
   }
@@ -10411,12 +10407,12 @@ function urCopyFamilyCode() {
 function urJoinFamilyCode() {
   var fam = urGetFamily();
   if ((fam.members || []).length >= UR_FAMILY_MAX_MEMBERS) {
-    showToast('이미 가족 구성원이 가득 찼어요');
+    showToast('이미 가족 구성원이 가득 찼어요!');
     return;
   }
   var input = document.getElementById('urFamilyJoinCode');
   var code = input ? input.value.trim() : '';
-  if (!code || code.length !== 6) { showToast('6자리 코드를 입력해주세요'); return; }
+  if (!code || code.length !== 6) { showToast('6자리 코드를 입력해주세요!'); return; }
   var name = window.prompt('연결할 가족 구성원의 이름을 입력해주세요 (예: 아빠, 할머니)');
   if (!name || !name.trim()) return;
   fam.members = fam.members || [];
@@ -10424,14 +10420,14 @@ function urJoinFamilyCode() {
   urSaveFamily(fam);
   urCloseFamilyInvite();
   urRenderFamilyList();
-  showToast(name.trim() + '님과 연결됐어요 👨‍👩‍👧');
+  showToast(name.trim() + '님과 연결됐어요!');
 }
 function urRemoveFamilyMember(id) {
   var fam = urGetFamily();
   fam.members = (fam.members || []).filter(function(m) { return m.id !== id; });
   urSaveFamily(fam);
   urRenderFamilyList();
-  showToast('가족 구성원을 내보냈어요');
+  showToast('가족 구성원을 내보냈어요!');
 }
 function urPickEmoji(el, emoji) {
   document.getElementById('urChildEmoji').value = emoji;
@@ -10499,7 +10495,7 @@ function urSaveParentField(key) {
   urCancelParentField(key);
   var valEl = document.getElementById('urParentVal_'+key);
   if (valEl) { valEl.textContent = val || '미입력'; valEl.classList.toggle('empty', !val); }
-  showToast('저장됐어요 ✓');
+  showToast('저장됐어요!');
 }
 
 // ── 성별 선택 ──
@@ -10577,7 +10573,7 @@ function urSaveSignature() {
   urSaveParentInfo(p);
   document.getElementById('urSignOverlay').classList.remove('open');
   urRenderParentInfoCard();
-  showToast('전자 서명이 등록됐어요 ✍️');
+  showToast('전자 서명이 등록됐어요!');
 }
 
 function urToggleNotif(btn) {
@@ -11552,7 +11548,7 @@ var _krapAcadId = null;
 function openShareCard() {
   var schedule = urGetSchedule();
   if (!schedule.length) {
-    showToast('먼저 학원을 스케줄에 추가해보세요 📅');
+    showToast('먼저 학원을 스케줄에 추가해보세요!');
     return;
   }
   _buildShareCard(schedule);
@@ -11684,7 +11680,7 @@ function copyShareLink() {
   var url = 'https://davegpt25.github.io/kids/';
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(function() {
-      showToast('링크가 복사됐어요! 카카오톡에 붙여넣기 해보세요 📋');
+      showToast('링크가 복사됐어요! 카카오톡에 붙여넣기 해보세요!');
     });
   } else {
     var el = document.createElement('input');
@@ -11693,7 +11689,7 @@ function copyShareLink() {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
-    showToast('링크가 복사됐어요! 카카오톡에 붙여넣기 해보세요 📋');
+    showToast('링크가 복사됐어요! 카카오톡에 붙여넣기 해보세요!');
   }
 }
 
@@ -11726,7 +11722,7 @@ function krapOpen() {
     // (sessionEmail이 비어있는 "master" 테스트 진입 경로는 예외로 둠)
     localStorage.removeItem('krap_session_email');
     _krapAcadId = null;
-    showToast('원장 계정 권한이 만료됐어요. 관리자에게 문의해주세요.');
+    showToast('원장 계정 권한이 만료됐어요. 관리자에게 문의해주세요!');
     return;
   }
 
@@ -11792,7 +11788,7 @@ function krapAddTeacher() {
   var name = (document.getElementById('krapTeacherName').value || '').trim();
   var subject = (document.getElementById('krapTeacherSubject').value || '').trim();
   var phone = (document.getElementById('krapTeacherPhone').value || '').trim();
-  if (!name || !subject) { showToast('이름과 담당 과목을 입력해주세요'); return; }
+  if (!name || !subject) { showToast('이름과 담당 과목을 입력해주세요!'); return; }
   if (!_krapAcadId) return;
   var teachers = krapGetTeachers();
   teachers.push({ id: 'kt' + Date.now(), name: name, subject: subject, phone: phone });
