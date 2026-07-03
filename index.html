@@ -11510,28 +11510,33 @@ function urRenderAiRecommend() {
   var summaryEl = document.getElementById('urAiComboSummary');
   if (!bodyEl) return;
   urUpdateDistances();
-  var pool = KR_SYNC.getMergedAcademies().filter(function(a) {
-    if (!a.verified || !a.hasTimetable || !a.rawTimetable) return false;
+  var dayNames = ['월','화','수','목','금'];
+  var labels = {};
+  UR_SUBJECT_GRID.forEach(function(s) { labels[s.subj] = s.label; });
+
+  var allInRadius = KR_SYNC.getMergedAcademies().filter(function(a) {
     if (a.dist == null || a.dist * 1000 > _urAiRadius) return false;
     if (_urAiSubjects.length && _urAiSubjects.indexOf(a.subj) < 0) return false;
     if (_urAiBudget != null && (a.fee == null || a.fee > _urAiBudget)) return false;
     return true;
-  }).map(function(a) {
-    a._slots = _urRawSlots(a.rawTimetable);
-    return a;
-  }).filter(function(a) { return a._slots.length > 0; });
+  });
 
-  if (!pool.length) {
+  // 시간표 있는 풀 — 충돌 체크 + 조합 추천에 사용
+  var timetablePool = allInRadius.filter(function(a) { return a.hasTimetable && a.rawTimetable; })
+    .map(function(a) { a._slots = _urRawSlots(a.rawTimetable); return a; })
+    .filter(function(a) { return a._slots.length > 0; });
+
+  // 시간표 없는 풀 — 목록에만 노출
+  var noTimetablePool = allInRadius.filter(function(a) { return !a.hasTimetable || !a.rawTimetable; });
+
+  if (!allInRadius.length) {
     summaryEl.innerHTML = '';
     bodyEl.innerHTML = '<div class="ur-notif-empty"><div class="ur-notif-empty-icon">📍</div>'
-      + '조건에 맞는 원장 인증 학원이 아직 없어요<br><span style="font-size:12px">반경을 넓히거나 과목을 바꿔보세요</span></div>';
+      + '조건에 맞는 학원이 아직 없어요.<br><span style="font-size:12px">반경을 넓히거나 과목을 바꿔보세요.</span></div>';
     return;
   }
 
-  var combo = _urBuildAiCombination(pool);
-  var dayNames = ['월','화','수','목','금'];
-  var labels = {};
-  UR_SUBJECT_GRID.forEach(function(s) { labels[s.subj] = s.label; });
+  var combo = _urBuildAiCombination(timetablePool);
 
   if (combo.length) {
     summaryEl.innerHTML = '<div class="ur-ai-combo-card">'
@@ -11546,18 +11551,33 @@ function urRenderAiRecommend() {
     summaryEl.innerHTML = '';
   }
 
-  bodyEl.innerHTML = '<div class="ur-ai-list-label">조건에 맞는 원장 인증 학원 ' + pool.length + '곳</div>'
-    + pool.map(function(a) {
-      var slotLabel = a._slots.slice(0, 2).map(function(s) { return dayNames[s.day] + ' ' + s.hour + '시'; }).join(', ');
-      return '<div class="ur-ai-reco-item">'
-        + '<div class="ur-ai-reco-top"><span class="ur-ai-reco-subj">' + _escHtml(a.name) + '<span class="ur-ai-verified-badge">✓ 원장 인증</span></span></div>'
-        + '<div class="ur-ai-reco-desc">' + (labels[a.subj] || a.subj) + ' · ' + slotLabel + ' · ' + a.dist + 'km</div>'
-        + '</div>';
-    }).join('');
+  var timetableHtml = timetablePool.length
+    ? '<div class="ur-ai-list-label">시간표 등록 학원 ' + timetablePool.length + '곳</div>'
+      + timetablePool.map(function(a) {
+          var slotLabel = a._slots.slice(0, 2).map(function(s) { return dayNames[s.day] + ' ' + s.hour + '시'; }).join(', ');
+          var verBadge = a.verified ? '<span class="ur-ai-verified-badge">✓ 원장 인증</span>' : '';
+          return '<div class="ur-ai-reco-item">'
+            + '<div class="ur-ai-reco-top"><span class="ur-ai-reco-subj">' + _escHtml(a.name) + verBadge + '</span></div>'
+            + '<div class="ur-ai-reco-desc">' + (labels[a.subj] || a.subj) + ' · ' + slotLabel + ' · ' + a.dist + 'km</div>'
+            + '</div>';
+        }).join('')
+    : '';
+
+  var noTimetableHtml = noTimetablePool.length
+    ? '<div class="ur-ai-list-label" style="margin-top:14px">주변 학원 ' + noTimetablePool.length + '곳 <span style="font-size:11px;color:#9CA3AF;font-weight:400">(시간표 미확인)</span></div>'
+      + noTimetablePool.slice(0, 30).map(function(a) {
+          return '<div class="ur-ai-reco-item" style="opacity:0.75">'
+            + '<div class="ur-ai-reco-top"><span class="ur-ai-reco-subj">' + _escHtml(a.name) + '<span style="font-size:10px;color:#9CA3AF;margin-left:5px;font-weight:400">시간표 미확인</span></span></div>'
+            + '<div class="ur-ai-reco-desc">' + (labels[a.subj] || a.subj) + ' · ' + a.dist + 'km</div>'
+            + '</div>';
+        }).join('')
+    : '';
+
+  bodyEl.innerHTML = timetableHtml + noTimetableHtml;
 }
 function urAddAiCombination() {
   var pool = KR_SYNC.getMergedAcademies().filter(function(a) {
-    if (!a.verified || !a.hasTimetable || !a.rawTimetable) return false;
+    if (!a.hasTimetable || !a.rawTimetable) return false;
     if (a.dist == null || a.dist * 1000 > _urAiRadius) return false;
     if (_urAiSubjects.length && _urAiSubjects.indexOf(a.subj) < 0) return false;
     if (_urAiBudget != null && (a.fee == null || a.fee > _urAiBudget)) return false;
