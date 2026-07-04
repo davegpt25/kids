@@ -2658,6 +2658,10 @@
 .qa-answer-input { flex:1; border:1.5px solid #E5E7EB; border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; }
 .qa-answer-input:focus { outline:none; border-color:#F97316; }
 .qa-answer-send { background:#F97316; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:14px; font-weight:600; cursor:pointer; }
+.qa-adopt-btn { background:none; border:1.5px solid #F97316; color:#F97316; border-radius:12px; padding:3px 10px; font-size:12px; font-weight:600; cursor:pointer; margin-left:6px; }
+.qa-adopt-btn:active { background:#FFF3EC; }
+.qa-adopted-badge { color:#F97316; font-weight:700; margin-left:4px; }
+.qa-answer-card.adopted { border:1.5px solid #F97316; background:#FFF9F5; }
 .rv-write-sheet { background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px 32px; width: 100%; max-width: 480px; box-sizing: border-box; }
 .rv-write-handle { width: 36px; height: 4px; background: #E5E7EB; border-radius: 2px; margin: 0 auto 16px; }
 .rv-write-title { font-size: 16px; font-weight: 700; color: #1A1A1A; margin-bottom: 4px; }
@@ -11880,6 +11884,7 @@ function qaAddPoints(pts, reason) {
 }
 
 var _qaDetailId = null;
+var _qaPostOwner = null;
 
 function qaOpenDetail(postId) {
   _qaDetailId = postId;
@@ -11894,6 +11899,7 @@ function qaCloseDetail() {
   var overlay = document.getElementById('qaDetailOverlay');
   if (overlay) overlay.classList.remove('open');
   _qaDetailId = null;
+  _qaPostOwner = null;
 }
 
 function qaLoadDetail(postId) {
@@ -11905,6 +11911,7 @@ function qaLoadDetail(postId) {
     .then(function(res) {
       if (res.error || !res.data) return;
       var post = res.data;
+      _qaPostOwner = post.user_email || null;
       var detailBody = document.getElementById('qaDetailBody');
       if (!detailBody) return;
       var date = new Date(post.created_at);
@@ -11931,18 +11938,38 @@ function qaLoadAnswers(postId) {
       if (!list) return;
       var rows = (res.data || []);
       if (rows.length === 0) { list.innerHTML = '<div style="color:#9CA3AF;font-size:13px;padding:8px 0">아직 답변이 없어요. 첫 답변을 남겨보세요!</div>'; return; }
+      var isOwner = _urUser && _qaPostOwner && _urUser.email === _qaPostOwner;
+      var hasAdopted = rows.some(function(a) { return a.is_adopted; });
       list.innerHTML = rows.map(function(a) {
         var body = a.body || '';
         var date = new Date(a.created_at);
         var dateStr = (date.getMonth()+1) + '/' + date.getDate();
-        var adoptedBadge = a.is_adopted ? '<span style="color:#F97316;font-weight:700;margin-left:4px">✓ 채택</span>' : '';
-        return '<div class="qa-answer-card">'
+        var adoptedBadge = a.is_adopted ? '<span class="qa-adopted-badge">✓ 채택</span>' : '';
+        var adoptBtn = (!a.is_adopted && isOwner && !hasAdopted)
+          ? '<button class="qa-adopt-btn" data-id="' + escHtml(a.id) + '" onclick="qaAdopt(this.dataset.id)">채택하기</button>'
+          : '';
+        return '<div class="qa-answer-card' + (a.is_adopted ? ' adopted' : '') + '">'
           + '<div class="qa-answer-body">' + escHtml(body) + '</div>'
-          + '<div class="qa-answer-meta"><span>' + dateStr + ' · 학부모</span>' + adoptedBadge + '</div>'
+          + '<div class="qa-answer-meta"><span>' + dateStr + ' · 학부모</span>' + adoptedBadge + adoptBtn + '</div>'
           + '</div>';
       }).join('');
     })
     .catch(function(){});
+}
+
+function qaAdopt(answerId) {
+  if (!_urUser || !_qaDetailId) return;
+  sbClient()
+    .from('qa_answers')
+    .update({ is_adopted: true })
+    .eq('id', answerId)
+    .then(function(res) {
+      if (res.error) { showToast('채택에 실패했어요.'); return; }
+      showToast('답변을 채택했어요!');
+      qaAddPoints(20, 'qa_adopt');
+      qaLoadAnswers(_qaDetailId);
+    })
+    .catch(function() { showToast('채택에 실패했어요.'); });
 }
 
 function qaAnswerSend() {
