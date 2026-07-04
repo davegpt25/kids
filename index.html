@@ -11520,6 +11520,12 @@ function userShowTab(idx) {
 }
 var _rvWishOnly = false;
 
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function rvRenderFeed() {
   var wrap = document.getElementById('rvFeedWrap');
   if (!wrap) return;
@@ -11530,7 +11536,7 @@ function rvRenderFeed() {
 function rvLoadFeed() {
   var query = sbClient()
     .from('reviews')
-    .select('id, academy_id, user_email, rating, body, created_at')
+    .select('id, academy_id, rating, body, created_at')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
     .limit(50);
@@ -11558,13 +11564,14 @@ function rvLoadFeed() {
       var cards = rows.map(function(r) {
         var ac = acs.find(function(a) { return a.id === r.academy_id; });
         var acName = ac ? ac.name : '학원 #' + r.academy_id;
-        var stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-        var region = r.user_email ? (r.user_email.split('@')[0].slice(0, 2) + '** 학부모') : '학부모';
+        var safeRating = Math.min(5, Math.max(0, r.rating || 0));
+        var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
+        var region = '학부모';
         var date = new Date(r.created_at);
         var dateStr = (date.getMonth()+1) + '/' + date.getDate();
         return '<div class="rv-card">'
-          + '<div class="rv-card-top"><span class="rv-card-name">' + acName + '</span><span class="rv-stars">' + stars + '</span></div>'
-          + '<div class="rv-body">' + r.body.slice(0, 80) + (r.body.length > 80 ? '...' : '') + '</div>'
+          + '<div class="rv-card-top"><span class="rv-card-name">' + escHtml(acName) + '</span><span class="rv-stars">' + stars + '</span></div>'
+          + '<div class="rv-body">' + escHtml(r.body).slice(0, 80) + (r.body.length > 80 ? '...' : '') + '</div>'
           + '<div class="rv-meta"><span>' + region + '</span><span>' + dateStr + '</span></div>'
           + '</div>';
       }).join('');
@@ -11573,6 +11580,9 @@ function rvLoadFeed() {
     if (_urUser) {
       wrap.innerHTML += '<button class="rv-write-btn" onclick="rvOpenAcademyPicker()">+ 후기 쓰기</button>';
     }
+  }).catch(function() {
+    var wrap = document.getElementById('rvFeedWrap');
+    if (wrap) wrap.innerHTML = '<div class="rv-empty">후기를 불러오지 못했어요.</div>';
   });
 }
 
