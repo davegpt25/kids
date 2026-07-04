@@ -11630,7 +11630,7 @@ function urRenderAiRecommend() {
     return '<div class="ur-ai-reco-item" onclick="urAiCardTap(' + a.id + ')">'
       + '<div class="ur-ai-reco-top">'
       + '<span class="ur-ai-reco-subj" style="' + (!hasTime ? 'color:#374151' : '') + '">' + _escHtml(a.name) + verBadge + scheduleBadge + '</span>'
-      + '<button class="ur-ai-wish-btn" onclick="urToggleWish(' + a.id + ',event)" title="찜하기">' + (wished ? '♥' : '♡') + '</button>'
+      + '<button class="ur-ai-wish-btn" onclick="urToggleWish(' + a.id + ',event)" title="찜하기">' + (wished ? '★' : '☆') + '</button>'
       + '</div>'
       + '<div class="ur-ai-reco-desc">' + (labels[a.subj]||a.subj) + ' · ' + a.dist + 'km' + timeBadge + '</div>'
       + '</div>';
@@ -11677,7 +11677,7 @@ function urAiRenderToolbar() {
   var chips = subjs.map(function(s) {
     return '<button class="ur-ai-fchip' + (_urAiListFilter===s.subj && !_urAiShowWishOnly ? ' active' : '') + '" onclick="urAiSetListFilter(\'' + s.subj + '\')">' + s.label + '</button>';
   }).join('');
-  var wishChip = '<button class="ur-ai-fchip' + (_urAiShowWishOnly ? ' wish-active' : '') + '" onclick="urAiToggleWishFilter()">♥ 찜' + (wishCount ? ' ' + wishCount : '') + '</button>';
+  var wishChip = '<button class="ur-ai-fchip' + (_urAiShowWishOnly ? ' wish-active' : '') + '" onclick="urAiToggleWishFilter()">★ 찜' + (wishCount ? ' ' + wishCount : '') + '</button>';
   var divider = '<div class="ur-ai-sort-divider"></div>';
   var sortDist = '<button class="ur-ai-sort-btn' + (_urAiSortBy==='dist' ? ' active' : '') + '" onclick="urAiSetSort(\'dist\')">거리순</button>';
   var sortName = '<button class="ur-ai-sort-btn' + (_urAiSortBy==='name' ? ' active' : '') + '" onclick="urAiSetSort(\'name\')">이름순</button>';
