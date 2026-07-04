@@ -2050,9 +2050,10 @@
 .sim-card-tag.orange { background: #FFF7ED; color: var(--orange); }
 .sim-card-tag.pending { background: #FFF7ED; color: #C2410C; }
 .sim-report-btn {
-  margin-left: auto; padding: 2px 8px; border-radius: 100px; border: 1.5px solid #FEE2E2;
-  background: #fff; color: #DC2626; font-size: 10px; font-weight: 700; cursor: pointer;
+  margin-left: auto; padding: 2px 8px; border-radius: 100px; border: 1.5px solid #FEF9C3;
+  background: #fff; color: #CA8A04; font-size: 11px; font-weight: 700; cursor: pointer;
 }
+.sim-report-btn.wished { border-color: #FDE68A; background: #FEF9C3; }
 .sim-auto-disclaimer { font-size: 10px; color: #B45309; margin-top: 5px; }
 .sim-card.sim-card-empty { background: var(--gray-50); border-style: dashed; }
 .sim-card-rank {
@@ -6816,7 +6817,7 @@ function _renderSimCards() {
         '<div class="sim-card-name">' + _escHtml(ac.name) + '</div>' +
         '<div class="sim-card-meta">' + ratingHtml + ' &nbsp;·&nbsp; 🚶 ' + walkMin + '분 (' + distM + 'm)' + (ac.hasTimetable ? ('&nbsp;·&nbsp; 🕐 ' + timeStr) : '') + '</div>' +
         '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;align-items:center">' + tag1 + tag2 + ttTag +
-        '<button class="sim-report-btn" onclick="urReportAcademyPrompt(' + ac.id + ',event)">🚩 신고</button></div>' +
+        '<button class="sim-report-btn' + (urIsWished(ac.id) ? ' wished' : '') + '" onclick="urToggleWish(' + ac.id + ',event)">' + (urIsWished(ac.id) ? '★ 찜됨' : '☆ 찜') + '</button></div>' +
         '<div class="sim-auto-disclaimer">공개 데이터 기반 자동 수집 정보 · 출처: 네이버 지도</div>' +
       '</div>';
     cardsEl.appendChild(card);
@@ -6904,7 +6905,7 @@ function _renderSimAllAcademies() {
         +   '<div class="sim-all-name">' + _escHtml(a.name) + ' <span class="sim-all-subj">' + a.label + '</span></div>'
         +   '<div class="sim-all-meta">' + distLabel + ' · ' + ratingHtml + ttHtml + verifiedHtml + '</div>'
         + '</div>'
-        + '<button class="sim-report-btn" onclick="urReportAcademyPrompt(' + a.id + ',event)">🚩</button>'
+        + '<button class="sim-report-btn' + (urIsWished(a.id) ? ' wished' : '') + '" onclick="urToggleWish(' + a.id + ',event)">' + (urIsWished(a.id) ? '★' : '☆') + '</button>'
         + '</div>';
     }).join('')
     + '<div class="sim-auto-disclaimer">공개 데이터 기반 자동 수집 정보 · 출처: 네이버 지도</div>';
@@ -12653,7 +12654,7 @@ function urToggleSchedule(academyId, btn) {
   for (var i = 0; i < schedule.length; i++) { if (schedule[i].academyId === academyId) { idx = i; break; } }
   if (idx >= 0) {
     schedule.splice(idx, 1);
-    btn.textContent = '+ 추가'; btn.classList.remove('added');
+    btn.textContent = '+'; btn.classList.remove('added');
     showToast('스케줄에서 제거했어요!');
   } else {
     var a = null;
@@ -12661,7 +12662,7 @@ function urToggleSchedule(academyId, btn) {
     for (var j = 0; j < merged.length; j++) { if (merged[j].id === academyId) { a = merged[j]; break; } }
     if (!a) return;
     schedule.push({ academyId: a.id, name: a.name, subj: a.subj, label: a.label, color: a.color, times: a.times, addedAt: Date.now() });
-    btn.textContent = '✓ 등록됨'; btn.classList.add('added');
+    btn.textContent = '✓'; btn.classList.add('added');
     showToast(_escHtml(a.name) + ' 스케줄 추가!');
   }
   urSaveSchedule(schedule);
