@@ -2577,6 +2577,35 @@
 .rv-empty-h { font-size: 15px; font-weight: 700; color: #1A1A1A; margin-bottom: 6px; }
 .rv-empty-sub { font-size: 12px; color: #9CA3AF; line-height: 1.6; margin-bottom: 16px; }
 .rv-demo-badge { display: inline-block; font-size: 9px; background: #F3F4F6; color: #9CA3AF; padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle; }
+/* ── 키즈톡 서브탭 ── */
+.kt-subtab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #F3F4F6;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.kt-subtab {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #9CA3AF;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.kt-subtab.active {
+  color: #F97316;
+  border-bottom-color: #F97316;
+  font-weight: 700;
+}
+.kt-panel { display: none; }
+.kt-panel.active { display: block; }
 .rv-write-btn { margin: 12px 16px 0; display: block; width: calc(100% - 32px); padding: 10px; background: #F97316; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; box-sizing: border-box; }
 /* 학원 카드 바텀시트 후기 섹션 */
 .rv-sheet-wrap { padding: 12px 16px 0; border-top: 1px solid #F3F4F6; margin-top: 12px; }
@@ -11612,7 +11641,28 @@ function escHtml(s) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+var _ktSubtab = 0;
+
+function ktShowSubtab(idx) {
+  _ktSubtab = idx;
+  for (var i = 0; i < 2; i++) {
+    var tab = document.getElementById('ktTab' + i);
+    var panel = document.getElementById('ktPanel' + i);
+    if (tab) tab.classList.toggle('active', i === idx);
+    if (panel) panel.classList.toggle('active', i === idx);
+  }
+  if (idx === 0) rvLoadFeed();
+  if (idx === 1) qaRenderFeed();
+}
+
 function rvRenderFeed() {
+  _ktSubtab = 0;
+  for (var i = 0; i < 2; i++) {
+    var tab = document.getElementById('ktTab' + i);
+    var panel = document.getElementById('ktPanel' + i);
+    if (tab) tab.classList.toggle('active', i === 0);
+    if (panel) panel.classList.toggle('active', i === 0);
+  }
   var wrap = document.getElementById('rvFeedWrap');
   if (!wrap) return;
   wrap.innerHTML = '<div class="rv-empty">불러오는 중...</div>';
@@ -11688,6 +11738,12 @@ function rvSetWishFilter(wishOnly) {
 function rvSetDemoMode(on) {
   _rvDemoMode = !!on;
   rvLoadFeed();
+}
+
+function qaRenderFeed() {
+  var wrap = document.getElementById('qaFeedWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="rv-empty"><div class="rv-empty-h">Q&A 준비 중이에요</div><div class="rv-empty-sub">학부모 질문·답변 커뮤니티가<br>곧 오픈됩니다!</div></div>';
 }
 
 function rvOpenAcademyPicker() {
@@ -13976,9 +14032,18 @@ function urToggleNotif(btn) {
       </div>
     </div>
 
-    <!-- ── 후기 탭 ── -->
+    <!-- ── 키즈톡 탭 ── -->
     <div id="urPageReviews" class="ur-page">
-      <div id="rvFeedWrap"></div>
+      <div class="kt-subtab-bar">
+        <button class="kt-subtab active" id="ktTab0" onclick="ktShowSubtab(0)">후기</button>
+        <button class="kt-subtab" id="ktTab1" onclick="ktShowSubtab(1)">Q&amp;A</button>
+      </div>
+      <div id="ktPanel0" class="kt-panel active">
+        <div id="rvFeedWrap"></div>
+      </div>
+      <div id="ktPanel1" class="kt-panel">
+        <div id="qaFeedWrap"></div>
+      </div>
     </div>
 
     <!-- ── 내 정보 탭 ── -->
