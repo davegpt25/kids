@@ -2580,6 +2580,21 @@
 .kt-gold-badge { display:inline-block; background:linear-gradient(135deg,#F59E0B,#FBBF24); color:#fff; font-size:10px; font-weight:700; border-radius:8px; padding:2px 6px; margin-left:4px; vertical-align:middle; }
 /* ── 멤버십 등급 카드 ── */
 .kt-membership-card { margin:0 16px 12px; background:linear-gradient(135deg,#FFF7ED,#FFF3E0); border:1.5px solid #FED7AA; border-radius:16px; padding:16px; }
+.kt-tier-info-btn { margin-left:8px; background:none; border:1.5px solid #F97316; color:#F97316; border-radius:12px; padding:2px 10px; font-size:11px; font-weight:700; cursor:pointer; }
+/* 등급 안내 바텀시트 */
+.kt-tier-overlay { display:none; position:fixed; inset:0; z-index:8600; background:rgba(0,0,0,0.45); align-items:flex-end; justify-content:center; }
+.kt-tier-overlay.open { display:flex; }
+.kt-tier-sheet { background:#fff; border-radius:20px 20px 0 0; width:100%; max-width:480px; padding:20px 20px 40px; max-height:80vh; overflow-y:auto; }
+.kt-tier-handle { width:40px; height:4px; background:#E5E7EB; border-radius:2px; margin:0 auto 16px; }
+.kt-tier-title { font-size:17px; font-weight:700; margin-bottom:18px; }
+.kt-tier-row { border:1.5px solid #F3F4F6; border-radius:14px; padding:14px 16px; margin-bottom:10px; }
+.kt-tier-row.current { border-color:#F97316; background:#FFF9F5; }
+.kt-tier-row-top { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.kt-tier-row-icon { font-size:22px; }
+.kt-tier-row-name { font-size:15px; font-weight:700; }
+.kt-tier-row-pts { font-size:12px; color:#9CA3AF; margin-left:auto; }
+.kt-tier-row-current-badge { font-size:11px; background:#F97316; color:#fff; border-radius:8px; padding:2px 8px; margin-left:6px; }
+.kt-tier-benefit-item { font-size:13px; color:#374151; margin-bottom:3px; }
 .kt-membership-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
 .kt-membership-icon { font-size:28px; }
 .kt-membership-name { font-size:16px; font-weight:700; color:#1A1A1A; }
@@ -11690,6 +11705,37 @@ function rvSubscribeRealtime() {
     .subscribe();
 }
 
+function ktOpenTierGuide() {
+  var overlay = document.getElementById('ktTierOverlay');
+  if (!overlay) return;
+  var tiers = [
+    { name: '새싹', icon: '🌱', pts: '0 – 29pt', benefits: ['후기 작성(승인) +30pt', 'Q&A 질문 +4pt', 'Q&A 답변 +10pt', 'Q&A 채택 +20pt'] },
+    { name: '활동 학부모', icon: '⭐', pts: '30 – 99pt', benefits: ['찜한 학원 새 후기 알림', '내 답변 채택 배지 표시', '모든 새싹 혜택 포함'] },
+    { name: '핵심 학부모', icon: '🏆', pts: '100pt 이상', benefits: ['인증 학부모 골드 배지', '월간 우수 후기 메인 노출', '신규 학원 오픈 정보 사전 알림', '신규 기능 베타 테스터 우선 초대', 'Q&A 채택 답변 상단 자동 고정'] }
+  ];
+  var currentTierName = '';
+  ktGetUserPoints(function(total) { currentTierName = ktGetTier(total).name; });
+  var html = tiers.map(function(t) {
+    var isCurrent = t.name === currentTierName;
+    return '<div class="kt-tier-row' + (isCurrent ? ' current' : '') + '">'
+      + '<div class="kt-tier-row-top">'
+      + '<span class="kt-tier-row-icon">' + t.icon + '</span>'
+      + '<span class="kt-tier-row-name">' + escHtml(t.name) + '</span>'
+      + (isCurrent ? '<span class="kt-tier-row-current-badge">현재</span>' : '')
+      + '<span class="kt-tier-row-pts">' + escHtml(t.pts) + '</span>'
+      + '</div>'
+      + t.benefits.map(function(b) { return '<div class="kt-tier-benefit-item">✓ ' + escHtml(b) + '</div>'; }).join('')
+      + '</div>';
+  }).join('');
+  document.getElementById('ktTierList').innerHTML = html;
+  overlay.classList.add('open');
+}
+
+function ktCloseTierGuide() {
+  var overlay = document.getElementById('ktTierOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
 function ktCheckCoreStatus(callback) {
   if (!_urUser) { _ktIsCore = false; callback(); return; }
   ktGetUserPoints(function(total) {
@@ -14383,7 +14429,10 @@ function urToggleNotif(btn) {
 
       <!-- 멤버십 등급 -->
       <div class="ur-info-section" style="padding-top:0">
-        <div class="ur-section-label">멤버십 등급</div>
+        <div style="display:flex;align-items:center;margin-bottom:8px">
+          <div class="ur-section-label" style="margin-bottom:0">멤버십 등급</div>
+          <button class="kt-tier-info-btn" onclick="ktOpenTierGuide()">등급 안내</button>
+        </div>
         <div class="kt-membership-card" id="ktMembershipCard"><!-- JS 렌더링 --></div>
       </div>
 
@@ -15711,6 +15760,15 @@ function krapSaveVis() {
   <div class="qa-answer-input-row">
     <input class="qa-answer-input" id="qaAnswerInput" type="text" placeholder="답변을 입력하세요">
     <button class="qa-answer-send" onclick="qaAnswerSend()">보내기</button>
+  </div>
+</div>
+
+<!-- 등급 안내 바텀시트 -->
+<div class="kt-tier-overlay" id="ktTierOverlay" onclick="if(event.target===this)ktCloseTierGuide()">
+  <div class="kt-tier-sheet">
+    <div class="kt-tier-handle"></div>
+    <div class="kt-tier-title">멤버십 등급 안내</div>
+    <div id="ktTierList"></div>
   </div>
 </div>
 
