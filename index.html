@@ -14466,6 +14466,34 @@ function urToggleNotif(btn) {
   var key = keyMap[btn.id];
   if (key) { prefs[key] = !isOn; urSaveNotifPrefs(prefs); }
 }
+
+// ── 카드 클릭 이벤트 위임 (인라인 onclick 대신 버블링 방식으로 안정적 처리) ──
+window.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    // 후기 카드
+    var rvCard = e.target.closest ? e.target.closest('.rv-card') : null;
+    if (rvCard) {
+      var rvId = rvCard.getAttribute('data-rvid');
+      var rvDemo = rvCard.getAttribute('data-demo') === '1';
+      if (rvId) {
+        if (rvDemo) rvOpenDemoDetail(rvId);
+        else rvOpenDetail(rvId);
+      }
+      return;
+    }
+    // Q&A 카드
+    var qaCard = e.target.closest ? e.target.closest('.qa-card') : null;
+    if (qaCard) {
+      var qaId = qaCard.getAttribute('data-qaid');
+      var qaDemo = qaCard.getAttribute('data-demo') === '1';
+      if (qaId) {
+        if (qaDemo) qaOpenDemoDetail(qaId);
+        else qaOpenDetail(qaId);
+      }
+      return;
+    }
+  });
+});
 </script>
 
 <!-- 멤버십 잠금 모달 -->
