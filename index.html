@@ -2584,6 +2584,23 @@
 .rv-sheet-card-meta { font-size: 10px; color: #9CA3AF; margin-top: 3px; }
 .rv-sheet-more { font-size: 12px; color: #F97316; cursor: pointer; margin-top: 4px; display: inline-block; }
 .rv-sheet-write { margin-top: 8px; width: 100%; padding: 8px; background: #FFF3EC; color: #F97316; border: 1px solid #F97316; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+/* ── 후기 작성 바텀시트 ── */
+.rv-write-overlay { display: none; position: fixed; inset: 0; z-index: 8500; background: rgba(0,0,0,0.45); align-items: flex-end; justify-content: center; }
+.rv-write-overlay.open { display: flex; }
+.rv-write-sheet { background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px 32px; width: 100%; max-width: 480px; box-sizing: border-box; }
+.rv-write-handle { width: 36px; height: 4px; background: #E5E7EB; border-radius: 2px; margin: 0 auto 16px; }
+.rv-write-title { font-size: 16px; font-weight: 700; color: #1A1A1A; margin-bottom: 4px; }
+.rv-write-sub { font-size: 12px; color: #9CA3AF; margin-bottom: 16px; }
+.rv-star-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.rv-star-btn { width: 36px; height: 36px; border-radius: 8px; background: #F3F4F6; border: none; font-size: 20px; cursor: pointer; transition: background .1s; }
+.rv-star-btn.on { background: #FFF3EC; }
+.rv-write-textarea { width: 100%; height: 100px; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px 12px; font-size: 13px; resize: none; box-sizing: border-box; outline: none; }
+.rv-char-count { font-size: 11px; color: #9CA3AF; text-align: right; margin: 4px 0 12px; }
+.rv-upload-label { display: flex; align-items: center; gap: 8px; border: 1.5px dashed #E5E7EB; border-radius: 10px; padding: 12px; cursor: pointer; margin-bottom: 16px; }
+.rv-upload-label span { font-size: 13px; color: #6B7280; }
+.rv-upload-preview { max-width: 100%; max-height: 120px; border-radius: 8px; display: none; margin-bottom: 12px; }
+.rv-submit-btn { width: 100%; padding: 13px; background: #F97316; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.rv-submit-btn:disabled { background: #D1D5DB; cursor: not-allowed; }
 .ur-tab {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px; cursor: pointer; padding: 8px 0; background: none; border: none;
@@ -11607,6 +11624,125 @@ function rvOpenAcademyPicker() {
   userShowTab(0);
 }
 
+var _rvWriteAcId = null;
+var _rvRating = 0;
+
+function rvOpenWrite(academyId) {
+  if (!_urUser) { showToast('로그인이 필요해요.'); return; }
+  _rvWriteAcId = academyId;
+  _rvRating = 0;
+  var bodyInput = document.getElementById('rvBodyInput');
+  var charCount = document.getElementById('rvCharCount');
+  var fileInput = document.getElementById('rvReceiptFile');
+  var preview = document.getElementById('rvUploadPreview');
+  var uploadSpan = document.getElementById('rvUploadSpan');
+  var submitBtn = document.getElementById('rvSubmitBtn');
+  if (bodyInput) bodyInput.value = '';
+  if (charCount) charCount.textContent = '0';
+  if (fileInput) fileInput.value = '';
+  if (preview) { preview.src = ''; preview.style.display = 'none'; }
+  if (uploadSpan) uploadSpan.textContent = '영수증 / 이체내역 사진 첨부 (필수, 10MB 이하)';
+  if (submitBtn) submitBtn.disabled = true;
+  Array.prototype.forEach.call(document.querySelectorAll('.rv-star-btn'), function(b) { b.classList.remove('on'); });
+  var acs = window.KR_SYNC ? KR_SYNC.getMergedAcademies() : (window.UR_ACADEMIES || []);
+  var ac = acs.find(function(a) { return a.id === academyId; });
+  var titleEl = document.getElementById('rvWriteAcName');
+  if (titleEl) titleEl.textContent = ac ? ac.name : '학원 후기';
+  var overlay = document.getElementById('rvWriteOverlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+function rvCloseWrite() {
+  var overlay = document.getElementById('rvWriteOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function rvSetRating(v) {
+  _rvRating = v;
+  Array.prototype.forEach.call(document.querySelectorAll('.rv-star-btn'), function(b) {
+    b.classList.toggle('on', parseInt(b.dataset.v) <= v);
+  });
+  rvCheckSubmitReady();
+}
+
+function rvOnBodyInput() {
+  var input = document.getElementById('rvBodyInput');
+  var count = document.getElementById('rvCharCount');
+  if (!input || !count) return;
+  count.textContent = input.value.length;
+  rvCheckSubmitReady();
+}
+
+function rvOnFileChange(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('10MB 이하 파일만 첨부 가능해요.');
+    input.value = '';
+    return;
+  }
+  var span = document.getElementById('rvUploadSpan');
+  if (span) span.textContent = file.name;
+  var preview = document.getElementById('rvUploadPreview');
+  if (preview) {
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+  }
+  rvCheckSubmitReady();
+}
+
+function rvCheckSubmitReady() {
+  var bodyInput = document.getElementById('rvBodyInput');
+  var fileInput = document.getElementById('rvReceiptFile');
+  var submitBtn = document.getElementById('rvSubmitBtn');
+  if (!bodyInput || !fileInput || !submitBtn) return;
+  var bodyOk = bodyInput.value.length >= 20;
+  var fileOk = !!(fileInput.files && fileInput.files[0]);
+  var ratingOk = _rvRating > 0;
+  submitBtn.disabled = !(bodyOk && fileOk && ratingOk);
+}
+
+function rvSubmit() {
+  var btn = document.getElementById('rvSubmitBtn');
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = '제출 중...';
+  var file = document.getElementById('rvReceiptFile').files[0];
+  var body = (document.getElementById('rvBodyInput').value || '').trim();
+  var email = _urUser && _urUser.email;
+  if (!file || !body || !email || !_rvWriteAcId || _rvRating < 1) {
+    showToast('모든 항목을 입력해 주세요.');
+    btn.disabled = false;
+    btn.textContent = '제출하기';
+    return;
+  }
+  var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  var path = email + '/' + Date.now() + '.' + ext;
+  sbClient().storage.from('receipts').upload(path, file, { upsert: false })
+    .then(function(uploadRes) {
+      if (uploadRes.error) throw uploadRes.error;
+      var receiptUrl = sbClient().storage.from('receipts').getPublicUrl(path).data.publicUrl;
+      return sbClient().from('reviews').insert({
+        academy_id: _rvWriteAcId,
+        user_email: email,
+        rating: _rvRating,
+        body: body,
+        receipt_url: receiptUrl,
+        status: 'pending'
+      });
+    })
+    .then(function(insertRes) {
+      if (insertRes.error) throw insertRes.error;
+      rvCloseWrite();
+      showToast('검토 중이에요. 승인 후 게시돼요.');
+    })
+    .catch(function(err) {
+      console.error('후기 제출 오류:', err);
+      showToast('제출에 실패했어요. 다시 시도해 주세요.');
+      if (btn) { btn.disabled = false; btn.textContent = '제출하기'; }
+    });
+}
+
 function rvLoadSheetReviews(academyId, containerEl) {
   sbClient()
     .from('reviews')
@@ -14957,6 +15093,31 @@ function krapSaveVis() {
   t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 2500);
 }
 </script>
+
+<!-- 후기 작성 바텀시트 -->
+<div class="rv-write-overlay" id="rvWriteOverlay" onclick="if(event.target===this)rvCloseWrite()">
+  <div class="rv-write-sheet">
+    <div class="rv-write-handle"></div>
+    <div class="rv-write-title" id="rvWriteAcName">학원 이름</div>
+    <div class="rv-write-sub">실제 수강 경험을 솔직하게 작성해 주세요</div>
+    <div class="rv-star-row" id="rvStarRow">
+      <button class="rv-star-btn" data-v="1" onclick="rvSetRating(1)">★</button>
+      <button class="rv-star-btn" data-v="2" onclick="rvSetRating(2)">★</button>
+      <button class="rv-star-btn" data-v="3" onclick="rvSetRating(3)">★</button>
+      <button class="rv-star-btn" data-v="4" onclick="rvSetRating(4)">★</button>
+      <button class="rv-star-btn" data-v="5" onclick="rvSetRating(5)">★</button>
+    </div>
+    <textarea class="rv-write-textarea" id="rvBodyInput" placeholder="최소 20자 이상 작성해 주세요" oninput="rvOnBodyInput()"></textarea>
+    <div class="rv-char-count"><span id="rvCharCount">0</span> / 20자 이상</div>
+    <label class="rv-upload-label" for="rvReceiptFile">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span id="rvUploadSpan">영수증 / 이체내역 사진 첨부 (필수, 10MB 이하)</span>
+    </label>
+    <input type="file" id="rvReceiptFile" accept="image/*" style="display:none" onchange="rvOnFileChange(this)">
+    <img id="rvUploadPreview" class="rv-upload-preview" alt="영수증 미리보기">
+    <button class="rv-submit-btn" id="rvSubmitBtn" onclick="rvSubmit()" disabled>제출하기</button>
+  </div>
+</div>
 
 </body>
 </html>
