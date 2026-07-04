@@ -11485,12 +11485,12 @@ function hideUserDashboard() {
 
 // ── 탭 전환 ──
 function userShowTab(idx) {
-  var pages = ['urPageSearch','urPageSchedule','urPageMyInfo'];
+  var pages = ['urPageSearch','urPageSchedule','urPageReviews','urPageMyInfo'];
   pages.forEach(function(id, i) {
     var el = document.getElementById(id);
     if (el) el.classList.toggle('active', i === idx);
   });
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < 4; i++) {
     var tab = document.getElementById('urTab' + i);
     if (tab) tab.classList.toggle('active', i === idx);
   }
@@ -11503,7 +11503,11 @@ function userShowTab(idx) {
     urAutoLocate();
   }
   if (idx === 1) urRenderSchedule();
-  if (idx === 2) urRenderMyInfo();
+  if (idx === 2) rvRenderFeed();
+  if (idx === 3) urRenderMyInfo();
+}
+function rvRenderFeed() {
+  // Task 4에서 구현
 }
 
 // ── 학원 검색 ──
@@ -13487,6 +13491,11 @@ function urToggleNotif(btn) {
       </div>
     </div>
 
+    <!-- ── 후기 탭 ── -->
+    <div id="urPageReviews" class="ur-page">
+      <div id="rvFeedWrap"></div>
+    </div>
+
     <!-- ── 내 정보 탭 ── -->
     <div class="ur-page" id="urPageMyInfo">
 
@@ -13654,6 +13663,12 @@ function urToggleNotif(btn) {
       <div class="ur-tab-label">스케줄</div>
     </button>
     <button class="ur-tab" id="urTab2" onclick="userShowTab(2)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span>후기</span>
+    </button>
+    <button class="ur-tab" id="urTab3" onclick="userShowTab(3)">
       <div class="ur-tab-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
