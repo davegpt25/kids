@@ -11824,6 +11824,7 @@ function rvRenderFeed() {
 }
 
 function rvLoadFeed() {
+  if (_rvDemoMode) { rvRenderRows([]); return; }
   var query = sbClient()
     .from('reviews')
     .select('id, academy_id, rating, body, created_at, academy_region, user_email')
@@ -11832,58 +11833,56 @@ function rvLoadFeed() {
     .limit(50);
 
   query.then(function(res) {
-    var wrap = document.getElementById('rvFeedWrap');
-    if (!wrap) return;
-    if (res.error) {
-      wrap.innerHTML = '<div class="rv-empty">후기를 불러오지 못했어요.</div>';
-      return;
-    }
+    if (res.error) { rvRenderRows([]); return; }
     var rows = res.data || [];
     if (_rvWishOnly) {
       var wished = urGetWishlist();
       rows = rows.filter(function(r) { return wished.indexOf(r.academy_id) >= 0; });
     }
-    var toolbar = '<div class="rv-toolbar">'
-      + '<button class="rv-toggle' + (_rvWishOnly ? '' : ' active') + '" onclick="rvSetWishFilter(false)">전체</button>'
-      + '<button class="rv-toggle' + (_rvWishOnly ? ' active' : '') + '" onclick="rvSetWishFilter(true)">★ 찜한 학원만</button>'
-      + '<button class="rv-toggle' + (_rvDemoMode ? ' active' : '') + '" onclick="rvSetDemoMode(' + (!_rvDemoMode) + ')" style="margin-left:auto">Demo</button>'
+    rvRenderRows(rows);
+  }).catch(function() { rvRenderRows([]); });
+}
+
+function rvRenderRows(rows) {
+  var wrap = document.getElementById('rvFeedWrap');
+  if (!wrap) return;
+  var toolbar = '<div class="rv-toolbar">'
+    + '<button class="rv-toggle' + (_rvWishOnly ? '' : ' active') + '" onclick="rvSetWishFilter(false)">전체</button>'
+    + '<button class="rv-toggle' + (_rvWishOnly ? ' active' : '') + '" onclick="rvSetWishFilter(true)">★ 찜한 학원만</button>'
+    + '<button class="rv-toggle' + (_rvDemoMode ? ' active' : '') + '" onclick="rvSetDemoMode(' + (!_rvDemoMode) + ')" style="margin-left:auto">Demo</button>'
+    + '</div>';
+  var displayRows = _rvDemoMode ? _rvDemoRows : rows;
+  if (displayRows.length === 0) {
+    var emptyHtml = '<div class="rv-empty">'
+      + '<div class="rv-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>'
+      + '<div class="rv-empty-h">첫 후기를 기다려요</div>'
+      + '<div class="rv-empty-sub">영수증으로 인증된 학부모만<br>후기를 남길 수 있어요</div>'
       + '</div>';
-    var displayRows = _rvDemoMode ? _rvDemoRows : rows;
-    if (displayRows.length === 0) {
-      var emptyHtml = '<div class="rv-empty">'
-        + '<div class="rv-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>'
-        + '<div class="rv-empty-h">첫 후기를 기다려요</div>'
-        + '<div class="rv-empty-sub">영수증으로 인증된 학부모만<br>후기를 남길 수 있어요</div>'
+    wrap.innerHTML = toolbar + emptyHtml;
+  } else {
+    var acs = window.KR_SYNC ? KR_SYNC.getMergedAcademies() : (window.UR_ACADEMIES || []);
+    var cards = displayRows.map(function(r) {
+      var acName = r._acName || (function() { var ac = acs.find(function(a) { return a.id === r.academy_id; }); return ac ? ac.name : '학원 #' + r.academy_id; })();
+      var region = r._region || (r.academy_region ? r.academy_region + ' 학부모' : '학부모');
+      var safeRating = Math.round(Math.min(5, Math.max(0, r.rating || 0)));
+      var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
+      var body = r.body || '';
+      var date = new Date(r.created_at);
+      var dateStr = (date.getMonth()+1) + '/' + date.getDate();
+      var demoMark = r._acName ? '<span class="rv-demo-badge">샘플</span>' : '';
+      var goldBadge = (_ktIsCore && _urUser && r.user_email === _urUser.email) ? '<span class="kt-gold-badge">골드</span>' : '';
+      var isDemo = !!r._acName;
+      return '<div class="rv-card" data-rvid="' + escHtml(r.id) + '" data-demo="' + (isDemo ? '1' : '0') + '" onclick="rvCardClick(this)" style="cursor:pointer">'
+        + '<div class="rv-card-top"><span class="rv-card-name">' + escHtml(acName) + '</span><span class="rv-stars">' + stars + '</span></div>'
+        + '<div class="rv-body">' + escHtml(body).slice(0, 80) + (body.length > 80 ? '...' : '') + '</div>'
+        + '<div class="rv-meta"><span>' + escHtml(region) + demoMark + goldBadge + '</span><span>' + dateStr + '</span></div>'
         + '</div>';
-      wrap.innerHTML = toolbar + emptyHtml;
-    } else {
-      var acs = window.KR_SYNC ? KR_SYNC.getMergedAcademies() : (window.UR_ACADEMIES || []);
-      var cards = displayRows.map(function(r) {
-        var acName = r._acName || (function() { var ac = acs.find(function(a) { return a.id === r.academy_id; }); return ac ? ac.name : '학원 #' + r.academy_id; })();
-        var region = r._region || (r.academy_region ? r.academy_region + ' 학부모' : '학부모');
-        var safeRating = Math.round(Math.min(5, Math.max(0, r.rating || 0)));
-        var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
-        var body = r.body || '';
-        var date = new Date(r.created_at);
-        var dateStr = (date.getMonth()+1) + '/' + date.getDate();
-        var demoMark = r._acName ? '<span class="rv-demo-badge">샘플</span>' : '';
-        var goldBadge = (_ktIsCore && _urUser && r.user_email === _urUser.email) ? '<span class="kt-gold-badge">골드</span>' : '';
-        var isDemo = !!r._acName;
-        return '<div class="rv-card" data-rvid="' + escHtml(r.id) + '" data-demo="' + (isDemo ? '1' : '0') + '" onclick="rvCardClick(this)" style="cursor:pointer">'
-          + '<div class="rv-card-top"><span class="rv-card-name">' + escHtml(acName) + '</span><span class="rv-stars">' + stars + '</span></div>'
-          + '<div class="rv-body">' + escHtml(body).slice(0, 80) + (body.length > 80 ? '...' : '') + '</div>'
-          + '<div class="rv-meta"><span>' + escHtml(region) + demoMark + goldBadge + '</span><span>' + dateStr + '</span></div>'
-          + '</div>';
-      }).join('');
-      wrap.innerHTML = toolbar + cards;
-    }
-    if (_urUser) {
-      wrap.innerHTML += '<button class="rv-write-btn" onclick="rvOpenAcademyPicker()">+ 후기 쓰기</button>';
-    }
-  }).catch(function() {
-    var wrap = document.getElementById('rvFeedWrap');
-    if (wrap) wrap.innerHTML = '<div class="rv-empty">후기를 불러오지 못했어요.</div>';
-  });
+    }).join('');
+    wrap.innerHTML = toolbar + cards;
+  }
+  if (_urUser) {
+    wrap.innerHTML += '<button class="rv-write-btn" onclick="rvOpenAcademyPicker()">+ 후기 쓰기</button>';
+  }
 }
 
 function rvSetWishFilter(wishOnly) {
