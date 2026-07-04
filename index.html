@@ -3238,6 +3238,10 @@
   background: var(--primary); color: #fff; border: none; cursor: pointer;
 }
 .ur-journey-master-btn.off { background: #E5E7EB; color: #9CA3AF; }
+.ur-notif-demo-btn {
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px;
+  background: #FEF3C7; color: #92400E; border: none; cursor: pointer;
+}
 .ur-journey-hint { font-size: 11px; color: #9CA3AF; margin-bottom: 12px; line-height: 1.5; }
 .ur-journey-track {
   display: flex; align-items: flex-start; overflow-x: auto;
@@ -11473,6 +11477,52 @@ function urInitNotifications() {
   setTimeout(urScheduleClassEndNotifs, 1000);
 }
 
+function urNotifDemoKakao() {
+  var children = [];
+  try { children = JSON.parse(localStorage.getItem((_urUser && _urUser.email) ? 'kr_children_' + _urUser.email : 'kr_children') || '[]'); } catch(e) {}
+  var childName = children.length ? children[0].name : '우리 아이';
+  var schedule = urGetSchedule();
+  var academyName = schedule.length ? schedule[0].name : '피아노학원';
+
+  // 브라우저 알림 데모 (즉시)
+  if ('Notification' in window) {
+    Notification.requestPermission().then(function(perm) {
+      if (perm === 'granted') {
+        new Notification('수업이 끝났어요!', {
+          body: childName + '이(가) ' + academyName + ' 수업이 방금 종료됐어요!',
+          icon: 'https://davegpt25.github.io/kids/og-image-v3.png',
+          tag: 'notif-demo'
+        });
+      }
+    });
+  }
+
+  // 카카오톡 공유
+  var appUrl = 'https://davegpt25.github.io/kids/';
+  var msg = '[키즈루트 하원 알림 미리보기]\n\n'
+    + '📣 수업이 끝났어요!\n'
+    + childName + '이(가) ' + academyName + ' 수업이 방금 종료됐어요!\n\n'
+    + '👉 키즈루트에서 실시간 하원 알림을 받아보세요\n'
+    + appUrl;
+
+  if (window.Kakao && window.Kakao.isInitialized()) {
+    window.Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '수업이 끝났어요! 🔔',
+        description: childName + '이(가) ' + academyName + ' 수업이 방금 종료됐어요!\n키즈루트에서 실시간 하원 알림을 받아보세요.',
+        imageUrl: 'https://davegpt25.github.io/kids/og-image-v3.png',
+        link: { mobileWebUrl: appUrl, webUrl: appUrl }
+      },
+      buttons: [{ title: '앱 열기', link: { mobileWebUrl: appUrl, webUrl: appUrl } }]
+    });
+  } else {
+    // 카카오 미초기화 시 클립보드 + 안내
+    try { navigator.clipboard.writeText(msg); } catch(e) {}
+    showToast('메시지가 복사됐어요! 카톡에 붙여넣기 해주세요 📋');
+  }
+}
+
 // ── 찜하기 ──
 function _urWishKey() {
   var email = _urUser && _urUser.email;
@@ -14870,7 +14920,10 @@ window.addEventListener('DOMContentLoaded', function() {
       <div class="ur-sched-section" id="urJourneySection" style="display:none;">
         <div class="ur-sched-section-title">
           <span>🔔 하원 알림</span>
-          <button class="ur-journey-master-btn" id="urJourneyMasterBtn" onclick="urToggleAllPush()">전체 ON</button>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="ur-notif-demo-btn" onclick="urNotifDemoKakao()">🔔 Demo</button>
+            <button class="ur-journey-master-btn" id="urJourneyMasterBtn" onclick="urToggleAllPush()">전체 ON</button>
+          </div>
         </div>
         <div class="ur-journey-hint">학원 수업이 끝나면 알려드려요. 학원별로 따로 켜고 끌 수 있어요.</div>
         <div class="ur-journey-track" id="urJourneyTrack"><!-- JS 렌더링 --></div>
