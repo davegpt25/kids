@@ -13566,19 +13566,21 @@ function urRenderMapMarkers() {
   filtered.forEach(function(a) {
     var isAdded = addedIds.indexOf(a.id) >= 0;
     var isHL = _urHighlightId === a.id;
-    var markerHtml = '<div style="width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);'
-      + 'background:' + a.color + ';border:2.5px solid #fff;'
-      + 'box-shadow:0 2px 8px rgba(0,0,0,0.25)' + (isHL ? ',0 0 0 3px ' + a.color : '') + ';'
-      + 'display:flex;align-items:center;justify-content:center">'
-      + '<span style="transform:rotate(45deg);font-size:15px">' + (isAdded ? '✓' : (emoji[a.subj]||'🏫')) + '</span>'
+    var pinColor = isAdded ? '#10B981' : '#F97316';
+    var hlRing = isHL ? 'filter:drop-shadow(0 0 5px rgba(249,115,22,0.7));' : '';
+    var markerHtml = '<div style="width:36px;height:46px;position:relative;' + hlRing + '">'
+      + '<svg width="36" height="46" viewBox="0 0 36 46" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0">'
+      +   '<path d="M18 0C8.06 0 0 8.06 0 18C0 31.5 18 46 18 46C18 46 36 31.5 36 18C36 8.06 27.94 0 18 0Z" fill="' + pinColor + '"/>'
+      +   '<circle cx="18" cy="18" r="7" fill="white" fill-opacity="0.9"/>'
+      + '</svg>'
       + '</div>';
     var marker = new naver.maps.Marker({
       position: new naver.maps.LatLng(a.lat, a.lng),
       map: _urMap,
       icon: {
         content: markerHtml,
-        size: new naver.maps.Size(36, 36),
-        anchor: new naver.maps.Point(18, 36)
+        size: new naver.maps.Size(36, 46),
+        anchor: new naver.maps.Point(18, 46)
       },
       zIndex: isHL ? 20 : 10
     });
@@ -13944,7 +13946,7 @@ function urRenderAcademies() {
       +       verifiedBadge + badgeHtml
       +     '</div>'
       +     '<div class="ur-row-hours">' + hoursHtml + '</div>'
-      +     '<div class="ur-row-meta">📍 ' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + '</div>'
+      +     '<div class="ur-row-meta"><svg width="11" height="14" viewBox="0 0 11 14" fill="none" style="vertical-align:-2px;margin-right:2px"><path d="M5.5 0C2.46 0 0 2.46 0 5.5C0 9.625 5.5 14 5.5 14C5.5 14 11 9.625 11 5.5C11 2.46 8.54 0 5.5 0Z" fill="' + a.color + '"/><circle cx="5.5" cy="5.5" r="2.2" fill="white" fill-opacity="0.9"/></svg>' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + '</div>'
       +     vacancyRow
       +   '</div>'
       +   '<div class="ur-row-actions">'
