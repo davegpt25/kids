@@ -11890,20 +11890,24 @@ function qaLoadFeed() {
       var rows = res.data || [];
       var toolbar = '<div class="qa-toolbar">'
         + (_urUser ? '<button class="qa-ask-btn" onclick="qaOpenWrite()">질문하기</button>' : '')
+        + '<button class="rv-toggle' + (_qaDemoMode ? ' active' : '') + '" onclick="qaSetDemoMode(' + (!_qaDemoMode) + ')" style="margin-left:auto">Demo</button>'
         + '</div>';
-      if (rows.length === 0) {
+      var displayRows = _qaDemoMode ? _qaDemoRows : rows;
+      if (displayRows.length === 0) {
         wrap.innerHTML = toolbar + '<div class="rv-empty"><div class="rv-empty-h">첫 질문을 남겨보세요</div><div class="rv-empty-sub">학부모끼리 학원 정보를<br>나눠요</div></div>';
         return;
       }
-      var cards = rows.map(function(r) {
+      var cards = displayRows.map(function(r) {
         var title = r.title || '';
         var body = r.body || '';
         var date = new Date(r.created_at);
         var dateStr = (date.getMonth()+1) + '/' + date.getDate();
-        return '<div class="qa-card" data-id="' + escHtml(r.id) + '" onclick="qaOpenDetail(\'' + escHtml(r.id) + '\')">'
-          + '<div class="qa-card-title">' + escHtml(title) + '</div>'
+        var demoMark = r._demo ? '<span class="rv-demo-badge">샘플</span>' : '';
+        var ansCount = r._ansCount ? '<span class="qa-ans-count">답변 ' + r._ansCount + '</span>' : '';
+        return '<div class="qa-card" onclick="' + (r._demo ? 'showToast(\'데모 항목이에요\')' : 'qaOpenDetail(\'' + escHtml(r.id) + '\')') + '">'
+          + '<div class="qa-card-title">' + escHtml(title) + demoMark + '</div>'
           + '<div class="qa-card-body">' + escHtml(body) + '</div>'
-          + '<div class="qa-card-meta"><span>' + dateStr + '</span></div>'
+          + '<div class="qa-card-meta"><span>' + dateStr + ' · 학부모</span>' + ansCount + '</div>'
           + '</div>';
       }).join('');
       wrap.innerHTML = toolbar + cards;
@@ -11914,8 +11918,20 @@ function qaLoadFeed() {
     });
 }
 
+var _qaDemoMode = false;
+var _qaDemoRows = [
+  { id: 'qdemo1', title: '강남구 피아노학원 추천해주세요', body: '7살 여아인데 처음 시작하는 거라 분위기 좋고 선생님이 친절한 곳 찾고 있어요. 대치동 근처면 더 좋고요!', user_email: 'demo@kids.app', created_at: '2026-07-03T10:00:00Z', _demo: true, _ansCount: 3 },
+  { id: 'qdemo2', title: '영어학원 레벨테스트 준비 어떻게 하나요?', body: '8살 아들 영어학원 등록하려는데 레벨테스트가 있다고 하더라고요. 미리 준비해야 하는 게 있는지 경험 있으신 분 알려주세요.', user_email: 'demo@kids.app', created_at: '2026-07-02T14:00:00Z', _demo: true, _ansCount: 5 },
+  { id: 'qdemo3', title: '수학학원 vs 수학과외, 어떤 게 나을까요?', body: '초등 3학년 아들 수학을 보내려는데 학원이랑 과외 중에 고민이에요. 학습 습관 잡는 데 어느 쪽이 더 효과적인지 경험 공유 부탁드려요.', user_email: 'demo@kids.app', created_at: '2026-07-01T09:00:00Z', _demo: true, _ansCount: 7 }
+];
+
 var _qaTitle = '';
 var _qaBody = '';
+
+function qaSetDemoMode(on) {
+  _qaDemoMode = !!on;
+  qaLoadFeed();
+}
 
 function qaOpenWrite() {
   if (!_urUser) { showToast('로그인이 필요해요.'); return; }
