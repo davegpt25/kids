@@ -11667,6 +11667,7 @@ function rvSubscribeRealtime() {
         if (!newRow) return;
         if (newRow.status === 'approved') {
           urAddNotification({ scope: 'personal', title: '후기가 게시됐어요! ⭐', body: '작성하신 후기가 승인되어 게시되었습니다.' });
+          qaAddPoints(30, 'review_approved');
         } else if (newRow.status === 'rejected') {
           var reason = newRow.reject_reason ? ' (' + newRow.reject_reason + ')' : '';
           urAddNotification({ scope: 'personal', title: '후기 검토 결과를 확인하세요.' + reason, body: '작성하신 후기가 반려되었습니다.' });
@@ -11674,6 +11675,26 @@ function rvSubscribeRealtime() {
       }
     )
     .subscribe();
+}
+
+function ktGetUserPoints(callback) {
+  if (!_urUser) { callback(0); return; }
+  sbClient()
+    .from('user_points')
+    .select('points')
+    .eq('user_email', _urUser.email)
+    .then(function(res) {
+      if (res.error || !res.data) { callback(0); return; }
+      var total = res.data.reduce(function(sum, r) { return sum + (r.points || 0); }, 0);
+      callback(total);
+    })
+    .catch(function() { callback(0); });
+}
+
+function ktGetTier(points) {
+  if (points >= 100) return { name: '핵심 학부모', min: 100, next: null, icon: '🏆' };
+  if (points >= 30) return { name: '활동 학부모', min: 30, next: 100, icon: '⭐' };
+  return { name: '새싹', min: 0, next: 30, icon: '🌱' };
 }
 
 function escHtml(s) {
