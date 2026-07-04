@@ -11733,27 +11733,29 @@ function rvSubscribeRealtime() {
 function ktOpenTierGuide() {
   var overlay = document.getElementById('ktTierOverlay');
   if (!overlay) return;
+  overlay.classList.add('open');
   var tiers = [
     { name: '새싹', icon: '🌱', pts: '0 – 29pt', benefits: ['후기 작성(승인) +30pt', 'Q&A 질문 +4pt', 'Q&A 답변 +10pt', 'Q&A 채택 +20pt'] },
     { name: '활동 학부모', icon: '⭐', pts: '30 – 99pt', benefits: ['찜한 학원 새 후기 알림', '내 답변 채택 배지 표시', '모든 새싹 혜택 포함'] },
     { name: '핵심 학부모', icon: '🏆', pts: '100pt 이상', benefits: ['인증 학부모 골드 배지', '월간 우수 후기 메인 노출', '신규 학원 오픈 정보 사전 알림', '신규 기능 베타 테스터 우선 초대', 'Q&A 채택 답변 상단 자동 고정'] }
   ];
-  var currentTierName = '';
-  ktGetUserPoints(function(total) { currentTierName = ktGetTier(total).name; });
-  var html = tiers.map(function(t) {
-    var isCurrent = t.name === currentTierName;
-    return '<div class="kt-tier-row' + (isCurrent ? ' current' : '') + '">'
-      + '<div class="kt-tier-row-top">'
-      + '<span class="kt-tier-row-icon">' + t.icon + '</span>'
-      + '<span class="kt-tier-row-name">' + escHtml(t.name) + '</span>'
-      + (isCurrent ? '<span class="kt-tier-row-current-badge">현재</span>' : '')
-      + '<span class="kt-tier-row-pts">' + escHtml(t.pts) + '</span>'
-      + '</div>'
-      + t.benefits.map(function(b) { return '<div class="kt-tier-benefit-item">✓ ' + escHtml(b) + '</div>'; }).join('')
-      + '</div>';
-  }).join('');
-  document.getElementById('ktTierList').innerHTML = html;
-  overlay.classList.add('open');
+  ktGetUserPoints(function(total) {
+    var currentTierName = ktGetTier(total).name;
+    var html = tiers.map(function(t) {
+      var isCurrent = t.name === currentTierName;
+      return '<div class="kt-tier-row' + (isCurrent ? ' current' : '') + '">'
+        + '<div class="kt-tier-row-top">'
+        + '<span class="kt-tier-row-icon">' + t.icon + '</span>'
+        + '<span class="kt-tier-row-name">' + escHtml(t.name) + '</span>'
+        + (isCurrent ? '<span class="kt-tier-row-current-badge">현재</span>' : '')
+        + '<span class="kt-tier-row-pts">' + escHtml(t.pts) + '</span>'
+        + '</div>'
+        + t.benefits.map(function(b) { return '<div class="kt-tier-benefit-item">✓ ' + escHtml(b) + '</div>'; }).join('')
+        + '</div>';
+    }).join('');
+    var tierList = document.getElementById('ktTierList');
+    if (tierList) tierList.innerHTML = html;
+  });
 }
 
 function ktCloseTierGuide() {
@@ -14565,7 +14567,7 @@ window.addEventListener('DOMContentLoaded', function() {
             <span class="ur-home-location-caret">⌄</span>
           </div>
           <div class="ur-home-top-actions" id="urHomeTopActions">
-            <button class="ur-membership-pill" onclick="urShowMembership()" title="멤버십">멤버십</button>
+            <button class="ur-membership-pill" onclick="ktOpenTierGuide()" title="멤버십">멤버십</button>
             <button class="ur-bell-btn" id="urBellBtn" onclick="urOpenNotifications()" title="알림">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               <span class="ur-bell-dot" id="urBellDot" style="display:none"></span>
