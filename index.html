@@ -11795,9 +11795,9 @@ function rvAdmRenderPage() {
           : '';
         var actions = r.status === 'pending'
           ? '<div class="rv-adm-actions">'
-            + '<button class="rv-adm-approve" onclick="rvAdmApprove(\'' + escHtml(r.id) + '\',\'' + escHtml(r.user_email) + '\')">승인</button>'
+            + '<button class="rv-adm-approve" data-id="' + escHtml(r.id) + '" data-email="' + escHtml(r.user_email) + '" onclick="rvAdmApprove(this.dataset.id, this.dataset.email)">승인</button>'
             + rejectSel
-            + '<button class="rv-adm-reject" onclick="rvAdmReject(\'' + escHtml(r.id) + '\',\'' + escHtml(r.user_email) + '\')">거부</button>'
+            + '<button class="rv-adm-reject" data-id="' + escHtml(r.id) + '" data-email="' + escHtml(r.user_email) + '" onclick="rvAdmReject(this.dataset.id, this.dataset.email)">거부</button>'
             + '</div>'
           : '';
         var rejectNote = r.status === 'rejected' && r.reject_reason
