@@ -2736,16 +2736,19 @@
 .ur-row-vacancy-btn { font-size: 11px; font-weight: 700; color: #F97316; background: #FFF3EC; border: none; border-radius: 100px; padding: 4px 10px; cursor: pointer; }
 .ur-row-vacancy-btn.subscribed { color: #16A34A; background: #ECFDF5; }
 .ur-row-actions { display: flex; flex-direction: column; gap: 6px; align-items: center; flex-shrink: 0; }
-.ur-row-report {
+.ur-row-wish {
   width: 26px; height: 26px; border-radius: 50%; border: none;
-  background: #F4F4F5; font-size: 12px; cursor: pointer;
+  background: #F4F4F5; font-size: 14px; cursor: pointer; line-height: 26px; text-align: center;
+  transition: background .15s;
 }
+.ur-row-wish.wished { background: #FEF9C3; }
 .ur-row-add {
   width: 30px; height: 30px; border-radius: 50%; border: none;
   background: var(--primary); color: #fff; font-size: 15px; font-weight: 800;
   cursor: pointer; transition: background .15s;
 }
-.ur-row-add.added { background: #10B981; }
+.ur-row-add.added { background: #10B981; font-size: 13px; }
+.ur-row-add.added span { display: none; }
 .ur-data-attribution { font-size: 11px; color: #9CA3AF; text-align: center; padding: 10px 4px 4px; }
 
 /* 알림 화면 */
@@ -12564,7 +12567,7 @@ function urRenderAcademies() {
       +     vacancyRow
       +   '</div>'
       +   '<div class="ur-row-actions">'
-      +     '<button class="ur-row-report" onclick="urReportAcademyPrompt(' + a.id + ',event)" title="정보가 잘못됐나요?">🚩</button>'
+      +     '<button class="ur-row-wish' + (urIsWished(a.id) ? ' wished' : '') + '" onclick="urToggleWish(' + a.id + ',event)" title="찜하기">' + (urIsWished(a.id) ? '★' : '☆') + '</button>'
       +     '<button class="ur-row-add' + (added ? ' added' : '') + '" onclick="event.stopPropagation();urToggleSchedule(' + a.id + ',this)">'
       +       (added ? '✓' : '+')
       +     '</button>'
