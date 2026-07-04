@@ -2799,9 +2799,41 @@
 .ur-membership-row { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid #F5F5F5; }
 .ur-membership-check { width: 20px; height: 20px; border-radius: 50%; background: #FFF3EC; color: #F97316; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
 .ur-membership-text { font-size: 13px; color: #1A1A1A; font-weight: 500; }
-.ur-ai-reco-item { padding: 16px; border-bottom: 1px solid #F0F0F0; }
-.ur-ai-reco-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.ur-ai-reco-item { padding: 14px 16px; border-bottom: 1px solid #F0F0F0; cursor: pointer; transition: background .15s; }
+.ur-ai-reco-item:active { background: #FFF7F3; }
+.ur-ai-reco-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .ur-ai-reco-subj { font-size: 15px; font-weight: 800; color: var(--text-main); }
+/* 정렬·필터 바 */
+.ur-ai-toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-bottom: 1px solid #F0F0F0; overflow-x: auto; scrollbar-width: none; }
+.ur-ai-toolbar::-webkit-scrollbar { display: none; }
+.ur-ai-fchip { font-size: 12px; font-weight: 600; color: #6B7280; background: #F4F4F5; border: none; border-radius: 100px; padding: 5px 11px; cursor: pointer; white-space: nowrap; }
+.ur-ai-fchip.active { background: #1A1A1A; color: #fff; }
+.ur-ai-sort-divider { width: 1px; height: 16px; background: #E5E7EB; flex-shrink: 0; margin: 0 2px; }
+.ur-ai-sort-btn { font-size: 12px; font-weight: 600; color: #6B7280; background: none; border: 1px solid #E5E7EB; border-radius: 100px; padding: 5px 10px; cursor: pointer; white-space: nowrap; }
+.ur-ai-sort-btn.active { color: #F97316; border-color: #F97316; }
+/* 카드 액션 바텀시트 */
+.ur-ai-card-sheet { display: none; position: absolute; inset: 0; z-index: 80; background: rgba(0,0,0,0.4); align-items: flex-end; }
+.ur-ai-card-sheet.open { display: flex; }
+.ur-ai-card-panel { background: #fff; width: 100%; border-radius: 20px 20px 0 0; padding: 20px 16px 28px; }
+.ur-ai-card-name { font-size: 16px; font-weight: 800; color: #1A1A1A; margin-bottom: 4px; }
+.ur-ai-card-meta { font-size: 12px; color: #9CA3AF; margin-bottom: 18px; }
+.ur-ai-action-btn { width: 100%; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
+.ur-ai-action-btn.primary { background: #F97316; color: #fff; }
+.ur-ai-action-btn.secondary { background: #F4F4F5; color: #1A1A1A; }
+/* 시간 직접 입력 UI */
+.ur-ai-time-sheet { display: none; position: absolute; inset: 0; z-index: 90; background: rgba(0,0,0,0.4); align-items: flex-end; }
+.ur-ai-time-sheet.open { display: flex; }
+.ur-ai-time-panel { background: #fff; width: 100%; border-radius: 20px 20px 0 0; padding: 20px 16px 28px; max-height: 80%; overflow-y: auto; }
+.ur-ai-time-title { font-size: 15px; font-weight: 800; color: #1A1A1A; margin-bottom: 4px; }
+.ur-ai-time-sub { font-size: 12px; color: #9CA3AF; margin-bottom: 16px; }
+.ur-ai-day-row { display: flex; gap: 6px; margin-bottom: 14px; }
+.ur-ai-day-btn { flex: 1; padding: 9px 4px; border-radius: 10px; border: 1.5px solid #E5E7EB; background: #fff; font-size: 13px; font-weight: 700; color: #374151; cursor: pointer; }
+.ur-ai-day-btn.active { border-color: #F97316; background: #FFF3EC; color: #F97316; }
+.ur-ai-hour-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 18px; }
+.ur-ai-hour-btn { padding: 9px 4px; border-radius: 8px; border: 1.5px solid #E5E7EB; background: #fff; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; }
+.ur-ai-hour-btn.active { border-color: #F97316; background: #FFF3EC; color: #F97316; }
+.ur-ai-conflict-warn { background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #DC2626; margin-bottom: 12px; display: none; }
+.ur-ai-conflict-warn.show { display: block; }
 .ur-ai-reco-pct { font-size: 18px; font-weight: 900; color: var(--primary); }
 .ur-ai-reco-desc { font-size: 12px; color: #9CA3AF; line-height: 1.5; margin-bottom: 10px; }
 .ur-ai-reco-btn {
@@ -11513,6 +11545,9 @@ function urRenderAiRecommend() {
   var labels = {};
   UR_SUBJECT_GRID.forEach(function(s) { labels[s.subj] = s.label; });
 
+  var schedule = urGetSchedule();
+  var scheduledIds = schedule.map(function(s) { return s.academyId; });
+
   var allInRadius = KR_SYNC.getMergedAcademies().filter(function(a) {
     if (a.dist == null || a.dist * 1000 > _urAiRadius) return false;
     if (_urAiSubjects.length && _urAiSubjects.indexOf(a.subj) < 0) return false;
@@ -11520,23 +11555,23 @@ function urRenderAiRecommend() {
     return true;
   });
 
-  // 시간표 있는 풀 — 충돌 체크 + 조합 추천에 사용
+  // 시간표 있는 풀 — 충돌 체크 + 조합 추천
   var timetablePool = allInRadius.filter(function(a) { return a.hasTimetable && a.rawTimetable; })
     .map(function(a) { a._slots = _urRawSlots(a.rawTimetable); return a; })
     .filter(function(a) { return a._slots.length > 0; });
 
-  // 시간표 없는 풀 — 목록에만 노출
+  // 시간표 없는 풀
   var noTimetablePool = allInRadius.filter(function(a) { return !a.hasTimetable || !a.rawTimetable; });
 
   if (!allInRadius.length) {
     summaryEl.innerHTML = '';
     bodyEl.innerHTML = '<div class="ur-notif-empty"><div class="ur-notif-empty-icon">📍</div>'
       + '조건에 맞는 학원이 아직 없어요.<br><span style="font-size:12px">반경을 넓히거나 과목을 바꿔보세요.</span></div>';
+    urAiRenderToolbar();
     return;
   }
 
   var combo = _urBuildAiCombination(timetablePool);
-
   if (combo.length) {
     summaryEl.innerHTML = '<div class="ur-ai-combo-card">'
       + '<div class="ur-ai-combo-title">✨ 시간 겹침 없는 추천 조합 (' + combo.length + '곳)</div>'
@@ -11550,30 +11585,222 @@ function urRenderAiRecommend() {
     summaryEl.innerHTML = '';
   }
 
-  var timetableHtml = timetablePool.length
-    ? '<div class="ur-ai-list-label">시간표 등록 학원 ' + timetablePool.length + '곳</div>'
-      + timetablePool.map(function(a) {
-          var slotLabel = a._slots.slice(0, 2).map(function(s) { return dayNames[s.day] + ' ' + s.hour + '시'; }).join(', ');
-          var verBadge = a.verified ? '<span class="ur-ai-verified-badge">✓ 원장 인증</span>' : '';
-          return '<div class="ur-ai-reco-item">'
-            + '<div class="ur-ai-reco-top"><span class="ur-ai-reco-subj">' + _escHtml(a.name) + verBadge + '</span></div>'
-            + '<div class="ur-ai-reco-desc">' + (labels[a.subj] || a.subj) + ' · ' + slotLabel + ' · ' + a.dist + 'km</div>'
-            + '</div>';
-        }).join('')
+  // 목록 과목 필터 적용
+  function applyListFilter(list) {
+    return _urAiListFilter === 'all' ? list : list.filter(function(a){ return a.subj === _urAiListFilter; });
+  }
+  // 정렬 적용
+  function applySort(list) {
+    return list.slice().sort(function(a, b) {
+      if (_urAiSortBy === 'name') return a.name.localeCompare(b.name, 'ko');
+      return (a.dist || 0) - (b.dist || 0);
+    });
+  }
+
+  function cardHtml(a, hasTime) {
+    var inSchedule = scheduledIds.indexOf(a.id) >= 0;
+    var verBadge = a.verified ? '<span class="ur-ai-verified-badge">✓ 원장 인증</span>' : '';
+    var timeBadge = hasTime
+      ? '<span style="font-size:10px;color:#16A34A;margin-left:5px;font-weight:600">' + a._slots.slice(0,2).map(function(s){ return dayNames[s.day]+' '+s.hour+'시'; }).join(', ') + '</span>'
+      : '<span style="font-size:10px;color:#9CA3AF;margin-left:5px;font-weight:400">시간표 미확인</span>';
+    var scheduleBadge = inSchedule ? '<span style="font-size:10px;color:#F97316;margin-left:5px;font-weight:700">담김</span>' : '';
+    return '<div class="ur-ai-reco-item' + (!hasTime ? '' : '') + '" onclick="urAiCardTap(' + a.id + ')">'
+      + '<div class="ur-ai-reco-top">'
+      + '<span class="ur-ai-reco-subj" style="' + (!hasTime ? 'color:#374151' : '') + '">' + _escHtml(a.name) + verBadge + scheduleBadge + '</span>'
+      + '<span style="font-size:11px;color:#D1D5DB">›</span>'
+      + '</div>'
+      + '<div class="ur-ai-reco-desc">' + (labels[a.subj]||a.subj) + ' · ' + a.dist + 'km' + timeBadge + '</div>'
+      + '</div>';
+  }
+
+  var filteredTt  = applySort(applyListFilter(timetablePool));
+  var filteredNot = applySort(applyListFilter(noTimetablePool));
+
+  var timetableHtml = filteredTt.length
+    ? '<div class="ur-ai-list-label">시간표 등록 학원 ' + filteredTt.length + '곳</div>'
+      + filteredTt.map(function(a){ return cardHtml(a, true); }).join('')
     : '';
 
-  var noTimetableHtml = noTimetablePool.length
-    ? '<div class="ur-ai-list-label" style="margin-top:14px">주변 학원 ' + noTimetablePool.length + '곳 <span style="font-size:11px;color:#9CA3AF;font-weight:400">(시간표 미확인)</span></div>'
-      + noTimetablePool.slice(0, 30).map(function(a) {
-          return '<div class="ur-ai-reco-item" style="opacity:0.75">'
-            + '<div class="ur-ai-reco-top"><span class="ur-ai-reco-subj">' + _escHtml(a.name) + '<span style="font-size:10px;color:#9CA3AF;margin-left:5px;font-weight:400">시간표 미확인</span></span></div>'
-            + '<div class="ur-ai-reco-desc">' + (labels[a.subj] || a.subj) + ' · ' + a.dist + 'km</div>'
-            + '</div>';
-        }).join('')
+  var noTimetableHtml = filteredNot.length
+    ? '<div class="ur-ai-list-label" style="margin-top:' + (filteredTt.length?'14px':'0') + '">주변 학원 ' + filteredNot.length + '곳 <span style="font-size:11px;color:#9CA3AF;font-weight:400">(시간표 미확인)</span></div>'
+      + filteredNot.slice(0, 50).map(function(a){ return cardHtml(a, false); }).join('')
     : '';
 
-  bodyEl.innerHTML = timetableHtml + noTimetableHtml;
+  bodyEl.innerHTML = timetableHtml + noTimetableHtml
+    || '<div class="ur-notif-empty"><div class="ur-notif-empty-icon">🔍</div>선택한 과목의 학원이 없어요.</div>';
+
+  urAiRenderToolbar();
 }
+// ── AI 추천 — 상태 ──
+var _urAiListFilter = 'all';   // 목록 과목 필터
+var _urAiSortBy = 'dist';      // 'dist' | 'name'
+var _urAiSelectedId = null;    // 카드 탭 시 선택된 학원 id
+var _urAiPickerDays = [];      // 시간입력: 선택된 요일 배열
+var _urAiPickerHours = [];     // 시간입력: 선택된 시간 배열
+var _urCustomSlots = {};       // {academyId: [{day,hour}]} — 학부모가 직접 입력한 슬롯
+
+// ── 툴바(과목 필터 + 정렬) 렌더 ──
+function urAiRenderToolbar() {
+  var el = document.getElementById('urAiToolbar');
+  if (!el) return;
+  var subjs = [{ subj:'all', label:'전체' }].concat(UR_SUBJECT_GRID.map(function(s){ return { subj:s.subj, label:s.label }; }));
+  var chips = subjs.map(function(s) {
+    return '<button class="ur-ai-fchip' + (_urAiListFilter===s.subj ? ' active' : '') + '" onclick="urAiSetListFilter(\'' + s.subj + '\')">' + s.label + '</button>';
+  }).join('');
+  var divider = '<div class="ur-ai-sort-divider"></div>';
+  var sortDist = '<button class="ur-ai-sort-btn' + (_urAiSortBy==='dist' ? ' active' : '') + '" onclick="urAiSetSort(\'dist\')">거리순</button>';
+  var sortName = '<button class="ur-ai-sort-btn' + (_urAiSortBy==='name' ? ' active' : '') + '" onclick="urAiSetSort(\'name\')">이름순</button>';
+  el.innerHTML = chips + divider + sortDist + sortName;
+}
+function urAiSetListFilter(subj) {
+  _urAiListFilter = subj;
+  urRenderAiRecommend();
+}
+function urAiSetSort(by) {
+  _urAiSortBy = by;
+  urRenderAiRecommend();
+}
+
+// ── 카드 탭 → 액션 시트 ──
+function urAiCardTap(id) {
+  var academies = KR_SYNC.getMergedAcademies();
+  var a = academies.filter(function(x){ return x.id === id; })[0];
+  if (!a) return;
+  _urAiSelectedId = id;
+  var labels = {};
+  UR_SUBJECT_GRID.forEach(function(s){ labels[s.subj]=s.label; });
+  document.getElementById('urAiCardName').textContent = a.name;
+  document.getElementById('urAiCardMeta').textContent = (labels[a.subj]||a.subj) + ' · ' + a.dist + 'km' + (a.verified ? ' · ✓ 원장 인증' : '');
+  document.getElementById('urAiCardSheet').classList.add('open');
+}
+function urAiCloseCardSheet(e) {
+  if (e && e.target !== document.getElementById('urAiCardSheet')) return;
+  document.getElementById('urAiCardSheet').classList.remove('open');
+}
+
+// ── 스케줄에 담기 (시간 없이) ──
+function urAiAddFromSheet() {
+  var academies = KR_SYNC.getMergedAcademies();
+  var a = academies.filter(function(x){ return x.id === _urAiSelectedId; })[0];
+  if (!a) return;
+  var schedule = urGetSchedule();
+  if (schedule.some(function(s){ return s.academyId === a.id; })) {
+    document.getElementById('urAiCardSheet').classList.remove('open');
+    showToast('이미 스케줄에 있는 학원이에요.');
+    return;
+  }
+  schedule.push({ academyId: a.id, name: a.name, subj: a.subj, label: a.label, color: a.color, times: a.times || [], addedAt: Date.now() });
+  urSaveSchedule(schedule);
+  document.getElementById('urAiCardSheet').classList.remove('open');
+  showToast(_escHtml(a.name) + '을 스케줄에 담았어요!');
+  urRenderHomePromo();
+}
+
+// ── 시간 직접 입력 ──
+function urAiOpenTimePicker() {
+  var academies = KR_SYNC.getMergedAcademies();
+  var a = academies.filter(function(x){ return x.id === _urAiSelectedId; })[0];
+  if (!a) return;
+  document.getElementById('urAiCardSheet').classList.remove('open');
+  document.getElementById('urAiTimeTitle').textContent = a.name;
+  _urAiPickerDays = [];
+  _urAiPickerHours = [];
+  // 이미 저장된 슬롯 있으면 복원
+  var saved = _urCustomSlots[_urAiSelectedId] || [];
+  saved.forEach(function(slot) {
+    if (_urAiPickerDays.indexOf(slot.day) < 0) _urAiPickerDays.push(slot.day);
+    if (_urAiPickerHours.indexOf(slot.hour) < 0) _urAiPickerHours.push(slot.hour);
+  });
+  // 요일 버튼 상태 복원
+  document.querySelectorAll('.ur-ai-day-btn').forEach(function(btn) {
+    var d = parseInt(btn.dataset.day);
+    btn.classList.toggle('active', _urAiPickerDays.indexOf(d) >= 0);
+  });
+  // 시간 버튼 생성 (9시~21시)
+  var hourEl = document.getElementById('urAiHourBtns');
+  hourEl.innerHTML = '';
+  for (var h = 9; h <= 21; h++) {
+    var active = _urAiPickerHours.indexOf(h) >= 0;
+    hourEl.innerHTML += '<button class="ur-ai-hour-btn' + (active ? ' active' : '') + '" data-hour="' + h + '" onclick="urAiToggleHour(this)">' + h + '시</button>';
+  }
+  document.getElementById('urAiConflictWarn').classList.remove('show');
+  document.getElementById('urAiTimeSheet').classList.add('open');
+}
+function urAiCloseTimePicker(e) {
+  if (e && e.target !== document.getElementById('urAiTimeSheet')) return;
+  document.getElementById('urAiTimeSheet').classList.remove('open');
+}
+function urAiToggleDay(btn) {
+  var d = parseInt(btn.dataset.day);
+  var idx = _urAiPickerDays.indexOf(d);
+  if (idx >= 0) { _urAiPickerDays.splice(idx, 1); btn.classList.remove('active'); }
+  else { _urAiPickerDays.push(d); btn.classList.add('active'); }
+}
+function urAiToggleHour(btn) {
+  var h = parseInt(btn.dataset.hour);
+  var idx = _urAiPickerHours.indexOf(h);
+  if (idx >= 0) { _urAiPickerHours.splice(idx, 1); btn.classList.remove('active'); }
+  else { _urAiPickerHours.push(h); btn.classList.add('active'); }
+}
+function urAiSaveTime() {
+  if (!_urAiPickerDays.length || !_urAiPickerHours.length) {
+    showToast('요일과 시간을 모두 선택해주세요.');
+    return;
+  }
+  // 새 슬롯 생성
+  var newSlots = [];
+  _urAiPickerDays.forEach(function(d) {
+    _urAiPickerHours.forEach(function(h) { newSlots.push({ day: d, hour: h }); });
+  });
+  // 기존 스케줄과 충돌 체크
+  var schedule = urGetSchedule();
+  var academies = KR_SYNC.getMergedAcademies();
+  var conflicts = [];
+  schedule.forEach(function(s) {
+    if (s.academyId === _urAiSelectedId) return;
+    var existSlots = (_urCustomSlots[s.academyId] || []).concat(
+      (function(){ var a2 = academies.filter(function(x){ return x.id===s.academyId; })[0]; return a2 && a2.rawTimetable ? _urRawSlots(a2.rawTimetable) : []; })()
+    );
+    newSlots.forEach(function(ns) {
+      existSlots.forEach(function(es) {
+        if (ns.day === es.day && ns.hour === es.hour) {
+          conflicts.push(s.name);
+        }
+      });
+    });
+  });
+  var warnEl = document.getElementById('urAiConflictWarn');
+  if (conflicts.length) {
+    var unique = conflicts.filter(function(v,i,a){ return a.indexOf(v)===i; });
+    warnEl.textContent = '시간 충돌: ' + unique.join(', ') + '과 겹쳐요. 그래도 담으시겠어요?';
+    warnEl.classList.add('show');
+    // 재클릭 시 강제 추가
+    warnEl.onclick = function() { urAiSaveTimeForce(newSlots); };
+    return;
+  }
+  urAiSaveTimeForce(newSlots);
+}
+function urAiSaveTimeForce(newSlots) {
+  _urCustomSlots[_urAiSelectedId] = newSlots;
+  var academies = KR_SYNC.getMergedAcademies();
+  var a = academies.filter(function(x){ return x.id === _urAiSelectedId; })[0];
+  if (!a) return;
+  var schedule = urGetSchedule();
+  var existing = schedule.filter(function(s){ return s.academyId === a.id; })[0];
+  var dayNames = ['월','화','수','목','금'];
+  var timeLabel = newSlots.slice(0,2).map(function(s){ return dayNames[s.day]+' '+s.hour+'시'; }).join(', ');
+  if (existing) {
+    existing.times = newSlots.map(function(s){ return dayNames[s.day]+' '+s.hour+'시'; });
+  } else {
+    schedule.push({ academyId: a.id, name: a.name, subj: a.subj, label: a.label, color: a.color, times: newSlots.map(function(s){ return dayNames[s.day]+' '+s.hour+'시'; }), addedAt: Date.now() });
+  }
+  urSaveSchedule(schedule);
+  document.getElementById('urAiTimeSheet').classList.remove('open');
+  showToast(a.name + ' — ' + timeLabel + ' 스케줄에 담았어요!');
+  urRenderHomePromo();
+  urRenderAiRecommend();
+}
+
 function urAddAiCombination() {
   var pool = KR_SYNC.getMergedAcademies().filter(function(a) {
     if (!a.hasTimetable || !a.rawTimetable) return false;
@@ -13323,9 +13550,45 @@ function urToggleNotif(btn) {
       <div class="ur-notif-title">✨ AI 추천</div>
       <button class="ur-ai-options-btn" onclick="urToggleAiOptions()">⚙️</button>
     </div>
-    <div class="ur-ai-reco-intro">원장 인증을 받아 실제 시간표가 등록된 학원만 모아 시간 충돌 없는 조합을 보여드려요</div>
+    <div class="ur-ai-reco-intro">반경 내 학원을 과목별로 탐색하고 스케줄에 담아보세요. 시간표 등록 학원은 충돌 없는 조합도 추천해드려요.</div>
     <div id="urAiComboSummary"><!-- JS 렌더링 --></div>
+    <!-- 과목 필터 + 정렬 툴바 -->
+    <div class="ur-ai-toolbar" id="urAiToolbar"><!-- JS 렌더링 --></div>
     <div class="ur-notif-list" id="urAiRecoBody"><!-- JS 렌더링 --></div>
+
+    <!-- 카드 탭 액션 시트 -->
+    <div class="ur-ai-card-sheet" id="urAiCardSheet" onclick="urAiCloseCardSheet(event)">
+      <div class="ur-ai-card-panel" id="urAiCardPanel">
+        <div class="ur-ai-card-name" id="urAiCardName"></div>
+        <div class="ur-ai-card-meta" id="urAiCardMeta"></div>
+        <button class="ur-ai-action-btn primary" onclick="urAiAddFromSheet()">스케줄에 담기</button>
+        <button class="ur-ai-action-btn secondary" onclick="urAiOpenTimePicker()">수업 시간 직접 입력</button>
+        <button class="ur-ai-action-btn secondary" style="margin-bottom:0" onclick="urAiCloseCardSheet()">닫기</button>
+      </div>
+    </div>
+
+    <!-- 시간 직접 입력 시트 -->
+    <div class="ur-ai-time-sheet" id="urAiTimeSheet" onclick="urAiCloseTimePicker(event)">
+      <div class="ur-ai-time-panel">
+        <div class="ur-ai-time-title" id="urAiTimeTitle"></div>
+        <div class="ur-ai-time-sub">수업 요일과 시작 시간을 선택하세요 (여러 개 가능)</div>
+        <div class="ur-ai-sheet-label">요일</div>
+        <div class="ur-ai-day-row" id="urAiDayBtns">
+          <button class="ur-ai-day-btn" data-day="0" onclick="urAiToggleDay(this)">월</button>
+          <button class="ur-ai-day-btn" data-day="1" onclick="urAiToggleDay(this)">화</button>
+          <button class="ur-ai-day-btn" data-day="2" onclick="urAiToggleDay(this)">수</button>
+          <button class="ur-ai-day-btn" data-day="3" onclick="urAiToggleDay(this)">목</button>
+          <button class="ur-ai-day-btn" data-day="4" onclick="urAiToggleDay(this)">금</button>
+        </div>
+        <div class="ur-ai-sheet-label">시작 시간</div>
+        <div class="ur-ai-hour-grid" id="urAiHourBtns">
+          <!-- 9시~21시 JS 렌더링 -->
+        </div>
+        <div class="ur-ai-conflict-warn" id="urAiConflictWarn"></div>
+        <button class="ur-ai-action-btn primary" onclick="urAiSaveTime()">이 시간으로 스케줄에 담기</button>
+        <button class="ur-ai-action-btn secondary" style="margin-bottom:0" onclick="urAiCloseTimePicker()">취소</button>
+      </div>
+    </div>
 
     <!-- 옵션 바텀시트 -->
     <div class="ur-ai-sheet-overlay" id="urAiSheetOverlay" onclick="urCloseAiOptions(event)">
