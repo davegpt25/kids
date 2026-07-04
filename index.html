@@ -11694,9 +11694,9 @@ var _rvWishOnly = false;
 var _ktIsCore = false; // true if current user is 핵심 학부모
 var _rvDemoMode = false;
 var _rvDemoRows = [
-  { id: 'demo1', academy_id: -1, _acName: '강남 토도피아노학원', _region: '강남구 학부모', rating: 5, body: '선생님이 아이 수준에 맞춰 정말 꼼꼼하게 가르쳐줘요. 6개월째 다니는데 실력이 눈에 띄게 늘었어요. 발표회도 있어서 아이가 동기부여가 되더라고요.', created_at: '2026-07-01T10:00:00Z' },
-  { id: 'demo2', academy_id: -1, _acName: '서초 폴리영어학원', _region: '서초구 학부모', rating: 4, body: '커리큘럼이 체계적이고 숙제량이 적당해요. 아이가 부담 없이 즐겁게 다니고 있어요. 선생님들이 친절하고 진도도 꼼꼼하게 체크해줍니다.', created_at: '2026-06-28T09:00:00Z' },
-  { id: 'demo3', academy_id: -1, _acName: '송파 코딩수학학원', _region: '송파구 학부모', rating: 5, body: '수학이랑 코딩을 함께 배우는 게 처음엔 낯설었는데, 아이가 논리적으로 생각하는 힘이 생긴 것 같아요. 선생님도 열정적이고 질문에 빠르게 답해줘서 좋았어요.', created_at: '2026-06-25T14:00:00Z' }
+  { id: 'demo1', academy_id: -1, _acName: '강남 토도피아노학원', _region: '강남구 이○○ 학부모', rating: 5, body: '선생님이 아이 수준에 맞춰 정말 꼼꼼하게 가르쳐줘요. 6개월째 다니는데 실력이 눈에 띄게 늘었어요. 발표회도 있어서 아이가 동기부여가 되더라고요.', created_at: '2026-07-01T10:00:00Z' },
+  { id: 'demo2', academy_id: -1, _acName: '서초 폴리영어학원', _region: '서초구 김○○ 학부모', rating: 4, body: '커리큘럼이 체계적이고 숙제량이 적당해요. 아이가 부담 없이 즐겁게 다니고 있어요. 선생님들이 친절하고 진도도 꼼꼼하게 체크해줍니다.', created_at: '2026-06-28T09:00:00Z' },
+  { id: 'demo3', academy_id: -1, _acName: '송파 코딩수학학원', _region: '송파구 박○○ 학부모', rating: 5, body: '수학이랑 코딩을 함께 배우는 게 처음엔 낯설었는데, 아이가 논리적으로 생각하는 힘이 생긴 것 같아요. 선생님도 열정적이고 질문에 빠르게 답해줘서 좋았어요.', created_at: '2026-06-25T14:00:00Z' }
 ];
 
 // ── Supabase Realtime 구독 — 후기 승인/거부 인앱 알림 ──
@@ -12012,22 +12012,22 @@ function rvCloseUserPanel() {
 
 /* 데모용 샘플 활동 프로필 (리뷰ID별 미리 정의) */
 var _rvDemoProfiles = {
-  'demo1': { region: '강남구 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 7, answers: 12, adopted: 4 },
-  'demo2': { region: '서초구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 3, answers: 8,  adopted: 2 },
-  'demo3': { region: '송파구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 5, answers: 5,  adopted: 1 }
+  'demo1': { region: '강남구 이○○ 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 7, answers: 12, adopted: 4 },
+  'demo2': { region: '서초구 김○○ 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 3, answers: 8,  adopted: 2 },
+  'demo3': { region: '송파구 박○○ 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 5, answers: 5,  adopted: 1 }
 };
 var _qaDemoProfiles = {
-  'qdemo1': { region: '강남구 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 6, answers: 15, adopted: 5 },
-  'qdemo2': { region: '노원구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 9,  adopted: 3 },
-  'qdemo3': { region: '마포구 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 1, answers: 3,  adopted: 0 },
-  'qa1-1':  { region: '대치동 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 4, answers: 21, adopted: 7 },
-  'qa1-2':  { region: '강남구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 6,  adopted: 1 },
-  'qa1-3':  { region: '서초구 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 0, answers: 2,  adopted: 0 },
-  'qa2-1':  { region: '송파구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 3, answers: 11, adopted: 4 },
-  'qa2-2':  { region: '강동구 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 1, answers: 4,  adopted: 0 },
-  'qa3-1':  { region: '노원구 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 8, answers: 18, adopted: 6 },
-  'qa3-2':  { region: '마포구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 7,  adopted: 2 },
-  'qa3-3':  { region: '은평구 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 0, answers: 1,  adopted: 0 }
+  'qdemo1': { region: '강남구 정○○ 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 6, answers: 15, adopted: 5 },
+  'qdemo2': { region: '노원구 최○○ 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 9,  adopted: 3 },
+  'qdemo3': { region: '마포구 윤○○ 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 1, answers: 3,  adopted: 0 },
+  'qa1-1':  { region: '대치동 장○○ 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 4, answers: 21, adopted: 7 },
+  'qa1-2':  { region: '강남구 한○○ 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 6,  adopted: 1 },
+  'qa1-3':  { region: '서초구 신○○ 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 0, answers: 2,  adopted: 0 },
+  'qa2-1':  { region: '송파구 오○○ 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 3, answers: 11, adopted: 4 },
+  'qa2-2':  { region: '강동구 임○○ 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 1, answers: 4,  adopted: 0 },
+  'qa3-1':  { region: '노원구 조○○ 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 8, answers: 18, adopted: 6 },
+  'qa3-2':  { region: '마포구 강○○ 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 7,  adopted: 2 },
+  'qa3-3':  { region: '은평구 황○○ 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 0, answers: 1,  adopted: 0 }
 };
 
 function rvOpenDemoUserPanel(el) {
@@ -12069,7 +12069,7 @@ function qaRenderFeedRows(rows) {
     return '<button type="button" class="qa-card" data-qaid="' + escHtml(r.id) + '" data-demo="' + (r._demo ? '1' : '0') + '" onclick="qaCardClick(this)">'
       + '<div class="qa-card-title">' + escHtml(title) + demoMark + '</div>'
       + '<div class="qa-card-body">' + escHtml(body) + '</div>'
-      + '<div class="qa-card-meta"><span>' + dateStr + ' · 학부모</span>' + ansCount + '</div>'
+      + '<div class="qa-card-meta"><span>' + dateStr + ' · ' + (r._demo ? ((_qaDemoProfiles[r.id] || {}).region || '학부모') : '학부모') + '</span>' + ansCount + '</div>'
       + '</button>';
   }).join('');
   wrap.innerHTML = toolbar + cards;
