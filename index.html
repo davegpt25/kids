@@ -12216,7 +12216,7 @@ function urRenderMapMarkers() {
           + '</div>'
           + '<button class="ur-map-popup-btn' + (isAddedNow ? ' added' : '') + '" '
           +   'onclick="var a=urGetSchedule().some(function(s){return s.academyId===' + academy.id + '});urToggleSchedule(' + academy.id + ',this);urRenderMapMarkers()">'
-          +   (isAddedNow ? '✓ 등록됨' : '+ 스케줄 추가')
+          +   (isAddedNow ? '✓' : '+')
           + '</button>'
           + '</div>';
         _urInfoWindow.setContent(content);
