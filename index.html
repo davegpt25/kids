@@ -11874,9 +11874,9 @@ function qaSubmit() {
     .catch(function() { showToast('등록에 실패했어요.'); if (submitBtn) submitBtn.disabled = false; });
 }
 
-function qaAddPoints(pts) {
+function qaAddPoints(pts, reason) {
   if (!_urUser) return;
-  sbClient().from('user_points').insert({ user_email: _urUser.email, points: pts, reason: 'qa_post' }).then(function(){}).catch(function(){});
+  sbClient().from('user_points').insert({ user_email: _urUser.email, points: pts, reason: reason || 'qa_post' }).then(function(){}).catch(function(){});
 }
 
 var _qaDetailId = null;
@@ -11959,7 +11959,7 @@ function qaAnswerSend() {
       if (res.error) { showToast('등록에 실패했어요.'); return; }
       input.value = '';
       showToast('답변이 등록됐어요!');
-      qaAddPoints(10);
+      qaAddPoints(10, 'qa_answer');
       qaLoadAnswers(_qaDetailId);
     })
     .catch(function() { showToast('등록에 실패했어요.'); });
