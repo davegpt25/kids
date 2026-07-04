@@ -3280,6 +3280,7 @@
   border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.3);
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <div id="scrollProgressBar"></div>
@@ -11174,6 +11175,14 @@ var KR_SYNC = {
 };
 
 var _urUser = { name: '', email: '', color: '#F97316' };
+// Supabase 클라이언트
+var _SB_URL  = 'https://gyveuoqgbasmagdyuver.supabase.co';
+var _SB_ANON = 'sb_publishable_mMejqV9bInqbNK1u0w-XdA_l0i8LoAb';
+var _sbClient = null;
+function sbClient() {
+  if (!_sbClient) _sbClient = supabase.createClient(_SB_URL, _SB_ANON);
+  return _sbClient;
+}
 var _urFilter = 'all';
 var _urSort = 'dist';
 var _urSearchText = '';
