@@ -2577,6 +2577,7 @@
 .rv-empty-h { font-size: 15px; font-weight: 700; color: #1A1A1A; margin-bottom: 6px; }
 .rv-empty-sub { font-size: 12px; color: #9CA3AF; line-height: 1.6; margin-bottom: 16px; }
 .rv-demo-badge { display: inline-block; font-size: 9px; background: #F3F4F6; color: #9CA3AF; padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle; }
+.kt-gold-badge { display:inline-block; background:linear-gradient(135deg,#F59E0B,#FBBF24); color:#fff; font-size:10px; font-weight:700; border-radius:8px; padding:2px 6px; margin-left:4px; vertical-align:middle; }
 /* ── 멤버십 등급 카드 ── */
 .kt-membership-card { margin:0 16px 12px; background:linear-gradient(135deg,#FFF7ED,#FFF3E0); border:1.5px solid #FED7AA; border-radius:16px; padding:16px; }
 .kt-membership-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
@@ -11650,6 +11651,7 @@ function userShowTab(idx) {
   if (idx === 3) urRenderMyInfo();
 }
 var _rvWishOnly = false;
+var _ktIsCore = false; // true if current user is 핵심 학부모
 var _rvDemoMode = false;
 var _rvDemoRows = [
   { id: 'demo1', academy_id: -1, _acName: '강남 토도피아노학원', _region: '강남구 학부모', rating: 5, body: '선생님이 아이 수준에 맞춰 정말 꼼꼼하게 가르쳐줘요. 6개월째 다니는데 실력이 눈에 띄게 늘었어요. 발표회도 있어서 아이가 동기부여가 되더라고요.', created_at: '2026-07-01T10:00:00Z' },
@@ -11686,6 +11688,14 @@ function rvSubscribeRealtime() {
       }
     )
     .subscribe();
+}
+
+function ktCheckCoreStatus(callback) {
+  if (!_urUser) { _ktIsCore = false; callback(); return; }
+  ktGetUserPoints(function(total) {
+    _ktIsCore = ktGetTier(total).name === '핵심 학부모';
+    callback();
+  });
 }
 
 function ktGetUserPoints(callback) {
@@ -11739,13 +11749,13 @@ function rvRenderFeed() {
   var wrap = document.getElementById('rvFeedWrap');
   if (!wrap) return;
   wrap.innerHTML = '<div class="rv-empty">불러오는 중...</div>';
-  rvLoadFeed();
+  ktCheckCoreStatus(function() { rvLoadFeed(); });
 }
 
 function rvLoadFeed() {
   var query = sbClient()
     .from('reviews')
-    .select('id, academy_id, rating, body, created_at, academy_region')
+    .select('id, academy_id, rating, body, created_at, academy_region, user_email')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
     .limit(50);
@@ -11786,10 +11796,11 @@ function rvLoadFeed() {
         var date = new Date(r.created_at);
         var dateStr = (date.getMonth()+1) + '/' + date.getDate();
         var demoMark = r._acName ? '<span class="rv-demo-badge">샘플</span>' : '';
+        var goldBadge = (_ktIsCore && _urUser && r.user_email === _urUser.email) ? '<span class="kt-gold-badge">골드</span>' : '';
         return '<div class="rv-card">'
           + '<div class="rv-card-top"><span class="rv-card-name">' + escHtml(acName) + '</span><span class="rv-stars">' + stars + '</span></div>'
           + '<div class="rv-body">' + escHtml(body).slice(0, 80) + (body.length > 80 ? '...' : '') + '</div>'
-          + '<div class="rv-meta"><span>' + escHtml(region) + demoMark + '</span><span>' + dateStr + '</span></div>'
+          + '<div class="rv-meta"><span>' + escHtml(region) + demoMark + goldBadge + '</span><span>' + dateStr + '</span></div>'
           + '</div>';
       }).join('');
       wrap.innerHTML = toolbar + cards;
@@ -11817,7 +11828,7 @@ function qaRenderFeed() {
   var wrap = document.getElementById('qaFeedWrap');
   if (!wrap) return;
   wrap.innerHTML = '<div class="rv-empty">불러오는 중...</div>';
-  qaLoadFeed();
+  ktCheckCoreStatus(function() { qaLoadFeed(); });
 }
 
 function qaLoadFeed() {
@@ -11980,9 +11991,10 @@ function qaLoadAnswers(postId) {
         var adoptBtn = (!a.is_adopted && isOwner && !hasAdopted)
           ? '<button class="qa-adopt-btn" data-id="' + escHtml(a.id) + '" onclick="qaAdopt(this.dataset.id)">채택하기</button>'
           : '';
+        var goldBadge = (_ktIsCore && _urUser && a.user_email === _urUser.email) ? '<span class="kt-gold-badge">골드</span>' : '';
         return '<div class="qa-answer-card' + (a.is_adopted ? ' adopted' : '') + '">'
           + '<div class="qa-answer-body">' + escHtml(body) + '</div>'
-          + '<div class="qa-answer-meta"><span>' + dateStr + ' · 학부모</span>' + adoptedBadge + adoptBtn + '</div>'
+          + '<div class="qa-answer-meta"><span>' + dateStr + ' · 학부모' + goldBadge + '</span>' + adoptedBadge + adoptBtn + '</div>'
           + '</div>';
       }).join('');
     })
