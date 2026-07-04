@@ -11415,7 +11415,63 @@ function urGetSchedule() {
     return JSON.parse(raw || '[]');
   } catch(e) { return []; }
 }
-function urSaveSchedule(list) { localStorage.setItem('kr_user_schedule', JSON.stringify(list)); }
+function urSaveSchedule(list) {
+  localStorage.setItem('kr_user_schedule', JSON.stringify(list));
+  if (typeof urScheduleClassEndNotifs === 'function') urScheduleClassEndNotifs();
+}
+
+var _urNotifTimers = [];
+function urRequestNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function urScheduleClassEndNotifs() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  _urNotifTimers.forEach(function(t) { clearTimeout(t); });
+  _urNotifTimers = [];
+  var schedule = urGetSchedule();
+  if (!schedule.length) return;
+  var children = [];
+  try { children = JSON.parse(localStorage.getItem((_urUser && _urUser.email) ? 'kr_children_' + _urUser.email : 'kr_children') || '[]'); } catch(e) {}
+  var childName = children.length ? children[0].name : '우리 아이';
+  var now = new Date();
+  var todayDay = now.getDay();
+  var CLASS_DURATION_MS = 90 * 60 * 1000;
+  schedule.forEach(function(entry) {
+    var slots = (_urCustomSlots && _urCustomSlots[entry.academyId]) || [];
+    if (!slots.length && entry.times && entry.times.length) {
+      var dayMap = {0:'일',1:'월',2:'화',3:'수',4:'목',5:'금',6:'토'};
+      entry.times.forEach(function(t) {
+        var m = String(t).match(/([월화수목금토일]+).*?(\d+)시/);
+        if (!m) return;
+        var dayStr = m[1]; var h = parseInt(m[2], 10);
+        for (var d = 0; d < 7; d++) { if (dayStr.indexOf(dayMap[d]) >= 0) slots.push({ day: d, hour: h }); }
+      });
+    }
+    slots.forEach(function(slot) {
+      if (slot.day !== todayDay) return;
+      var endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), slot.hour, 0, 0, 0).getTime() + CLASS_DURATION_MS;
+      var delay = endTime - now.getTime();
+      if (delay < 0 || delay > 24 * 60 * 60 * 1000) return;
+      var t = setTimeout(function() {
+        new Notification('수업이 끝났어요!', {
+          body: childName + '이(가) ' + entry.name + ' 수업이 방금 종료됐어요!',
+          icon: 'https://davegpt25.github.io/kids/og-image-v3.png',
+          tag: 'class-end-' + entry.academyId
+        });
+      }, delay);
+      _urNotifTimers.push(t);
+    });
+  });
+}
+
+function urInitNotifications() {
+  urRequestNotifPermission();
+  setTimeout(urScheduleClassEndNotifs, 1000);
+}
 
 // ── 찜하기 ──
 function _urWishKey() {
@@ -11581,6 +11637,7 @@ function _rsEnterParent() {
   urUpdateBellDot();
   rvSubscribeRealtime();
   userShowTab(0);
+  urInitNotifications();
   if (urGetChildren().length === 0) obOpen();
 }
 
