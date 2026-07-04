@@ -11424,6 +11424,7 @@ function _rsEnterParent() {
   root.style.display = 'flex';
   document.body.style.overflow = 'hidden';
   urUpdateBellDot();
+  rvSubscribeRealtime();
   userShowTab(0);
   if (urGetChildren().length === 0) obOpen();
 }
@@ -11563,6 +11564,36 @@ function userShowTab(idx) {
   if (idx === 3) urRenderMyInfo();
 }
 var _rvWishOnly = false;
+
+// ── Supabase Realtime 구독 — 후기 승인/거부 인앱 알림 ──
+var _rvRealtimeChannel = null;
+
+function rvSubscribeRealtime() {
+  if (!_urUser || !_urUser.email) return;
+  // Avoid duplicate subscriptions
+  if (_rvRealtimeChannel) {
+    sbClient().removeChannel(_rvRealtimeChannel);
+    _rvRealtimeChannel = null;
+  }
+  var email = _urUser.email;
+  _rvRealtimeChannel = sbClient()
+    .channel('review-status-' + email)
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'reviews', filter: 'user_email=eq.' + email },
+      function(payload) {
+        var newRow = payload.new;
+        if (!newRow) return;
+        if (newRow.status === 'approved') {
+          urAddNotification({ scope: 'personal', title: '후기가 게시됐어요! ⭐', body: '작성하신 후기가 승인되어 게시되었습니다.' });
+        } else if (newRow.status === 'rejected') {
+          var reason = newRow.reject_reason ? ' (' + newRow.reject_reason + ')' : '';
+          urAddNotification({ scope: 'personal', title: '후기 검토 결과를 확인하세요.' + reason, body: '작성하신 후기가 반려되었습니다.' });
+        }
+      }
+    )
+    .subscribe();
+}
 
 function escHtml(s) {
   return String(s || '')
