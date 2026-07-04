@@ -2606,6 +2606,15 @@
 .kt-membership-benefits { margin-top:12px; border-top:1px solid #FED7AA; padding-top:10px; }
 .kt-benefit-row { font-size:13px; color:#374151; margin-bottom:4px; }
 /* ── 키즈톡 서브탭 ── */
+.kt-page-header {
+  padding: 16px 16px 0;
+  background: #fff;
+  border-bottom: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.kt-page-title { font-size: 17px; font-weight: 800; color: var(--text-main, #1A1A1A); }
 .kt-subtab-bar {
   display: flex;
   gap: 0;
@@ -14821,6 +14830,9 @@ window.addEventListener('DOMContentLoaded', function() {
 
     <!-- ── 키즈톡 탭 ── -->
     <div id="urPageReviews" class="ur-page">
+      <div class="kt-page-header">
+        <div class="kt-page-title">키즈톡</div>
+      </div>
       <div class="kt-subtab-bar">
         <button class="kt-subtab active" id="ktTab0" onclick="ktShowSubtab(0)">후기</button>
         <button class="kt-subtab" id="ktTab1" onclick="ktShowSubtab(1)">Q&amp;A</button>
