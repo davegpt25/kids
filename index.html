@@ -2601,6 +2601,21 @@
 .rv-upload-preview { max-width: 100%; max-height: 120px; border-radius: 8px; display: none; margin-bottom: 12px; }
 .rv-submit-btn { width: 100%; padding: 13px; background: #F97316; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
 .rv-submit-btn:disabled { background: #D1D5DB; cursor: not-allowed; }
+/* 관리자 후기 승인 탭 */
+.rv-adm-card { background: #fff; border: 1px solid #F3F4F6; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+.rv-adm-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.rv-adm-name { font-size: 14px; font-weight: 700; color: #1A1A1A; }
+.rv-adm-stars { color: #F59E0B; font-size: 12px; }
+.rv-adm-body { font-size: 13px; color: #4B5563; margin-bottom: 8px; line-height: 1.5; }
+.rv-adm-meta { font-size: 11px; color: #9CA3AF; margin-bottom: 8px; }
+.rv-adm-receipt { max-width: 100%; max-height: 140px; border-radius: 8px; object-fit: cover; display: block; margin-bottom: 8px; cursor: pointer; }
+.rv-adm-actions { display: flex; gap: 8px; }
+.rv-adm-approve { flex: 1; padding: 8px; background: #ECFDF5; color: #059669; border: 1px solid #6EE7B7; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.rv-adm-reject { flex: 1; padding: 8px; background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.rv-adm-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: 600; }
+.rv-adm-badge.pending { background: #FEF3C7; color: #D97706; }
+.rv-adm-badge.approved { background: #ECFDF5; color: #059669; }
+.rv-adm-badge.rejected { background: #FEF2F2; color: #DC2626; }
 .ur-tab {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px; cursor: pointer; padding: 8px 0; background: none; border: none;
@@ -7326,7 +7341,7 @@ function adminShowPage(pageId) {
   var pageEl = document.getElementById('admPage' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
   if (pageEl) pageEl.classList.add('adm-page-active');
   Array.prototype.forEach.call(document.querySelectorAll('.adm-nav-item'), function(item) { item.classList.remove('adm-active'); });
-  var navMap = { dashboard:'대시보드', members:'멤버십 관리', features:'기능 설정', alerts:'공석 알림', stats:'가입 통계', academies:'학원 관리' };
+  var navMap = { dashboard:'대시보드', members:'멤버십 관리', features:'기능 설정', alerts:'공석 알림', stats:'가입 통계', academies:'학원 관리', reviews:'후기 승인' };
   Array.prototype.forEach.call(document.querySelectorAll('.adm-nav-item'), function(item) {
     if (item.textContent.trim().indexOf(navMap[pageId]) >= 0) item.classList.add('adm-active');
   });
@@ -7335,6 +7350,7 @@ function adminShowPage(pageId) {
   if (pageId === 'alerts')    adminRenderAlertsFull();
   if (pageId === 'stats')     adminRenderStats();
   if (pageId === 'academies') adminRenderAcademies();
+  if (pageId === 'reviews')   rvAdmRenderPage();
 }
 
 // ── HTML 이스케이프 헬퍼 ──
@@ -11743,6 +11759,108 @@ function rvSubmit() {
     });
 }
 
+function rvAdmRenderPage() {
+  var wrap = document.getElementById('admPageReviews');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="padding:20px;color:#9CA3AF;font-size:13px">불러오는 중...</div>';
+  sbClient()
+    .from('reviews')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(100)
+    .then(function(res) {
+      if (res.error) {
+        wrap.innerHTML = '<div style="padding:20px;color:#EF4444;font-size:13px">오류: ' + escHtml(res.error.message) + '</div>';
+        return;
+      }
+      var rows = res.data || [];
+      if (rows.length === 0) {
+        wrap.innerHTML = '<div style="padding:20px;color:#9CA3AF;font-size:13px">후기가 없어요.</div>';
+        return;
+      }
+      var acs = window.KR_SYNC ? KR_SYNC.getMergedAcademies() : (window.UR_ACADEMIES || []);
+      wrap.innerHTML = rows.map(function(r) {
+        var ac = acs.find(function(a) { return a.id === r.academy_id; });
+        var acName = ac ? ac.name : '학원 #' + r.academy_id;
+        var safeRating = Math.round(Math.min(5, Math.max(0, r.rating || 0)));
+        var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
+        var badgeClass = r.status === 'approved' ? 'approved' : (r.status === 'rejected' ? 'rejected' : 'pending');
+        var badgeLabel = r.status === 'approved' ? '승인됨' : (r.status === 'rejected' ? '거부됨' : '대기중');
+        var rejectSel = r.status === 'pending'
+          ? '<select id="rvRejectReason_' + escHtml(r.id) + '" style="font-size:12px;border:1px solid #E5E7EB;border-radius:6px;padding:3px 6px;margin-right:6px">'
+            + '<option value="영수증 불명확">영수증 불명확</option>'
+            + '<option value="관련 없는 학원">관련 없는 학원</option>'
+            + '<option value="부적절한 내용">부적절한 내용</option>'
+            + '</select>'
+          : '';
+        var actions = r.status === 'pending'
+          ? '<div class="rv-adm-actions">'
+            + '<button class="rv-adm-approve" onclick="rvAdmApprove(\'' + escHtml(r.id) + '\',\'' + escHtml(r.user_email) + '\')">승인</button>'
+            + rejectSel
+            + '<button class="rv-adm-reject" onclick="rvAdmReject(\'' + escHtml(r.id) + '\',\'' + escHtml(r.user_email) + '\')">거부</button>'
+            + '</div>'
+          : '';
+        var rejectNote = r.status === 'rejected' && r.reject_reason
+          ? '<div style="font-size:11px;color:#DC2626;margin-bottom:6px">거부 사유: ' + escHtml(r.reject_reason) + '</div>'
+          : '';
+        return '<div class="rv-adm-card" id="rvAdmCard_' + escHtml(r.id) + '">'
+          + '<div class="rv-adm-top"><span class="rv-adm-name">' + escHtml(acName) + '</span>'
+          + '<span class="rv-adm-badge ' + badgeClass + '">' + badgeLabel + '</span></div>'
+          + '<div class="rv-adm-stars">' + stars + '</div>'
+          + '<div class="rv-adm-meta">' + escHtml(r.user_email) + ' · ' + new Date(r.created_at).toLocaleDateString('ko') + '</div>'
+          + '<div class="rv-adm-body">' + escHtml(r.body || '') + '</div>'
+          + '<img class="rv-adm-receipt" id="rvReceipt_' + escHtml(r.id) + '" src="" onclick="window.open(this.src)" alt="영수증">'
+          + rejectNote
+          + actions
+          + '</div>';
+      }).join('');
+      rows.forEach(function(r) {
+        if (!r.receipt_url) return;
+        var storagePath = r.receipt_url;
+        var match = storagePath.match(/\/receipts\/(.+)$/);
+        if (match) storagePath = match[1];
+        sbClient().storage.from('receipts').createSignedUrl(storagePath, 3600)
+          .then(function(signedRes) {
+            if (signedRes.error || !signedRes.data) return;
+            var img = document.getElementById('rvReceipt_' + r.id);
+            if (img) img.src = signedRes.data.signedUrl;
+          })
+          .catch(function() {});
+      });
+    })
+    .catch(function() {
+      wrap.innerHTML = '<div style="padding:20px;color:#EF4444;font-size:13px">후기를 불러오지 못했어요.</div>';
+    });
+}
+
+function rvAdmApprove(reviewId, userEmail) {
+  sbClient()
+    .from('reviews')
+    .update({ status: 'approved', approved_at: new Date().toISOString() })
+    .eq('id', reviewId)
+    .then(function(res) {
+      if (res.error) { showToast('승인 실패: ' + res.error.message); return; }
+      showToast('승인 완료');
+      rvAdmRenderPage();
+    })
+    .catch(function() { showToast('승인 중 오류가 발생했어요.'); });
+}
+
+function rvAdmReject(reviewId, userEmail) {
+  var sel = document.getElementById('rvRejectReason_' + reviewId);
+  var reason = sel ? sel.value : '영수증 불명확';
+  sbClient()
+    .from('reviews')
+    .update({ status: 'rejected', reject_reason: reason })
+    .eq('id', reviewId)
+    .then(function(res) {
+      if (res.error) { showToast('거부 실패: ' + res.error.message); return; }
+      showToast('거부 처리 완료');
+      rvAdmRenderPage();
+    })
+    .catch(function() { showToast('거부 중 오류가 발생했어요.'); });
+}
+
 function rvLoadSheetReviews(academyId, containerEl) {
   sbClient()
     .from('reviews')
@@ -14160,6 +14278,9 @@ function urToggleNotif(btn) {
     <div class="adm-nav-item" onclick="adminShowPage('stats')">
       <span class="adm-nav-icon">📈</span> 가입 통계
     </div>
+    <div class="adm-nav-item" onclick="adminShowPage('reviews')">
+      <span class="adm-nav-icon">⭐</span> 후기 승인
+    </div>
 
     <div class="adm-sidebar-footer">
       <div class="adm-profile">
@@ -14317,6 +14438,9 @@ function urToggleNotif(btn) {
       <!-- 학원 목록 (KR_SYNC 기반) -->
       <div id="admAcadList" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
+
+    <!-- ⭐ 후기 승인 페이지 -->
+    <div id="admPageReviews" class="adm-page" style="padding:16px;"></div>
 
   </main>
 </div>
