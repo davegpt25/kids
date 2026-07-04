@@ -2834,6 +2834,9 @@
 .ur-ai-hour-btn.active { border-color: #F97316; background: #FFF3EC; color: #F97316; }
 .ur-ai-conflict-warn { background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #DC2626; margin-bottom: 12px; display: none; }
 .ur-ai-conflict-warn.show { display: block; }
+/* 찜하기 */
+.ur-ai-wish-btn { background: none; border: none; cursor: pointer; font-size: 18px; padding: 2px 4px; line-height: 1; flex-shrink: 0; }
+.ur-ai-fchip.wish-active { background: #FEE2E2; color: #EF4444; }
 .ur-ai-reco-pct { font-size: 18px; font-weight: 900; color: var(--primary); }
 .ur-ai-reco-desc { font-size: 12px; color: #9CA3AF; line-height: 1.5; margin-bottom: 10px; }
 .ur-ai-reco-btn {
@@ -11145,6 +11148,24 @@ function urGetSchedule() {
   } catch(e) { return []; }
 }
 function urSaveSchedule(list) { localStorage.setItem('kr_user_schedule', JSON.stringify(list)); }
+
+// ── 찜하기 ──
+function _urWishKey() {
+  var email = _urUser && _urUser.email;
+  return email ? 'kr_wishlist_' + email : 'kr_wishlist';
+}
+function urGetWishlist() { try { return JSON.parse(localStorage.getItem(_urWishKey()) || '[]'); } catch(e) { return []; } }
+function urSaveWishlist(list) { localStorage.setItem(_urWishKey(), JSON.stringify(list)); }
+function urIsWished(id) { return urGetWishlist().indexOf(id) >= 0; }
+function urToggleWish(id, e) {
+  if (e) e.stopPropagation();
+  var list = urGetWishlist();
+  var idx = list.indexOf(id);
+  if (idx >= 0) { list.splice(idx, 1); showToast('찜 목록에서 제거했어요.'); }
+  else { list.push(id); showToast('찜 목록에 추가했어요!'); }
+  urSaveWishlist(list);
+  urRenderAiRecommend();
+}
 // 계정별로 분리 저장 — 과거엔 'kr_children' 단일 키라 한 브라우저에서
 // 다른 계정으로 로그인해도 이전 계정이 등록한 아이가 그대로 보이는 문제가 있었음
 function _urChildrenKey() {
@@ -11597,24 +11618,31 @@ function urRenderAiRecommend() {
     });
   }
 
+  var wishlist = urGetWishlist();
   function cardHtml(a, hasTime) {
     var inSchedule = scheduledIds.indexOf(a.id) >= 0;
+    var wished = wishlist.indexOf(a.id) >= 0;
     var verBadge = a.verified ? '<span class="ur-ai-verified-badge">✓ 원장 인증</span>' : '';
     var timeBadge = hasTime
       ? '<span style="font-size:10px;color:#16A34A;margin-left:5px;font-weight:600">' + a._slots.slice(0,2).map(function(s){ return dayNames[s.day]+' '+s.hour+'시'; }).join(', ') + '</span>'
       : '<span style="font-size:10px;color:#9CA3AF;margin-left:5px;font-weight:400">시간표 미확인</span>';
     var scheduleBadge = inSchedule ? '<span style="font-size:10px;color:#F97316;margin-left:5px;font-weight:700">담김</span>' : '';
-    return '<div class="ur-ai-reco-item' + (!hasTime ? '' : '') + '" onclick="urAiCardTap(' + a.id + ')">'
+    return '<div class="ur-ai-reco-item" onclick="urAiCardTap(' + a.id + ')">'
       + '<div class="ur-ai-reco-top">'
       + '<span class="ur-ai-reco-subj" style="' + (!hasTime ? 'color:#374151' : '') + '">' + _escHtml(a.name) + verBadge + scheduleBadge + '</span>'
-      + '<span style="font-size:11px;color:#D1D5DB">›</span>'
+      + '<button class="ur-ai-wish-btn" onclick="urToggleWish(' + a.id + ',event)" title="찜하기">' + (wished ? '♥' : '♡') + '</button>'
       + '</div>'
       + '<div class="ur-ai-reco-desc">' + (labels[a.subj]||a.subj) + ' · ' + a.dist + 'km' + timeBadge + '</div>'
       + '</div>';
   }
 
-  var filteredTt  = applySort(applyListFilter(timetablePool));
-  var filteredNot = applySort(applyListFilter(noTimetablePool));
+  function applyWishFilter(list) {
+    if (!_urAiShowWishOnly) return list;
+    return list.filter(function(a){ return wishlist.indexOf(a.id) >= 0; });
+  }
+
+  var filteredTt  = applySort(applyListFilter(applyWishFilter(timetablePool)));
+  var filteredNot = applySort(applyListFilter(applyWishFilter(noTimetablePool)));
 
   var timetableHtml = filteredTt.length
     ? '<div class="ur-ai-list-label">시간표 등록 학원 ' + filteredTt.length + '곳</div>'
@@ -11639,21 +11667,29 @@ var _urAiPickerDays = [];      // 시간입력: 선택된 요일 배열
 var _urAiPickerHours = [];     // 시간입력: 선택된 시간 배열
 var _urCustomSlots = {};       // {academyId: [{day,hour}]} — 학부모가 직접 입력한 슬롯
 
-// ── 툴바(과목 필터 + 정렬) 렌더 ──
+// ── 툴바(과목 필터 + 찜 + 정렬) 렌더 ──
+var _urAiShowWishOnly = false;
 function urAiRenderToolbar() {
   var el = document.getElementById('urAiToolbar');
   if (!el) return;
+  var wishCount = urGetWishlist().length;
   var subjs = [{ subj:'all', label:'전체' }].concat(UR_SUBJECT_GRID.map(function(s){ return { subj:s.subj, label:s.label }; }));
   var chips = subjs.map(function(s) {
-    return '<button class="ur-ai-fchip' + (_urAiListFilter===s.subj ? ' active' : '') + '" onclick="urAiSetListFilter(\'' + s.subj + '\')">' + s.label + '</button>';
+    return '<button class="ur-ai-fchip' + (_urAiListFilter===s.subj && !_urAiShowWishOnly ? ' active' : '') + '" onclick="urAiSetListFilter(\'' + s.subj + '\')">' + s.label + '</button>';
   }).join('');
+  var wishChip = '<button class="ur-ai-fchip' + (_urAiShowWishOnly ? ' wish-active' : '') + '" onclick="urAiToggleWishFilter()">♥ 찜' + (wishCount ? ' ' + wishCount : '') + '</button>';
   var divider = '<div class="ur-ai-sort-divider"></div>';
   var sortDist = '<button class="ur-ai-sort-btn' + (_urAiSortBy==='dist' ? ' active' : '') + '" onclick="urAiSetSort(\'dist\')">거리순</button>';
   var sortName = '<button class="ur-ai-sort-btn' + (_urAiSortBy==='name' ? ' active' : '') + '" onclick="urAiSetSort(\'name\')">이름순</button>';
-  el.innerHTML = chips + divider + sortDist + sortName;
+  el.innerHTML = chips + wishChip + divider + sortDist + sortName;
 }
 function urAiSetListFilter(subj) {
   _urAiListFilter = subj;
+  _urAiShowWishOnly = false;
+  urRenderAiRecommend();
+}
+function urAiToggleWishFilter() {
+  _urAiShowWishOnly = !_urAiShowWishOnly;
   urRenderAiRecommend();
 }
 function urAiSetSort(by) {
