@@ -2577,6 +2577,17 @@
 .rv-empty-h { font-size: 15px; font-weight: 700; color: #1A1A1A; margin-bottom: 6px; }
 .rv-empty-sub { font-size: 12px; color: #9CA3AF; line-height: 1.6; margin-bottom: 16px; }
 .rv-demo-badge { display: inline-block; font-size: 9px; background: #F3F4F6; color: #9CA3AF; padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle; }
+/* ── 멤버십 등급 카드 ── */
+.kt-membership-card { margin:0 16px 12px; background:linear-gradient(135deg,#FFF7ED,#FFF3E0); border:1.5px solid #FED7AA; border-radius:16px; padding:16px; }
+.kt-membership-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.kt-membership-icon { font-size:28px; }
+.kt-membership-name { font-size:16px; font-weight:700; color:#1A1A1A; }
+.kt-membership-pts { font-size:13px; color:#F97316; font-weight:600; margin-top:2px; }
+.kt-progress-bar-wrap { background:#FED7AA; border-radius:8px; height:8px; overflow:hidden; margin-bottom:6px; }
+.kt-progress-bar { height:100%; background:linear-gradient(90deg,#F97316,#FB923C); border-radius:8px; transition:width .4s; }
+.kt-progress-label { font-size:12px; color:#9CA3AF; text-align:right; }
+.kt-membership-benefits { margin-top:12px; border-top:1px solid #FED7AA; padding-top:10px; }
+.kt-benefit-row { font-size:13px; color:#374151; margin-bottom:4px; }
 /* ── 키즈톡 서브탭 ── */
 .kt-subtab-bar {
   display: flex;
@@ -13733,8 +13744,38 @@ function urRemoveSchedule(academyId) {
   showToast('스케줄에서 제거했어요!');
 }
 
+function ktRenderMembership() {
+  var wrap = document.getElementById('ktMembershipCard');
+  if (!wrap) return;
+  if (!_urUser) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<div style="color:#9CA3AF;font-size:13px;padding:4px 0">로그인 후 확인할 수 있어요.</div>';
+  ktGetUserPoints(function(total) {
+    var tier = ktGetTier(total);
+    var progressPct = tier.next ? Math.round((total - tier.min) / (tier.next - tier.min) * 100) : 100;
+    var progressLabel = tier.next ? (total - tier.min) + ' / ' + (tier.next - tier.min) + 'pt' : '최고 등급 달성!';
+    var benefits = {
+      '새싹': ['후기 작성 +30pt', 'Q&A 질문 +4pt', 'Q&A 답변 +10pt', 'Q&A 채택 +20pt'],
+      '활동 학부모': ['찜한 학원 새 후기 알림', '내 답변 채택 배지 표시', '모든 새싹 혜택 포함'],
+      '핵심 학부모': ['인증 학부모 골드 배지', '월간 우수 후기 메인 노출', '신규 학원 오픈 정보 사전 알림', '신규 기능 베타 테스터 우선 초대', 'Q&A 채택 답변 상단 자동 고정']
+    };
+    var tierBenefits = benefits[tier.name] || benefits['새싹'];
+    wrap.innerHTML = '<div class="kt-membership-top">'
+      + '<div class="kt-membership-icon">' + tier.icon + '</div>'
+      + '<div><div class="kt-membership-name">' + escHtml(tier.name) + '</div>'
+      + '<div class="kt-membership-pts">' + total + 'pt 보유</div></div>'
+      + '</div>'
+      + (tier.next ? '<div class="kt-progress-bar-wrap"><div class="kt-progress-bar" style="width:' + progressPct + '%"></div></div>'
+          + '<div class="kt-progress-label">' + escHtml(progressLabel) + ' → ' + escHtml(tier.next + 'pt에서 다음 등급') + '</div>'
+        : '<div class="kt-progress-bar-wrap"><div class="kt-progress-bar" style="width:100%"></div></div>'
+          + '<div class="kt-progress-label">최고 등급 달성! 🎉</div>')
+      + '<div class="kt-membership-benefits">'
+      + tierBenefits.map(function(b) { return '<div class="kt-benefit-row">✓ ' + escHtml(b) + '</div>'; }).join('')
+      + '</div>';
+  });
+}
 // ── 내 정보 탭 ──
 function urRenderMyInfo() {
+  ktRenderMembership();
   // 프로필
   var av = document.getElementById('urProfileAvatar');
   var nm = document.getElementById('urProfileName');
@@ -14326,6 +14367,12 @@ function urToggleNotif(btn) {
             <div class="ur-p-email" id="urProfileEmail"></div>
           </div>
         </div>
+      </div>
+
+      <!-- 멤버십 등급 -->
+      <div class="ur-info-section" style="padding-top:0">
+        <div class="ur-section-label">멤버십 등급</div>
+        <div class="kt-membership-card" id="ktMembershipCard"><!-- JS 렌더링 --></div>
       </div>
 
       <!-- 학부모 상세 정보 -->
