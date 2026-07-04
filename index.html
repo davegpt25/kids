@@ -11896,7 +11896,7 @@ function qaRenderFeedRows(rows) {
     var dateStr = (date.getMonth()+1) + '/' + date.getDate();
     var demoMark = r._demo ? '<span class="rv-demo-badge">샘플</span>' : '';
     var ansCount = r._ansCount ? '<span class="qa-ans-count">답변 ' + r._ansCount + '</span>' : '';
-    return '<div class="qa-card" onclick="' + (r._demo ? 'qaOpenDemoDetail(\'' + escHtml(r.id) + '\')' : 'qaOpenDetail(\'' + escHtml(r.id) + '\')') + '">'
+    return '<div class="qa-card" data-qaid="' + escHtml(r.id) + '" data-demo="' + (r._demo ? '1' : '0') + '" onclick="qaCardClick(this)">'
       + '<div class="qa-card-title">' + escHtml(title) + demoMark + '</div>'
       + '<div class="qa-card-body">' + escHtml(body) + '</div>'
       + '<div class="qa-card-meta"><span>' + dateStr + ' · 학부모</span>' + ansCount + '</div>'
@@ -12009,6 +12009,12 @@ function qaAddPoints(pts, reason) {
 var _qaDetailId = null;
 var _qaPostOwner = null;
 
+function qaCardClick(el) {
+  var id = el.getAttribute('data-qaid');
+  var demo = el.getAttribute('data-demo') === '1';
+  if (demo) qaOpenDemoDetail(id);
+  else qaOpenDetail(id);
+}
 function qaOpenDemoDetail(postId) {
   var post = _qaDemoRows.filter(function(r) { return r.id === postId; })[0];
   if (!post) return;
