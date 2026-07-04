@@ -2565,7 +2565,8 @@
 .rv-toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 16px 8px; border-bottom: 1px solid #F3F4F6; }
 .rv-toggle { font-size: 12px; padding: 4px 10px; border-radius: 100px; border: 1px solid #E5E7EB; background: #fff; color: #6B7280; cursor: pointer; transition: background .15s; }
 .rv-toggle.active { background: #FFF3EC; border-color: #F97316; color: #F97316; font-weight: 600; }
-.rv-card { padding: 14px 16px; border-bottom: 1px solid #F3F4F6; display:block; width:100%; text-align:left; background:none; border-left:none; border-right:none; border-top:none; cursor:pointer; font-family:inherit; }
+.rv-card { padding: 14px 16px 0; border-bottom: 1px solid #F3F4F6; display:block; width:100%; text-align:left; background:none; }
+.rv-card-clickable { cursor:pointer; padding-bottom:10px; }
 .rv-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .rv-card-name { font-size: 14px; font-weight: 700; color: #1A1A1A; }
 .rv-stars { color: #F59E0B; font-size: 13px; letter-spacing: 1px; }
@@ -2651,7 +2652,8 @@
 /* ── Q&A 피드 ── */
 .qa-toolbar { display:flex; gap:8px; padding:12px 16px 8px; align-items:center; }
 .qa-ask-btn { margin-left:auto; background:#F97316; color:#fff; border:none; border-radius:20px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; }
-.qa-card { background:#fff; border-radius:14px; margin:0 16px 10px; padding:14px 16px; box-shadow:0 1px 4px rgba(0,0,0,0.07); cursor:pointer; display:block; width:calc(100% - 32px); text-align:left; border:none; font-family:inherit; }
+.qa-card { background:#fff; border-radius:14px; margin:0 16px 10px; padding:14px 16px 0; box-shadow:0 1px 4px rgba(0,0,0,0.07); display:block; width:calc(100% - 32px); text-align:left; overflow:hidden; }
+.qa-card-clickable { cursor:pointer; padding-bottom:10px; }
 .qa-card-title { font-size:14px; font-weight:600; color:#1A1A1A; margin-bottom:4px; }
 .qa-card-body { font-size:13px; color:#6B7280; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .qa-card-meta { font-size:12px; color:#9CA3AF; display:flex; gap:8px; }
@@ -2722,6 +2724,13 @@
 .qa-like-btn.liked { color:#EF4444; }
 .qa-like-btn svg { width:16px; height:16px; flex-shrink:0; }
 .qa-like-btn .lk-label { font-size:12px; }
+/* ── 포스트 액션바 ── */
+.kt-action-bar { display:flex; align-items:center; gap:4px; padding:8px 0 10px; border-top:1px solid #F3F4F6; margin-top:8px; }
+.kt-action-btn { background:none; border:none; display:inline-flex; align-items:center; gap:4px; font-size:13px; color:#9CA3AF; cursor:pointer; font-family:inherit; padding:4px 8px; }
+.kt-action-btn.active { color:#EF4444; }
+.kt-action-btn.bookmarked { color:#F97316; }
+.kt-action-btn svg { width:18px; height:18px; flex-shrink:0; }
+.kt-action-spacer { flex:1; }
 .qa-post-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
 .qa-post-date { font-size:12px; color:#9CA3AF; margin-left:auto; }
 .rv-write-sheet { background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px 32px; width: 100%; max-width: 480px; box-sizing: border-box; }
@@ -11820,6 +11829,72 @@ function relativeDate(dateStr) {
 }
 
 var _likes = (function() { try { return JSON.parse(localStorage.getItem('kids_likes') || '{}'); } catch(e) { return {}; } })();
+var _postLikes = (function() { try { return JSON.parse(localStorage.getItem('kids_plikes') || '{}'); } catch(e) { return {}; } })();
+
+function ktTogglePostLike(id, el) {
+  var key = 'kids_pliked_' + id;
+  var liked = localStorage.getItem(key);
+  if (!_postLikes[id]) _postLikes[id] = 0;
+  if (liked) { _postLikes[id] = Math.max(0, _postLikes[id] - 1); localStorage.removeItem(key); el.classList.remove('active'); }
+  else { _postLikes[id]++; localStorage.setItem(key, '1'); el.classList.add('active'); }
+  var cnt = el.querySelector('.plike-cnt');
+  if (cnt) cnt.textContent = _postLikes[id];
+  var svg = el.querySelector('svg');
+  if (svg) { var on = el.classList.contains('active'); svg.setAttribute('fill', on ? '#EF4444' : 'none'); svg.setAttribute('stroke', on ? '#EF4444' : 'currentColor'); }
+  try { localStorage.setItem('kids_plikes', JSON.stringify(_postLikes)); } catch(e) {}
+}
+function ktToggleBookmark(id, el) {
+  var key = 'kids_bmark_' + id;
+  var saved = localStorage.getItem(key);
+  if (saved) { localStorage.removeItem(key); el.classList.remove('bookmarked'); var sv = el.querySelector('svg'); if(sv) sv.setAttribute('fill','none'); }
+  else { localStorage.setItem(key, '1'); el.classList.add('bookmarked'); var sv = el.querySelector('svg'); if(sv) sv.setAttribute('fill','#F97316'); }
+  showToast(localStorage.getItem(key) ? '북마크에 저장했어요!' : '북마크에서 제거했어요.');
+}
+function ktShare(title) {
+  if (navigator.share) { navigator.share({ title: title, url: location.href }); }
+  else { try { navigator.clipboard.writeText(location.href); showToast('링크가 복사됐어요!'); } catch(e) { showToast('공유하기를 지원하지 않는 환경이에요.'); } }
+}
+function ktPostLikeHtml(id) {
+  var cnt = _postLikes[id] || 0;
+  var liked = localStorage.getItem('kids_pliked_' + id);
+  var cls = liked ? ' active' : '';
+  var fill = liked ? '#EF4444' : 'none'; var strk = liked ? '#EF4444' : 'currentColor';
+  return '<button class="kt-action-btn' + cls + '" onclick="event.stopPropagation();ktTogglePostLike(\'' + escHtml(id) + '\',this)">'
+    + '<svg viewBox="0 0 24 24" fill="' + fill + '" stroke="' + strk + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+    + '<span class="plike-cnt">' + cnt + '</span></button>';
+}
+function ktCommentHtml(cnt) {
+  return '<button class="kt-action-btn" style="cursor:default">'
+    + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+    + '<span>' + (cnt || 0) + '</span></button>';
+}
+function ktShareHtml(title) {
+  return '<button class="kt-action-btn" onclick="event.stopPropagation();ktShare(\'' + escHtml(title) + '\')">'
+    + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>'
+    + '</button>';
+}
+function ktBookmarkHtml(id) {
+  var saved = localStorage.getItem('kids_bmark_' + id);
+  var cls = saved ? ' bookmarked' : '';
+  var fill = saved ? '#F97316' : 'none';
+  return '<button class="kt-action-btn' + cls + '" onclick="event.stopPropagation();ktToggleBookmark(\'' + escHtml(id) + '\',this)">'
+    + '<svg viewBox="0 0 24 24" fill="' + fill + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+    + '</button>';
+}
+function ktQaActionBar(id, ansCount, title) {
+  return '<div class="kt-action-bar" onclick="event.stopPropagation()">'
+    + ktPostLikeHtml(id) + ktCommentHtml(ansCount)
+    + '<div class="kt-action-spacer"></div>'
+    + ktShareHtml(title) + ktBookmarkHtml(id)
+    + '</div>';
+}
+function ktRvActionBar(id, title) {
+  return '<div class="kt-action-bar" onclick="event.stopPropagation()">'
+    + ktPostLikeHtml(id)
+    + '<div class="kt-action-spacer"></div>'
+    + ktShareHtml(title) + ktBookmarkHtml(id)
+    + '</div>';
+}
 function qaToggleLike(id, el) {
   var key = 'kids_liked_' + id;
   var liked = localStorage.getItem(key);
@@ -11924,11 +11999,14 @@ function rvRenderRows(rows) {
       var demoMark = r._acName ? '<span class="rv-demo-badge">샘플</span>' : '';
       var goldBadge = (_ktIsCore && _urUser && r.user_email === _urUser.email) ? '<span class="kt-gold-badge">골드</span>' : '';
       var isDemo = !!r._acName;
-      return '<button type="button" class="rv-card" data-rvid="' + escHtml(r.id) + '" data-demo="' + (isDemo ? '1' : '0') + '" onclick="rvCardClick(this)">'
+      return '<div class="rv-card" data-rvid="' + escHtml(r.id) + '" data-demo="' + (isDemo ? '1' : '0') + '">'
+        + '<div class="rv-card-clickable" onclick="rvCardClick(this.closest(\'.rv-card\'))">'
         + '<div class="rv-card-top"><span class="rv-card-name">' + escHtml(acName) + '</span><span class="rv-stars">' + stars + '</span></div>'
         + '<div class="rv-body">' + escHtml(body).slice(0, 80) + (body.length > 80 ? '...' : '') + '</div>'
         + '<div class="rv-meta"><span>' + escHtml(region) + demoMark + goldBadge + '</span><span>' + dateStr + '</span></div>'
-        + '</button>';
+        + '</div>'
+        + ktRvActionBar(r.id, acName)
+        + '</div>';
     }).join('');
     wrap.innerHTML = toolbar + cards;
   }
@@ -12002,7 +12080,8 @@ function rvRenderDetailBody(r, isDemo) {
     + '</div>'
     + '<div class="rv-detail-ac">' + escHtml(acName) + '</div>'
     + '<div class="rv-detail-stars">' + stars + '</div>'
-    + '<div class="rv-detail-text">' + escHtml(r.body || '') + '</div>';
+    + '<div class="rv-detail-text">' + escHtml(r.body || '') + '</div>'
+    + ktRvActionBar(r.id, acName);
 }
 
 function rvCloseDetail() {
@@ -12116,12 +12195,15 @@ function qaRenderFeedRows(rows) {
     var demoMark = r._demo ? '<span class="rv-demo-badge">샘플</span>' : '';
     var ansCount = r._ansCount ? '<span class="qa-ans-count">답변 ' + r._ansCount + '</span>' : '';
     var authorStr = r._demo ? ((_qaDemoProfiles[r.id] || {}).region || '학부모') : '학부모';
-    return '<button type="button" class="qa-card" data-qaid="' + escHtml(r.id) + '" data-demo="' + (r._demo ? '1' : '0') + '" onclick="qaCardClick(this)">'
+    var ansNum = r._ansCount || 0;
+    return '<div class="qa-card" data-qaid="' + escHtml(r.id) + '" data-demo="' + (r._demo ? '1' : '0') + '">'
+      + '<div class="qa-card-clickable" onclick="qaCardClick(this.closest(\'.qa-card\'))">'
       + '<div class="qa-card-meta" style="margin-bottom:4px"><span style="font-size:12px;color:#6B7280">👤 ' + escHtml(authorStr) + '</span><span style="margin-left:auto;font-size:12px;color:#9CA3AF">' + dateStr + '</span></div>'
       + '<div class="qa-card-title">' + escHtml(title) + demoMark + '</div>'
       + '<div class="qa-card-body">' + escHtml(body) + '</div>'
-      + '<div class="qa-card-meta">' + ansCount + '</div>'
-      + '</button>';
+      + '</div>'
+      + ktQaActionBar(r.id, ansNum, title)
+      + '</div>';
   }).join('');
   wrap.innerHTML = toolbar + cards;
 }
@@ -12267,7 +12349,8 @@ function qaOpenDemoDetail(postId) {
     + '</div>'
     + '<div class="qa-detail-q-title">' + escHtml(post.title) + ' <span class="rv-demo-badge">샘플</span></div>'
     + '<div class="qa-detail-q-body">' + escHtml(post.body) + '</div>'
-    + '<div class="qa-answers-label" style="margin-top:16px">답변 ' + (post._answers || []).length + '개</div>'
+    + ktQaActionBar(post.id, (post._answers || []).length, post.title)
+    + '<div class="qa-answers-label" style="margin-top:4px">답변 ' + (post._answers || []).length + '개</div>'
     + '<div id="qaAnswerList">' + (answers || '<div style="color:#9CA3AF;font-size:13px;padding:8px 0">아직 답변이 없어요.</div>') + '</div>';
   var answerInput = document.getElementById('qaAnswerInput');
   if (answerInput) answerInput.placeholder = '데모 항목에는 답변을 남길 수 없어요';
@@ -12314,7 +12397,8 @@ function qaLoadDetail(postId) {
         + '</div>'
         + '<div class="qa-detail-q-title">' + escHtml(post.title || '') + '</div>'
         + '<div class="qa-detail-q-body">' + escHtml(post.body || '') + '</div>'
-        + '<div class="qa-answers-label" style="margin-top:16px">답변</div>'
+        + ktQaActionBar(post.id, 0, post.title || '')
+        + '<div class="qa-answers-label" style="margin-top:4px">답변</div>'
         + '<div id="qaAnswerList"><div class="rv-empty">불러오는 중...</div></div>';
       qaLoadAnswers(postId);
     })
