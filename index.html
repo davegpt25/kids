@@ -11629,13 +11629,14 @@ function rvLoadSheetReviews(academyId, containerEl) {
         + '<span class="rv-sheet-avg">★ ' + safeAvg.toFixed(1) + '</span>'
         + '</div>';
       var preview = rows.slice(0, 2).map(function(r) {
-        var safeRating = Math.min(5, Math.max(0, r.rating || 0));
+        var safeRating = Math.round(Math.min(5, Math.max(0, r.rating || 0)));
         var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
         var date = new Date(r.created_at);
         var dateStr = (date.getMonth()+1) + '/' + date.getDate();
+        var body = r.body || '';
         return '<div class="rv-sheet-card">'
           + '<div class="rv-sheet-card-stars">' + stars + '</div>'
-          + '<div class="rv-sheet-card-body">' + escHtml(r.body).slice(0, 60) + (r.body.length > 60 ? '...' : '') + '</div>'
+          + '<div class="rv-sheet-card-body">' + escHtml(body).slice(0, 60) + (body.length > 60 ? '...' : '') + '</div>'
           + '<div class="rv-sheet-card-meta">학부모 · ' + dateStr + '</div>'
           + '</div>';
       }).join('');
@@ -11657,13 +11658,13 @@ function rvShowAllSheetReviews(academyId, btn) {
   var rows = containerEl._allRows || [];
   btn.remove();
   var extra = rows.slice(2).map(function(r) {
-    var safeRating = Math.min(5, Math.max(0, r.rating || 0));
+    var safeRating = Math.round(Math.min(5, Math.max(0, r.rating || 0)));
     var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
     var date = new Date(r.created_at);
     var dateStr = (date.getMonth()+1) + '/' + date.getDate();
     return '<div class="rv-sheet-card">'
       + '<div class="rv-sheet-card-stars">' + stars + '</div>'
-      + '<div class="rv-sheet-card-body">' + escHtml(r.body) + '</div>'
+      + '<div class="rv-sheet-card-body">' + escHtml(r.body || '') + '</div>'
       + '<div class="rv-sheet-card-meta">학부모 · ' + dateStr + '</div>'
       + '</div>';
   }).join('');
