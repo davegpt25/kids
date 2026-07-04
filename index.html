@@ -2718,8 +2718,10 @@
 .qa-answer-header { display:flex; align-items:center; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
 .qa-answer-date { font-size:11px; color:#9CA3AF; margin-left:auto; }
 .qa-answer-footer { margin-top:8px; }
-.qa-like-btn { background:none; border:1px solid #E5E7EB; border-radius:20px; padding:4px 12px; font-size:12px; color:#6B7280; cursor:pointer; font-family:inherit; }
-.qa-like-btn.liked { border-color:#F97316; color:#F97316; }
+.qa-like-btn { background:none; border:none; padding:4px 8px; font-size:12px; color:#9CA3AF; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:4px; }
+.qa-like-btn.liked { color:#EF4444; }
+.qa-like-btn svg { width:16px; height:16px; flex-shrink:0; }
+.qa-like-btn .lk-label { font-size:12px; }
 .qa-post-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
 .qa-post-date { font-size:12px; color:#9CA3AF; margin-left:auto; }
 .rv-write-sheet { background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px 32px; width: 100%; max-width: 480px; box-sizing: border-box; }
@@ -11825,12 +11827,25 @@ function qaToggleLike(id, el) {
   else { _likes[id] = (_likes[id] || 0) + 1; localStorage.setItem(key, '1'); el.classList.add('liked'); }
   var cnt = el.querySelector('.lk-cnt');
   if (cnt) cnt.textContent = _likes[id] || 0;
+  var svg = el.querySelector('svg');
+  if (svg) {
+    var nowLiked = el.classList.contains('liked');
+    svg.setAttribute('fill', nowLiked ? '#EF4444' : 'none');
+    svg.setAttribute('stroke', nowLiked ? '#EF4444' : '#9CA3AF');
+  }
   try { localStorage.setItem('kids_likes', JSON.stringify(_likes)); } catch(e) {}
 }
 function qaLikeHtml(id) {
   var cnt = _likes[id] || 0;
-  var liked = localStorage.getItem('kids_liked_' + id) ? ' liked' : '';
-  return '<button class="qa-like-btn' + liked + '" onclick="qaToggleLike(\'' + escHtml(id) + '\',this)">👍 <span class="lk-cnt">' + cnt + '</span></button>';
+  var liked = localStorage.getItem('kids_liked_' + id);
+  var cls = liked ? ' liked' : '';
+  var fill = liked ? '#EF4444' : 'none';
+  var stroke = liked ? '#EF4444' : '#9CA3AF';
+  return '<button class="qa-like-btn' + cls + '" onclick="qaToggleLike(\'' + escHtml(id) + '\',this)">'
+    + '<svg viewBox="0 0 24 24" fill="' + fill + '" stroke="' + stroke + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+    + '<span class="lk-cnt" style="min-width:14px;text-align:left">' + cnt + '</span>'
+    + '<span class="lk-label">좋아요</span>'
+    + '</button>';
 }
 
 var _ktSubtab = 0;
