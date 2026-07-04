@@ -11877,45 +11877,46 @@ function qaRenderFeed() {
   ktCheckCoreStatus(function() { qaLoadFeed(); });
 }
 
+function qaRenderFeedRows(rows) {
+  var wrap = document.getElementById('qaFeedWrap');
+  if (!wrap) return;
+  var toolbar = '<div class="qa-toolbar">'
+    + (_urUser ? '<button class="qa-ask-btn" onclick="qaOpenWrite()">질문하기</button>' : '')
+    + '<button class="rv-toggle' + (_qaDemoMode ? ' active' : '') + '" onclick="qaSetDemoMode(' + (!_qaDemoMode) + ')" style="margin-left:auto">Demo</button>'
+    + '</div>';
+  var displayRows = _qaDemoMode ? _qaDemoRows : rows;
+  if (displayRows.length === 0) {
+    wrap.innerHTML = toolbar + '<div class="rv-empty"><div class="rv-empty-h">첫 질문을 남겨보세요</div><div class="rv-empty-sub">학부모끼리 학원 정보를<br>나눠요</div></div>';
+    return;
+  }
+  var cards = displayRows.map(function(r) {
+    var title = r.title || '';
+    var body = r.body || '';
+    var date = new Date(r.created_at);
+    var dateStr = (date.getMonth()+1) + '/' + date.getDate();
+    var demoMark = r._demo ? '<span class="rv-demo-badge">샘플</span>' : '';
+    var ansCount = r._ansCount ? '<span class="qa-ans-count">답변 ' + r._ansCount + '</span>' : '';
+    return '<div class="qa-card" onclick="' + (r._demo ? 'qaOpenDemoDetail(\'' + escHtml(r.id) + '\')' : 'qaOpenDetail(\'' + escHtml(r.id) + '\')') + '">'
+      + '<div class="qa-card-title">' + escHtml(title) + demoMark + '</div>'
+      + '<div class="qa-card-body">' + escHtml(body) + '</div>'
+      + '<div class="qa-card-meta"><span>' + dateStr + ' · 학부모</span>' + ansCount + '</div>'
+      + '</div>';
+  }).join('');
+  wrap.innerHTML = toolbar + cards;
+}
+
 function qaLoadFeed() {
+  if (_qaDemoMode) { qaRenderFeedRows([]); return; }
   sbClient()
     .from('qa_posts')
     .select('id, title, body, user_email, created_at')
     .order('created_at', { ascending: false })
     .limit(50)
     .then(function(res) {
-      var wrap = document.getElementById('qaFeedWrap');
-      if (!wrap) return;
-      if (res.error) { wrap.innerHTML = '<div class="rv-empty">Q&A를 불러오지 못했어요.</div>'; return; }
-      var rows = res.data || [];
-      var toolbar = '<div class="qa-toolbar">'
-        + (_urUser ? '<button class="qa-ask-btn" onclick="qaOpenWrite()">질문하기</button>' : '')
-        + '<button class="rv-toggle' + (_qaDemoMode ? ' active' : '') + '" onclick="qaSetDemoMode(' + (!_qaDemoMode) + ')" style="margin-left:auto">Demo</button>'
-        + '</div>';
-      var displayRows = _qaDemoMode ? _qaDemoRows : rows;
-      if (displayRows.length === 0) {
-        wrap.innerHTML = toolbar + '<div class="rv-empty"><div class="rv-empty-h">첫 질문을 남겨보세요</div><div class="rv-empty-sub">학부모끼리 학원 정보를<br>나눠요</div></div>';
-        return;
-      }
-      var cards = displayRows.map(function(r) {
-        var title = r.title || '';
-        var body = r.body || '';
-        var date = new Date(r.created_at);
-        var dateStr = (date.getMonth()+1) + '/' + date.getDate();
-        var demoMark = r._demo ? '<span class="rv-demo-badge">샘플</span>' : '';
-        var ansCount = r._ansCount ? '<span class="qa-ans-count">답변 ' + r._ansCount + '</span>' : '';
-        return '<div class="qa-card" onclick="' + (r._demo ? 'qaOpenDemoDetail(\'' + escHtml(r.id) + '\')' : 'qaOpenDetail(\'' + escHtml(r.id) + '\')') + '">'
-          + '<div class="qa-card-title">' + escHtml(title) + demoMark + '</div>'
-          + '<div class="qa-card-body">' + escHtml(body) + '</div>'
-          + '<div class="qa-card-meta"><span>' + dateStr + ' · 학부모</span>' + ansCount + '</div>'
-          + '</div>';
-      }).join('');
-      wrap.innerHTML = toolbar + cards;
+      if (res.error) { qaRenderFeedRows([]); return; }
+      qaRenderFeedRows(res.data || []);
     })
-    .catch(function() {
-      var wrap = document.getElementById('qaFeedWrap');
-      if (wrap) wrap.innerHTML = '<div class="rv-empty">Q&A를 불러오지 못했어요.</div>';
-    });
+    .catch(function() { qaRenderFeedRows([]); });
 }
 
 var _qaDemoMode = false;
