@@ -2671,6 +2671,31 @@
 /* Q&A 상세 오버레이 */
 .qa-detail-overlay { display:none; position:fixed; inset:0; z-index:8400; background:#fff; overflow-y:auto; flex-direction:column; }
 .qa-detail-overlay.open { display:flex; }
+/* 후기 상세 오버레이 */
+.rv-detail-overlay { display:none; position:fixed; inset:0; z-index:8400; background:#fff; overflow-y:auto; flex-direction:column; }
+.rv-detail-overlay.open { display:flex; }
+.rv-detail-header { display:flex; align-items:center; gap:10px; padding:16px; border-bottom:1px solid #F3F4F6; position:sticky; top:0; background:#fff; z-index:1; }
+.rv-detail-back { background:none; border:none; font-size:22px; cursor:pointer; color:#374151; padding:0 4px; }
+.rv-detail-body { padding:16px; flex:1; }
+.rv-detail-ac { font-size:18px; font-weight:700; color:#1A1A1A; margin-bottom:4px; }
+.rv-detail-stars { font-size:18px; color:#F59E0B; margin-bottom:12px; }
+.rv-detail-text { font-size:15px; color:#374151; line-height:1.7; margin-bottom:16px; }
+.rv-detail-date { font-size:12px; color:#9CA3AF; }
+.rv-detail-author { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; background:#F9FAFB; border-radius:20px; cursor:pointer; border:none; font-size:13px; color:#374151; margin-bottom:16px; }
+.rv-detail-author:active { background:#F3F4F6; }
+/* 유저 프로필 미니 패널 */
+.rv-user-panel { display:none; position:fixed; inset:0; z-index:8500; align-items:flex-end; background:rgba(0,0,0,0.35); }
+.rv-user-panel.open { display:flex; }
+.rv-user-sheet { background:#fff; border-radius:20px 20px 0 0; padding:20px 20px 32px; width:100%; max-width:480px; margin:0 auto; animation:slideUp 0.2s ease; }
+.rv-user-sheet-handle { width:40px; height:4px; background:#E5E7EB; border-radius:2px; margin:0 auto 16px; }
+.rv-user-tier { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+.rv-user-tier-icon { font-size:28px; }
+.rv-user-tier-name { font-size:16px; font-weight:700; color:#1A1A1A; }
+.rv-user-tier-badge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:#FEF3C7; color:#92400E; }
+.rv-user-stats { display:flex; gap:0; border-top:1px solid #F3F4F6; padding-top:16px; }
+.rv-user-stat { flex:1; text-align:center; }
+.rv-user-stat-num { font-size:22px; font-weight:700; color:#1A1A1A; }
+.rv-user-stat-label { font-size:11px; color:#9CA3AF; margin-top:2px; }
 .qa-detail-header { display:flex; align-items:center; gap:10px; padding:16px; border-bottom:1px solid #F3F4F6; position:sticky; top:0; background:#fff; z-index:1; }
 .qa-detail-back { background:none; border:none; font-size:22px; cursor:pointer; color:#374151; padding:0 4px; }
 .qa-detail-body { padding:16px; flex:1; }
@@ -11843,7 +11868,8 @@ function rvLoadFeed() {
         var dateStr = (date.getMonth()+1) + '/' + date.getDate();
         var demoMark = r._acName ? '<span class="rv-demo-badge">샘플</span>' : '';
         var goldBadge = (_ktIsCore && _urUser && r.user_email === _urUser.email) ? '<span class="kt-gold-badge">골드</span>' : '';
-        return '<div class="rv-card">'
+        var isDemo = !!r._acName;
+        return '<div class="rv-card" data-rvid="' + escHtml(r.id) + '" data-demo="' + (isDemo ? '1' : '0') + '" onclick="rvCardClick(this)" style="cursor:pointer">'
           + '<div class="rv-card-top"><span class="rv-card-name">' + escHtml(acName) + '</span><span class="rv-stars">' + stars + '</span></div>'
           + '<div class="rv-body">' + escHtml(body).slice(0, 80) + (body.length > 80 ? '...' : '') + '</div>'
           + '<div class="rv-meta"><span>' + escHtml(region) + demoMark + goldBadge + '</span><span>' + dateStr + '</span></div>'
@@ -11868,6 +11894,116 @@ function rvSetWishFilter(wishOnly) {
 function rvSetDemoMode(on) {
   _rvDemoMode = !!on;
   rvLoadFeed();
+}
+
+function rvCardClick(el) {
+  var id = el.getAttribute('data-rvid');
+  var demo = el.getAttribute('data-demo') === '1';
+  if (demo) rvOpenDemoDetail(id);
+  else rvOpenDetail(id);
+}
+
+function rvOpenDetail(reviewId) {
+  var overlay = document.getElementById('rvDetailOverlay');
+  if (!overlay) return;
+  overlay.classList.add('open');
+  var body = document.getElementById('rvDetailBody');
+  if (body) body.innerHTML = '<div class="rv-empty">불러오는 중...</div>';
+  sbClient()
+    .from('reviews')
+    .select('id, academy_id, rating, body, created_at, academy_region, user_email')
+    .eq('id', reviewId)
+    .single()
+    .then(function(res) {
+      if (res.error || !res.data) return;
+      rvRenderDetailBody(res.data, false);
+    })
+    .catch(function() {});
+}
+
+function rvOpenDemoDetail(reviewId) {
+  var row = _rvDemoRows.filter(function(r) { return r.id === reviewId; })[0];
+  if (!row) return;
+  var overlay = document.getElementById('rvDetailOverlay');
+  if (!overlay) return;
+  overlay.classList.add('open');
+  rvRenderDetailBody(row, true);
+}
+
+function rvRenderDetailBody(r, isDemo) {
+  var body = document.getElementById('rvDetailBody');
+  if (!body) return;
+  var acs = window.KR_SYNC ? KR_SYNC.getMergedAcademies() : (window.UR_ACADEMIES || []);
+  var acName = r._acName || (function() { var ac = acs.find(function(a) { return a.id === r.academy_id; }); return ac ? ac.name : '학원 #' + r.academy_id; })();
+  var region = r._region || (r.academy_region ? r.academy_region + ' 학부모' : '학부모');
+  var safeRating = Math.round(Math.min(5, Math.max(0, r.rating || 0)));
+  var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
+  var date = new Date(r.created_at);
+  var dateStr = (date.getMonth()+1) + '/' + date.getDate();
+  var demoNote = isDemo ? '<div style="font-size:11px;color:#F97316;margin-bottom:12px">샘플 후기입니다</div>' : '';
+  var authorAttr = isDemo ? '' : ' data-email="' + escHtml(r.user_email || '') + '" data-region="' + escHtml(region) + '"';
+  body.innerHTML = demoNote
+    + '<div class="rv-detail-ac">' + escHtml(acName) + '</div>'
+    + '<div class="rv-detail-stars">' + stars + '</div>'
+    + '<div class="rv-detail-text">' + escHtml(r.body || '') + '</div>'
+    + '<button class="rv-detail-author"' + authorAttr + ' onclick="' + (isDemo ? 'void(0)' : 'rvOpenUserPanel(this)') + '">'
+    + '👤 ' + escHtml(region) + '</button>'
+    + '<div class="rv-detail-date">' + dateStr + '</div>';
+}
+
+function rvCloseDetail() {
+  var overlay = document.getElementById('rvDetailOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function rvOpenUserPanel(el) {
+  var email = el.getAttribute('data-email');
+  var region = el.getAttribute('data-region') || '학부모';
+  var panel = document.getElementById('rvUserPanel');
+  var panelBody = document.getElementById('rvUserPanelBody');
+  if (!panel || !panelBody) return;
+  panelBody.innerHTML = '<div style="color:#9CA3AF;font-size:13px;padding:8px 0">불러오는 중...</div>';
+  panel.classList.add('open');
+  if (!email) { rvRenderUserPanel(panelBody, region, null, 0, 0, 0); return; }
+  var reviewCount = 0, answerCount = 0, adoptedCount = 0;
+  var done = 0;
+  function check() { done++; if (done === 3) rvFetchUserTierAndRender(panelBody, email, region, reviewCount, answerCount, adoptedCount); }
+  sbClient().from('reviews').select('id', { count: 'exact', head: true }).eq('user_email', email).eq('status', 'approved')
+    .then(function(r) { reviewCount = r.count || 0; check(); }).catch(function() { check(); });
+  sbClient().from('qa_answers').select('id', { count: 'exact', head: true }).eq('user_email', email)
+    .then(function(r) { answerCount = r.count || 0; check(); }).catch(function() { check(); });
+  sbClient().from('qa_answers').select('id', { count: 'exact', head: true }).eq('user_email', email).eq('is_adopted', true)
+    .then(function(r) { adoptedCount = r.count || 0; check(); }).catch(function() { check(); });
+}
+
+function rvFetchUserTierAndRender(panelBody, email, region, reviewCount, answerCount, adoptedCount) {
+  sbClient().from('user_points').select('points').eq('user_email', email)
+    .then(function(res) {
+      var total = (res.data || []).reduce(function(s, r) { return s + (r.points || 0); }, 0);
+      var tier = ktGetTier(total);
+      rvRenderUserPanel(panelBody, region, tier, reviewCount, answerCount, adoptedCount);
+    })
+    .catch(function() { rvRenderUserPanel(panelBody, region, null, reviewCount, answerCount, adoptedCount); });
+}
+
+function rvRenderUserPanel(panelBody, region, tier, reviewCount, answerCount, adoptedCount) {
+  var tierInfo = tier || { name: '새싹', icon: '🌱' };
+  panelBody.innerHTML = '<div class="rv-user-tier">'
+    + '<span class="rv-user-tier-icon">' + tierInfo.icon + '</span>'
+    + '<div>'
+    + '<div class="rv-user-tier-name">' + escHtml(region) + '</div>'
+    + '<span class="rv-user-tier-badge">' + escHtml(tierInfo.name) + '</span>'
+    + '</div></div>'
+    + '<div class="rv-user-stats">'
+    + '<div class="rv-user-stat"><div class="rv-user-stat-num">' + reviewCount + '</div><div class="rv-user-stat-label">작성 후기</div></div>'
+    + '<div class="rv-user-stat"><div class="rv-user-stat-num">' + answerCount + '</div><div class="rv-user-stat-label">Q&amp;A 답변</div></div>'
+    + '<div class="rv-user-stat"><div class="rv-user-stat-num">' + adoptedCount + '</div><div class="rv-user-stat-label">채택된 답변</div></div>'
+    + '</div>';
+}
+
+function rvCloseUserPanel() {
+  var panel = document.getElementById('rvUserPanel');
+  if (panel) panel.classList.remove('open');
 }
 
 function qaRenderFeed() {
@@ -15827,6 +15963,21 @@ function krapSaveVis() {
 </div>
 
 <!-- Q&A 상세 (질문+답변) -->
+<!-- 후기 상세 전체화면 -->
+<div class="rv-detail-overlay" id="rvDetailOverlay">
+  <div class="rv-detail-header">
+    <button class="rv-detail-back" onclick="rvCloseDetail()">&#8592;</button>
+    <span style="font-size:16px;font-weight:700">후기</span>
+  </div>
+  <div class="rv-detail-body" id="rvDetailBody"></div>
+</div>
+<!-- 유저 프로필 미니 패널 -->
+<div class="rv-user-panel" id="rvUserPanel" onclick="if(event.target===this)rvCloseUserPanel()">
+  <div class="rv-user-sheet">
+    <div class="rv-user-sheet-handle"></div>
+    <div id="rvUserPanelBody"></div>
+  </div>
+</div>
 <div class="qa-detail-overlay" id="qaDetailOverlay">
   <div class="qa-detail-header">
     <button class="qa-detail-back" onclick="qaCloseDetail()">&#8592;</button>
