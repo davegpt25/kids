@@ -11941,12 +11941,15 @@ function rvRenderDetailBody(r, isDemo) {
   var date = new Date(r.created_at);
   var dateStr = (date.getMonth()+1) + '/' + date.getDate();
   var demoNote = isDemo ? '<div style="font-size:11px;color:#F97316;margin-bottom:12px">샘플 후기입니다</div>' : '';
-  var authorAttr = isDemo ? '' : ' data-email="' + escHtml(r.user_email || '') + '" data-region="' + escHtml(region) + '"';
+  var authorOnclick = isDemo ? 'rvOpenDemoUserPanel(this)' : 'rvOpenUserPanel(this)';
+  var authorAttr = isDemo
+    ? ' data-region="' + escHtml(region) + '" data-demo-rv="' + escHtml(r.id) + '"'
+    : ' data-email="' + escHtml(r.user_email || '') + '" data-region="' + escHtml(region) + '"';
   body.innerHTML = demoNote
     + '<div class="rv-detail-ac">' + escHtml(acName) + '</div>'
     + '<div class="rv-detail-stars">' + stars + '</div>'
     + '<div class="rv-detail-text">' + escHtml(r.body || '') + '</div>'
-    + '<button class="rv-detail-author"' + authorAttr + ' onclick="' + (isDemo ? 'void(0)' : 'rvOpenUserPanel(this)') + '">'
+    + '<button class="rv-detail-author"' + authorAttr + ' onclick="' + authorOnclick + '">'
     + '👤 ' + escHtml(region) + '</button>'
     + '<div class="rv-detail-date">' + dateStr + '</div>';
 }
@@ -12004,6 +12007,36 @@ function rvRenderUserPanel(panelBody, region, tier, reviewCount, answerCount, ad
 function rvCloseUserPanel() {
   var panel = document.getElementById('rvUserPanel');
   if (panel) panel.classList.remove('open');
+}
+
+/* 데모용 샘플 활동 프로필 (리뷰ID별 미리 정의) */
+var _rvDemoProfiles = {
+  'demo1': { region: '강남구 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 7, answers: 12, adopted: 4 },
+  'demo2': { region: '서초구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 3, answers: 8,  adopted: 2 },
+  'demo3': { region: '송파구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 5, answers: 5,  adopted: 1 }
+};
+var _qaDemoProfiles = {
+  'qdemo1': { region: '강남구 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 6, answers: 15, adopted: 5 },
+  'qdemo2': { region: '노원구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 9,  adopted: 3 },
+  'qdemo3': { region: '마포구 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 1, answers: 3,  adopted: 0 },
+  'qa1-1':  { region: '대치동 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 4, answers: 21, adopted: 7 },
+  'qa1-2':  { region: '강남구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 6,  adopted: 1 },
+  'qa1-3':  { region: '서초구 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 0, answers: 2,  adopted: 0 },
+  'qa2-1':  { region: '송파구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 3, answers: 11, adopted: 4 },
+  'qa2-2':  { region: '강동구 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 1, answers: 4,  adopted: 0 },
+  'qa3-1':  { region: '노원구 학부모', tier: { name: '핵심 학부모', icon: '🏆' }, reviews: 8, answers: 18, adopted: 6 },
+  'qa3-2':  { region: '마포구 학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 2, answers: 7,  adopted: 2 },
+  'qa3-3':  { region: '은평구 학부모', tier: { name: '새싹',        icon: '🌱' }, reviews: 0, answers: 1,  adopted: 0 }
+};
+
+function rvOpenDemoUserPanel(el) {
+  var demoId = el.getAttribute('data-demo-rv') || el.getAttribute('data-demo-qa');
+  var profile = _rvDemoProfiles[demoId] || _qaDemoProfiles[demoId] || { region: el.getAttribute('data-region') || '학부모', tier: { name: '활동 학부모', icon: '⭐' }, reviews: 3, answers: 8, adopted: 2 };
+  var panel = document.getElementById('rvUserPanel');
+  var panelBody = document.getElementById('rvUserPanelBody');
+  if (!panel || !panelBody) return;
+  panel.classList.add('open');
+  rvRenderUserPanel(panelBody, profile.region, profile.tier, profile.reviews, profile.answers, profile.adopted);
 }
 
 function qaRenderFeed() {
@@ -12163,18 +12196,25 @@ function qaOpenDemoDetail(postId) {
   if (!detailBody) return;
   var date = new Date(post.created_at);
   var dateStr = (date.getMonth()+1) + '/' + date.getDate();
+  var postProfile = _qaDemoProfiles[post.id] || { region: '학부모', tier: { name: '활동 학부모', icon: '⭐' } };
   var answers = (post._answers || []).map(function(a) {
     var aDate = new Date(a.created_at);
     var aDateStr = (aDate.getMonth()+1) + '/' + aDate.getDate();
     var adoptedBadge = a.is_adopted ? '<span class="qa-adopted-badge">✓ 채택</span>' : '';
+    var aRegion = (_qaDemoProfiles[a.id] || {}).region || '학부모';
     return '<div class="qa-answer-card' + (a.is_adopted ? ' adopted' : '') + '">'
       + '<div class="qa-answer-body">' + escHtml(a.body) + '</div>'
-      + '<div class="qa-answer-meta"><span>' + aDateStr + ' · 학부모</span>' + adoptedBadge + '</div>'
+      + '<div class="qa-answer-meta">'
+      + '<button class="rv-detail-author" data-demo-qa="' + escHtml(a.id) + '" data-region="' + escHtml(aRegion) + '" onclick="rvOpenDemoUserPanel(this)" style="font-size:11px;padding:3px 8px">👤 ' + escHtml(aRegion) + '</button>'
+      + '<span style="color:#9CA3AF;font-size:11px;margin-left:6px">' + aDateStr + '</span>'
+      + adoptedBadge + '</div>'
       + '</div>';
   }).join('');
   detailBody.innerHTML = '<div class="qa-detail-q-title">' + escHtml(post.title) + ' <span class="rv-demo-badge">샘플</span></div>'
     + '<div class="qa-detail-q-body">' + escHtml(post.body) + '</div>'
-    + '<div class="qa-detail-meta">' + dateStr + ' · 학부모</div>'
+    + '<div class="qa-detail-meta" style="display:flex;align-items:center;gap:8px;margin-bottom:16px">'
+    + '<button class="rv-detail-author" data-demo-qa="' + escHtml(post.id) + '" data-region="' + escHtml(postProfile.region) + '" onclick="rvOpenDemoUserPanel(this)" style="font-size:12px;padding:4px 10px">👤 ' + escHtml(postProfile.region) + '</button>'
+    + '<span style="color:#9CA3AF;font-size:12px">' + dateStr + '</span></div>'
     + '<div class="qa-answers-label">답변 ' + (post._answers || []).length + '개</div>'
     + '<div id="qaAnswerList">' + (answers || '<div style="color:#9CA3AF;font-size:13px;padding:8px 0">아직 답변이 없어요.</div>') + '</div>';
   var answerInput = document.getElementById('qaAnswerInput');
@@ -12219,7 +12259,9 @@ function qaLoadDetail(postId) {
       var dateStr = (date.getMonth()+1) + '/' + date.getDate();
       detailBody.innerHTML = '<div class="qa-detail-q-title">' + escHtml(post.title || '') + '</div>'
         + '<div class="qa-detail-q-body">' + escHtml(post.body || '') + '</div>'
-        + '<div class="qa-detail-meta">' + dateStr + ' · 학부모</div>'
+        + '<div class="qa-detail-meta" style="display:flex;align-items:center;gap:8px;margin-bottom:16px">'
+        + '<button class="rv-detail-author" data-email="' + escHtml(post.user_email || '') + '" data-region="학부모" onclick="rvOpenUserPanel(this)" style="font-size:12px;padding:4px 10px">👤 학부모</button>'
+        + '<span style="color:#9CA3AF;font-size:12px">' + dateStr + '</span></div>'
         + '<div class="qa-answers-label">답변</div>'
         + '<div id="qaAnswerList"><div class="rv-empty">불러오는 중...</div></div>';
       qaLoadAnswers(postId);
@@ -12252,7 +12294,10 @@ function qaLoadAnswers(postId) {
         var goldBadge = (_ktIsCore && _urUser && a.user_email === _urUser.email) ? '<span class="kt-gold-badge">골드</span>' : '';
         return '<div class="qa-answer-card' + (a.is_adopted ? ' adopted' : '') + '">'
           + '<div class="qa-answer-body">' + escHtml(body) + '</div>'
-          + '<div class="qa-answer-meta"><span>' + dateStr + ' · 학부모' + goldBadge + '</span>' + adoptedBadge + adoptBtn + '</div>'
+          + '<div class="qa-answer-meta">'
+          + '<button class="rv-detail-author" data-email="' + escHtml(a.user_email || '') + '" data-region="학부모" onclick="rvOpenUserPanel(this)" style="font-size:11px;padding:3px 8px">👤 학부모' + goldBadge + '</button>'
+          + '<span style="color:#9CA3AF;font-size:11px;margin-left:6px">' + dateStr + '</span>'
+          + adoptedBadge + adoptBtn + '</div>'
           + '</div>';
       }).join('');
     })
