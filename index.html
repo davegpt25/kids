@@ -11622,7 +11622,7 @@ function rvRenderFeed() {
 function rvLoadFeed() {
   var query = sbClient()
     .from('reviews')
-    .select('id, academy_id, rating, body, created_at')
+    .select('id, academy_id, rating, body, created_at, academy_region')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
     .limit(50);
@@ -11656,7 +11656,7 @@ function rvLoadFeed() {
       var acs = window.KR_SYNC ? KR_SYNC.getMergedAcademies() : (window.UR_ACADEMIES || []);
       var cards = displayRows.map(function(r) {
         var acName = r._acName || (function() { var ac = acs.find(function(a) { return a.id === r.academy_id; }); return ac ? ac.name : '학원 #' + r.academy_id; })();
-        var region = r._region || '학부모';
+        var region = r._region || (r.academy_region ? r.academy_region + ' 학부모' : '학부모');
         var safeRating = Math.round(Math.min(5, Math.max(0, r.rating || 0)));
         var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
         var body = r.body || '';
@@ -11799,6 +11799,7 @@ function rvSubmit() {
         rating: _rvRating,
         body: body,
         receipt_url: receiptUrl,
+        academy_region: (function() { var acs = window.KR_SYNC ? KR_SYNC.getMergedAcademies() : (window.UR_ACADEMIES || []); var ac = acs.find(function(a) { return a.id === _rvWriteAcId; }); return ac && ac.address ? ac.address.match(/([가-힣]+구)/) && ac.address.match(/([가-힣]+구)/)[1] : null; })(),
         status: 'pending'
       });
     })
