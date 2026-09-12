@@ -3242,6 +3242,34 @@
   font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px;
   background: #FEF3C7; color: #92400E; border: none; cursor: pointer;
 }
+/* ── 일정표 뷰 토글 ── */
+.ur-view-toggle-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 100px;
+  background: #F3F4F6; border: none; cursor: pointer; color: #6B7280;
+  transition: background 0.15s, color 0.15s; flex-shrink: 0;
+}
+.ur-view-toggle-btn.active { background: #FFF7ED; color: #F97316; }
+/* ── 일정표 타임라인 뷰 ── */
+.ur-timeline-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px 4px; }
+.ur-timeline-header-title { font-size: 16px; font-weight: 700; color: #111827; flex: 1; }
+.ur-timeline-wrap { padding: 0 16px 32px; }
+.ur-timeline-month { font-size: 12px; font-weight: 700; color: #9CA3AF; padding: 18px 0 6px; letter-spacing: 0.3px; }
+.ur-timeline-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid #F3F4F6;
+}
+.ur-timeline-item:last-child { border-bottom: none; }
+.ur-timeline-item.tl-today { background: #FFF7ED; border-radius: 14px; padding: 14px 12px; margin: 2px -12px; border-bottom: none; }
+.ur-tl-date-col { width: 44px; flex-shrink: 0; text-align: center; }
+.ur-tl-day-num { font-size: 28px; font-weight: 800; color: #111827; line-height: 1; }
+.ur-tl-day-num.tl-today { color: #F97316; }
+.ur-tl-day-name { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+.ur-tl-bar { width: 3px; border-radius: 2px; flex-shrink: 0; align-self: stretch; min-height: 40px; }
+.ur-tl-content { flex: 1; min-width: 0; }
+.ur-tl-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 3px; }
+.ur-tl-sub { font-size: 12px; color: #6B7280; }
+.ur-tl-sub-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
 .ur-journey-hint { font-size: 11px; color: #9CA3AF; margin-bottom: 12px; line-height: 1.5; }
 .ur-journey-track {
   display: flex; align-items: flex-start; overflow-x: auto;
@@ -14226,6 +14254,112 @@ function urRenderSchedule() {
       + '</div>';
   }).join('');
 }
+// ── 일정표 뷰 토글 ────────────────────────────────────────
+var _urSchedViewMode = 'week';
+
+function urToggleSchedView() {
+  _urSchedViewMode = _urSchedViewMode === 'week' ? 'timeline' : 'week';
+  var weekView = document.getElementById('urSchedWeekView');
+  var tlView   = document.getElementById('urSchedTimelineView');
+  var btn      = document.getElementById('urSchedViewBtn');
+  var title    = document.getElementById('urSchedHeaderTitle');
+  if (_urSchedViewMode === 'timeline') {
+    if (weekView) weekView.style.display = 'none';
+    if (tlView)   tlView.style.display = 'block';
+    if (btn)      btn.classList.add('active');
+    if (title)    title.textContent = '일정표';
+    urRenderTimeline();
+  } else {
+    if (weekView) weekView.style.display = 'block';
+    if (tlView)   tlView.style.display = 'none';
+    if (btn)      btn.classList.remove('active');
+    if (title)    title.textContent = '스케줄';
+    urRenderSchedule();
+  }
+}
+
+function urParseTimeDays(t) {
+  if (!t) return [];
+  if (t.indexOf('월화수목금') >= 0) return [1,2,3,4,5];
+  if (t.indexOf('월수금') >= 0)     return [1,3,5];
+  if (t.indexOf('화목') >= 0)       return [2,4];
+  if (t.indexOf('주말') >= 0)       return [6,0];
+  // 단독 요일
+  var map = {'월':1,'화':2,'수':3,'목':4,'금':5,'토':6,'일':0};
+  var days = [];
+  for (var k in map) { if (t.indexOf(k) >= 0) days.push(map[k]); }
+  return days.length ? days : [1,3,5]; // fallback
+}
+
+function urParseTimeLabel(t) {
+  if (!t) return '';
+  return t.replace(/월화수목금|월수금|화목|주말반|주말오전|주말/g,'').trim();
+}
+
+function urRenderTimeline() {
+  var wrap = document.getElementById('urTimelineContent');
+  if (!wrap) return;
+  var schedule = urGetSchedule();
+  if (!schedule.length) {
+    wrap.innerHTML = '<div class="ur-empty" style="padding:40px 16px"><div class="ur-empty-icon">📅</div>아직 등록된 학원이 없어요.<br>학원 검색에서 추가해보세요!</div>';
+    return;
+  }
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var dayNames = ['일','월','화','수','목','금','토'];
+  var events = [];
+
+  schedule.forEach(function(s) {
+    var times = (s.times && s.times.length) ? s.times : ['오후4시'];
+    times.forEach(function(t) {
+      var days = urParseTimeDays(t);
+      var label = urParseTimeLabel(t);
+      for (var i = 0; i < 45; i++) {
+        var d = new Date(today); d.setDate(today.getDate() + i);
+        if (days.indexOf(d.getDay()) >= 0) {
+          events.push({ date: new Date(d), name: s.name, label: s.label || '', color: s.color || '#F97316', timeLabel: label });
+        }
+      }
+    });
+  });
+
+  events.sort(function(a, b) { return a.date - b.date; });
+
+  // Group by month
+  var months = [], monthMap = {};
+  events.forEach(function(e) {
+    var key = e.date.getFullYear() + '년 ' + (e.date.getMonth()+1) + '월';
+    if (!monthMap[key]) { monthMap[key] = []; months.push(key); }
+    monthMap[key].push(e);
+  });
+
+  var html = '<div class="ur-timeline-wrap">';
+  months.forEach(function(month) {
+    html += '<div class="ur-timeline-month">' + month + '</div>';
+    var todayStr = today.toDateString();
+    monthMap[month].forEach(function(e) {
+      var isToday = e.date.toDateString() === todayStr;
+      var dayNum = e.date.getDate();
+      var dayName = dayNames[e.date.getDay()];
+      html += '<div class="ur-timeline-item' + (isToday ? ' tl-today' : '') + '">'
+        + '<div class="ur-tl-date-col">'
+        +   '<div class="ur-tl-day-num' + (isToday ? ' tl-today' : '') + '">' + dayNum + '</div>'
+        +   '<div class="ur-tl-day-name">' + dayName + '요일</div>'
+        + '</div>'
+        + '<div class="ur-tl-bar" style="background:' + e.color + '"></div>'
+        + '<div class="ur-tl-content">'
+        +   '<div class="ur-tl-title">' + _escHtml(e.name) + '</div>'
+        +   '<div class="ur-tl-sub-row">'
+        +     '<span class="ur-tl-sub">' + _escHtml(e.label) + (e.timeLabel ? ' · ' + _escHtml(e.timeLabel) : '') + '</span>'
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    });
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
 // ── 🔔 하원 알림 — 여정 라인 + 학원별 푸시 토글 ──────────
 function urGetPushPrefs() {
   try { return JSON.parse(localStorage.getItem('kr_push_prefs') || '{}'); } catch(e) { return {}; }
@@ -14911,33 +15045,45 @@ window.addEventListener('DOMContentLoaded', function() {
     <!-- ── 스케줄 탭 ── -->
     <div class="ur-page" id="urPageSchedule">
       <div class="ur-sched-header">
-        <div class="ur-sched-title">스케줄</div>
-        <div style="display:flex;gap:8px;">
+        <div class="ur-sched-title" id="urSchedHeaderTitle">스케줄</div>
+        <div style="display:flex;gap:8px;align-items:center;">
           <button class="ur-share-btn" onclick="openShareCard()">🔗 공유하기</button>
+          <button class="ur-view-toggle-btn" id="urSchedViewBtn" onclick="urToggleSchedView()" title="일정표로 보기">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
           <button class="ur-sched-sim-btn" onclick="urOpenAiRecommend()">✨ AI 추천</button>
         </div>
       </div>
-      <div class="ur-week-scroll" id="urWeekScroll"><!-- JS 렌더링 --></div>
 
-      <!-- 🔔 하원 알림 — 여정 라인 + 학원별 푸시 토글 -->
-      <div class="ur-sched-section" id="urJourneySection" style="display:none;">
-        <div class="ur-sched-section-title">
-          <span>🔔 하원 알림</span>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <button class="ur-notif-demo-btn" onclick="urNotifDemoKakao()">🔔 Demo</button>
-            <button class="ur-journey-master-btn" id="urJourneyMasterBtn" onclick="urToggleAllPush()">전체 ON</button>
+      <!-- 주간 뷰 (기본) -->
+      <div id="urSchedWeekView">
+        <div class="ur-week-scroll" id="urWeekScroll"><!-- JS 렌더링 --></div>
+
+        <!-- 🔔 하원 알림 — 여정 라인 + 학원별 푸시 토글 -->
+        <div class="ur-sched-section" id="urJourneySection" style="display:none;">
+          <div class="ur-sched-section-title">
+            <span>🔔 하원 알림</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="ur-notif-demo-btn" onclick="urNotifDemoKakao()">🔔 Demo</button>
+              <button class="ur-journey-master-btn" id="urJourneyMasterBtn" onclick="urToggleAllPush()">전체 ON</button>
+            </div>
           </div>
+          <div class="ur-journey-hint">학원 수업이 끝나면 알려드려요. 학원별로 따로 켜고 끌 수 있어요.</div>
+          <div class="ur-journey-track" id="urJourneyTrack"><!-- JS 렌더링 --></div>
         </div>
-        <div class="ur-journey-hint">학원 수업이 끝나면 알려드려요. 학원별로 따로 켜고 끌 수 있어요.</div>
-        <div class="ur-journey-track" id="urJourneyTrack"><!-- JS 렌더링 --></div>
+
+        <div class="ur-sched-section">
+          <div class="ur-sched-section-title">
+            <span>등록된 학원</span>
+            <span style="font-size:11px;color:#9CA3AF;font-weight:400" id="urSchedCount"></span>
+          </div>
+          <div id="urSchedList"><!-- JS 렌더링 --></div>
+        </div>
       </div>
 
-      <div class="ur-sched-section">
-        <div class="ur-sched-section-title">
-          <span>등록된 학원</span>
-          <span style="font-size:11px;color:#9CA3AF;font-weight:400" id="urSchedCount"></span>
-        </div>
-        <div id="urSchedList"><!-- JS 렌더링 --></div>
+      <!-- 일정표 뷰 -->
+      <div id="urSchedTimelineView" style="display:none;">
+        <div id="urTimelineContent"><!-- JS 렌더링 --></div>
       </div>
     </div>
 
