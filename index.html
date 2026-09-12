@@ -2942,7 +2942,11 @@
   padding: 14px 16px; border-bottom: 1px solid #F0F0F0;
 }
 .ur-academy-row-main { flex: 1; min-width: 0; }
-.ur-row-name-line { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.ur-row-name-line { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+.ur-extra-subj-chip {
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 100px;
+  background: #F3F4F6; color: #6B7280; flex-shrink: 0;
+}
 .ur-academy-name { font-size: 15px; font-weight: 800; color: var(--text-main); }
 .ur-subj-dot {
   display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
@@ -13726,8 +13730,12 @@ function urRenderMapMarkers() {
         urHighlightCard(academy.id);
         var isAddedNow = urGetSchedule().some(function(s) { return s.academyId === academy.id; });
         var popupRegion = _urShortRegion(academy.addr);
+        var popupExtraChips = _urAllSubjs(academy).slice(1).map(function(s) {
+          var m = AC_SUBJECT_META[s]; if (!m) return '';
+          return '<span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:100px;background:' + m.color + '1a;color:' + m.color + ';margin-left:4px">' + m.label + '</span>';
+        }).join('');
         var content = '<div class="ur-map-popup">'
-          + '<div class="ur-map-popup-name">' + _escHtml(academy.name) + '</div>'
+          + '<div class="ur-map-popup-name">' + _escHtml(academy.name) + popupExtraChips + '</div>'
           + '<div class="ur-map-popup-meta">'
           +   _urHoursLine(academy) + '<br>'
           +   '📍 ' + academy.dist + 'km' + (popupRegion ? ' &nbsp;' + _escHtml(popupRegion) : '')
@@ -13950,8 +13958,33 @@ function urSearchAddress() {
 // 자녀 연령대 필터 — 1차 타겟은 유아~초등5학년이라 단일 칩(초등만)으로는 유아를 빠뜨리게 됨.
 // 칩이 다중선택을 지원하기 전까지는 '전체'를 기본값으로 둔다 (연령 미지정 + 모든 연령대 학원 노출).
 var _urAgeFilter = 'all';
+// 학원명 키워드로 다과목 자동 감지 — 명시된 subj 포함 전체 과목 배열 반환
+var _urSubjKeywords = {
+  math:      ['수학'],
+  english:   ['영어', '어학'],
+  science:   ['과학'],
+  piano:     ['피아노', '음악'],
+  art:       ['미술', '아트'],
+  taekwondo: ['태권도'],
+  coding:    ['코딩', '로봇'],
+  sports:    ['체육', '줄넘기', '발레', '야구', '농구', '축구', '수영']
+};
+function _urAllSubjs(a) {
+  var subjs = [a.subj];
+  var name = a.name || '';
+  for (var s in _urSubjKeywords) {
+    if (s === a.subj) continue;
+    var kws = _urSubjKeywords[s];
+    for (var i = 0; i < kws.length; i++) {
+      if (name.indexOf(kws[i]) >= 0) { if (subjs.indexOf(s) < 0) subjs.push(s); break; }
+    }
+  }
+  (a.extraSubjs || []).forEach(function(s) { if (subjs.indexOf(s) < 0) subjs.push(s); });
+  return subjs;
+}
+
 function _urMatchesCommonFilters(a) {
-  if (_urFilter !== 'all' && a.subj !== _urFilter) return false;
+  if (_urFilter !== 'all' && _urAllSubjs(a).indexOf(_urFilter) < 0) return false;
   if (_urAgeFilter !== 'all' && (a.ageBand || 'all') !== 'all' && a.ageBand !== _urAgeFilter) return false;
   if (_urSearchText && a.name.toLowerCase().indexOf(_urSearchText) < 0 && a.label.indexOf(_urSearchText) < 0 && (a.addr || '').toLowerCase().indexOf(_urSearchText) < 0) return false;
   return true;
@@ -14040,7 +14073,7 @@ function urRenderAcademies() {
       var savedText2 = _urSearchText;
       _urSearchText = '';
       var widerNoText = KR_SYNC.getMergedAcademies().filter(function(a) {
-        if (_urFilter !== 'all' && a.subj !== _urFilter) return false;
+        if (_urFilter !== 'all' && _urAllSubjs(a).indexOf(_urFilter) < 0) return false;
         if (_urAgeFilter !== 'all' && (a.ageBand || 'all') !== 'all' && a.ageBand !== _urAgeFilter) return false;
         return true;
       });
@@ -14074,12 +14107,18 @@ function urRenderAcademies() {
         + '<button class="ur-row-vacancy-btn' + (subscribed ? ' subscribed' : '') + '" onclick="event.stopPropagation();urSubscribeVacancy(' + a.id + ')">'
         + (subscribed ? '✓ 알림 신청됨' : '🔔 공석 알림 받기') + '</button></div>'
       : '';
+    var allSubjs = _urAllSubjs(a);
+    var extraChips = allSubjs.slice(1).map(function(s) {
+      var m = AC_SUBJECT_META[s];
+      if (!m) return '';
+      return '<span class="ur-extra-subj-chip" style="background:' + m.color + '1a;color:' + m.color + '">' + m.label + '</span>';
+    }).join('');
     return '<div class="ur-academy-row' + (_urHighlightId === a.id ? ' highlight' : '') + '" id="urCard' + a.id + '" onclick="urFlyToAcademy(' + a.id + ')">'
       +   '<div class="ur-academy-row-main">'
       +     '<div class="ur-row-name-line">'
       +       '<span class="ur-subj-dot" style="background:' + a.color + '"></span>'
       +       '<span class="ur-academy-name">' + _escHtml(a.name) + '</span>'
-      +       verifiedBadge + badgeHtml
+      +       verifiedBadge + badgeHtml + extraChips
       +     '</div>'
       +     '<div class="ur-row-hours">' + hoursHtml + '</div>'
       +     '<div class="ur-row-meta"><svg width="11" height="14" viewBox="0 0 11 14" fill="none" style="vertical-align:-2px;margin-right:2px"><path d="M5.5 0C2.46 0 0 2.46 0 5.5C0 9.625 5.5 14 5.5 14C5.5 14 11 9.625 11 5.5C11 2.46 8.54 0 5.5 0Z" fill="' + a.color + '"/><circle cx="5.5" cy="5.5" r="2.2" fill="white" fill-opacity="0.9"/></svg>' + a.dist + 'km' + (region ? ' · ' + _escHtml(region) : '') + ' · ' + a.label + ' · ' + feeHtml + '</div>'
