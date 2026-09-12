@@ -11440,6 +11440,8 @@ var _urUserMarker = null;
 var _urRadius = 1000;
 var _urUserLat = 37.4979;
 var _urUserLng = 127.0276;
+var _urLocReady = false; // true after first GPS fix (or failure)
+var _urLocCbs  = [];    // queued callbacks waiting for GPS
 var _urHighlightId = null;
 var _urEditChildId = '';
 
@@ -11718,9 +11720,11 @@ function _rsEnterParent() {
   document.body.style.overflow = 'hidden';
   urUpdateBellDot();
   rvSubscribeRealtime();
-  userShowTab(0);
   urInitNotifications();
   if (urGetChildren().length === 0) obOpen();
+  // GPS를 먼저 요청 — 학원 목록은 위치 확인 후 로드
+  urPreFetchGPS();
+  userShowTab(0);
 }
 
 function showUserDashboard(name, email, color) {
@@ -11848,10 +11852,27 @@ function userShowTab(idx) {
   var content = document.getElementById('urContent');
   if (content) content.scrollTop = 0;
   if (idx === 0) {
-    urRenderAcademies();
     urRenderSubjectGrid();
     urRenderHomePromo();
-    urAutoLocate();
+    if (_urLocReady) {
+      // GPS 이미 확보 — 바로 렌더링
+      urUpdateDistances();
+      urRenderAcademies();
+      if (_urMap) { urUpdateUserMarker(); urUpdateCircle(); urRenderMapMarkers(); }
+    } else {
+      // GPS 대기 — 로딩 표시 후 완료 시 렌더링
+      var acListEl = document.getElementById('urAcademyList');
+      if (acListEl) acListEl.innerHTML = '<div style="text-align:center;padding:40px 16px;color:#9CA3AF"><div style="font-size:28px;margin-bottom:10px">📍</div><div style="font-size:14px;font-weight:600;color:#6B7280">위치 확인 중...</div><div style="font-size:12px;margin-top:4px">주변 학원을 불러오고 있어요</div></div>';
+      urEnsureLocation(function() {
+        urUpdateDistances();
+        urRenderAcademies();
+        if (_urMap) {
+          urUpdateUserMarker(); urUpdateCircle(); urRenderMapMarkers();
+          _urMap.setCenter(new naver.maps.LatLng(_urUserLat, _urUserLng));
+        }
+        urReverseGeocode(_urUserLat, _urUserLng);
+      });
+    }
   }
   if (idx === 1) urRenderSchedule();
   if (idx === 2) rvRenderFeed();
@@ -13845,12 +13866,51 @@ function urSheetPointerUp(e) {
 // ── 내 위치로 이동 ──
 // 검색 탭에 들어올 때마다 실제 GPS로 기준 위치를 갱신 — 고정된 기본값(서초구 강남대로 인근)이
 // 계속 "내 위치"로 보이는 문제를 막기 위함. 권한 거부/실패 시에는 기존 기준 위치를 그대로 쓴다.
+// GPS 준비 완료 후 cb 실행 — 이미 준비됐으면 즉시 실행
+function urEnsureLocation(cb) {
+  if (_urLocReady) { cb(); return; }
+  _urLocCbs.push(cb);
+}
+function _urFlushLocCbs() {
+  var cbs = _urLocCbs.splice(0);
+  cbs.forEach(function(f) { f(); });
+}
+// 앱 진입 시 GPS를 미리 요청 — 결과가 오면 지도·목록을 실제 위치 기준으로 초기화
+function urPreFetchGPS() {
+  if (_urLocReady || !navigator.geolocation) {
+    _urLocReady = true; _urFlushLocCbs(); return;
+  }
+  var settled = false;
+  var fallback = setTimeout(function() {
+    // 5초 안에 GPS 응답 없으면 기본값으로 진행
+    if (!settled) { settled = true; _urLocReady = true; _urFlushLocCbs(); }
+  }, 5000);
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      if (settled) return;
+      settled = true; clearTimeout(fallback);
+      _urUserLat = pos.coords.latitude;
+      _urUserLng = pos.coords.longitude;
+      _urLocReady = true;
+      _urFlushLocCbs();
+    },
+    function() {
+      if (settled) return;
+      settled = true; clearTimeout(fallback);
+      _urLocReady = true;
+      _urFlushLocCbs();
+    },
+    { timeout: 5000, maximumAge: 30000 }
+  );
+}
+
 function urAutoLocate(forceFresh) {
-  if (!navigator.geolocation) { urReverseGeocode(_urUserLat, _urUserLng); return; }
+  if (!navigator.geolocation) { _urLocReady = true; urReverseGeocode(_urUserLat, _urUserLng); return; }
   navigator.geolocation.getCurrentPosition(
     function(pos) {
       _urUserLat = pos.coords.latitude;
       _urUserLng = pos.coords.longitude;
+      _urLocReady = true;
       urUpdateDistances();
       if (document.getElementById('urAcademyList')) urRenderAcademies();
       if (_urMap) {
