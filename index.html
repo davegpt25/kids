@@ -11898,10 +11898,13 @@ function ktCloseTierGuide() {
   if (overlay) overlay.classList.remove('open');
 }
 
+var _ktCoreStatusChecked = false;
 function ktCheckCoreStatus(callback) {
   if (!_urUser) { _ktIsCore = false; callback(); return; }
+  if (_ktCoreStatusChecked) { callback(); return; }
   ktGetUserPoints(function(total) {
     _ktIsCore = ktGetTier(total).name === '핵심 학부모';
+    _ktCoreStatusChecked = true;
     callback();
   });
 }
