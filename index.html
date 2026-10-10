@@ -3274,6 +3274,13 @@
 .ur-tl-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 3px; }
 .ur-tl-sub { font-size: 12px; color: #6B7280; }
 .ur-tl-sub-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+/* ── 날짜 그룹 (셀 합침) ── */
+.ur-tl-group { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+.ur-tl-group:last-child { border-bottom: none; }
+.ur-tl-group.tl-today { background: #FFF7ED; border-radius: 14px; padding: 14px 12px; margin: 2px -12px; border-bottom: none; }
+.ur-tl-group-rows { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ur-tl-row { display: flex; align-items: flex-start; gap: 14px; padding-bottom: 10px; }
+.ur-tl-row-last { padding-bottom: 0; }
 /* ── 보강 기능 ── */
 .ur-tl-makeup-btn { font-size: 11px; font-weight: 700; color: #9CA3AF; background: #F4F4F5; border: none; border-radius: 100px; padding: 4px 10px; cursor: pointer; margin-left: auto; flex-shrink: 0; white-space: nowrap; }
 .ur-tl-makeup-btn:active { background: #FFE8D6; color: #F97316; }
@@ -3290,15 +3297,34 @@
 .ur-makeup-card-status { font-size: 11px; font-weight: 700; color: #F97316; }
 .ur-makeup-card.confirmed .ur-makeup-card-status { color: #16A34A; }
 /* 보강 신청 바텀시트 */
-.kr-makeup-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.4); align-items: flex-end; }
+.kr-makeup-overlay { display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.4); align-items: flex-end; }
 .kr-makeup-overlay.open { display: flex; }
 .kr-makeup-panel { background: #fff; width: 100%; border-radius: 20px 20px 0 0; padding: 20px 16px 32px; }
 .kr-makeup-handle { width: 36px; height: 4px; background: #E5E7EB; border-radius: 2px; margin: 0 auto 18px; }
 .kr-makeup-title { font-size: 15px; font-weight: 800; color: #1A1A1A; margin-bottom: 4px; }
 .kr-makeup-sub { font-size: 12px; color: #9CA3AF; margin-bottom: 18px; }
 .kr-makeup-field-label { font-size: 11px; font-weight: 700; color: #6B7280; margin-bottom: 6px; }
-.kr-makeup-date-input { width: 100%; box-sizing: border-box; border: 1.5px solid #E5E7EB; border-radius: 12px; padding: 12px 14px; font-size: 15px; color: #111827; outline: none; margin-bottom: 18px; }
-.kr-makeup-date-input:focus { border-color: #F97316; }
+/* ── 커스텀 달력 ── */
+.kr-cal { background: #F9FAFB; border-radius: 16px; padding: 14px 12px 10px; margin-bottom: 18px; }
+.kr-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.kr-cal-arr { background: none; border: none; font-size: 24px; color: #6B7280; cursor: pointer; padding: 0 6px; line-height: 1; }
+.kr-cal-arr:active { color: #F97316; }
+.kr-cal-title { font-size: 15px; font-weight: 700; color: #111827; }
+.kr-cal-dow { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; margin-bottom: 4px; }
+.kr-cal-dow span { font-size: 11px; font-weight: 600; color: #9CA3AF; padding: 4px 0; }
+.kr-cal-dow span:first-child { color: #EF4444; }
+.kr-cal-dow span:last-child { color: #3B82F6; }
+.kr-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.kr-cal-day { display: flex; align-items: center; justify-content: center; height: 36px; border-radius: 50%; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; position: relative; }
+.kr-cal-day:active { background: #FFE8D6; }
+.kr-cal-day.empty { cursor: default; }
+.kr-cal-day.past { color: #D1D5DB; cursor: default; }
+.kr-cal-day.today::after { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background:#F97316; }
+.kr-cal-day.selected { background: #F97316; color: #fff; font-weight: 700; }
+.kr-cal-day.selected::after { display: none; }
+.kr-cal-day.sun { color: #EF4444; }
+.kr-cal-day.sat { color: #3B82F6; }
+.kr-cal-day.past.sun, .kr-cal-day.past.sat { color: #D1D5DB; }
 .kr-makeup-submit { width: 100%; background: #F97316; color: #fff; border: none; border-radius: 13px; padding: 14px; font-size: 15px; font-weight: 800; cursor: pointer; }
 .kr-makeup-submit:disabled { background: #E5E7EB; color: #9CA3AF; cursor: default; }
 .kr-makeup-cancel { width: 100%; background: none; border: none; color: #9CA3AF; font-size: 14px; font-weight: 600; padding: 12px; cursor: pointer; margin-top: 4px; }
@@ -14464,27 +14490,48 @@ function urRenderTimeline() {
   months.forEach(function(month) {
     html += '<div class="ur-timeline-month">' + month + '</div>';
     var todayStr = today.toDateString();
+
+    // ── 같은 날짜 그룹화 ──
+    var dayGroups = [], dayGroupMap = {};
     monthMap[month].forEach(function(e) {
-      var isToday = e.date.toDateString() === todayStr;
-      var dayNum = e.date.getDate();
-      var dayName = dayNames[e.date.getDay()];
-      var mm = String(e.date.getMonth()+1).padStart(2,'0'); var dd = String(e.date.getDate()).padStart(2,'0');
-      var dateStr = e.date.getFullYear() + '-' + mm + '-' + dd;
-      var makeupBtnAttr = 'onclick="urOpenMakeupSheet(\'' + dateStr + '\',\'' + _escHtml(e.name).replace(/'/g,"\\'") + '\',\'' + e.color + '\',\'' + _escHtml(e.label).replace(/'/g,"\\'") + '\')"';
-      html += '<div class="ur-timeline-item' + (isToday ? ' tl-today' : '') + '">'
+      var key = e.date.toDateString();
+      if (!dayGroupMap[key]) { dayGroupMap[key] = []; dayGroups.push({ key: key, date: e.date, items: dayGroupMap[key] }); }
+      dayGroupMap[key].push(e);
+    });
+
+    dayGroups.forEach(function(group) {
+      var isToday = group.key === todayStr;
+      var dayNum  = group.date.getDate();
+      var dayName = dayNames[group.date.getDay()];
+      var mm = String(group.date.getMonth()+1).padStart(2,'0');
+      var dd = String(group.date.getDate()).padStart(2,'0');
+      var dateStr = group.date.getFullYear() + '-' + mm + '-' + dd;
+
+      html += '<div class="ur-tl-group' + (isToday ? ' tl-today' : '') + '">'
         + '<div class="ur-tl-date-col">'
         +   '<div class="ur-tl-day-num' + (isToday ? ' tl-today' : '') + '">' + dayNum + '</div>'
         +   '<div class="ur-tl-day-name">' + dayName + '요일</div>'
         + '</div>'
-        + '<div class="ur-tl-bar" style="background:' + e.color + '"></div>'
-        + '<div class="ur-tl-content">'
-        +   '<div class="ur-tl-title">' + _escHtml(e.name) + '</div>'
-        +   '<div class="ur-tl-sub-row">'
-        +     '<span class="ur-tl-sub">' + _escHtml(e.label) + (e.timeLabel ? ' · ' + _escHtml(e.timeLabel) : '') + '</span>'
-        +   '</div>'
-        + '</div>'
-        + '<button class="ur-tl-makeup-btn" ' + makeupBtnAttr + '>결석·보강</button>'
-        + '</div>';
+        + '<div class="ur-tl-group-rows">';
+
+      group.items.forEach(function(e, idx) {
+        var isLast = idx === group.items.length - 1;
+        var safeN = _escHtml(e.name).replace(/'/g,"\\'");
+        var safeL = _escHtml(e.label).replace(/'/g,"\\'");
+        var makeupBtnAttr = 'onclick="urOpenMakeupSheet(\'' + dateStr + '\',\'' + safeN + '\',\'' + e.color + '\',\'' + safeL + '\')"';
+        html += '<div class="ur-tl-row' + (isLast ? ' ur-tl-row-last' : '') + '">'
+          + '<div class="ur-tl-bar" style="background:' + e.color + '"></div>'
+          + '<div class="ur-tl-content">'
+          +   '<div class="ur-tl-title">' + _escHtml(e.name) + '</div>'
+          +   '<div class="ur-tl-sub-row">'
+          +     '<span class="ur-tl-sub">' + _escHtml(e.label) + (e.timeLabel ? ' · ' + _escHtml(e.timeLabel) : '') + '</span>'
+          +   '</div>'
+          + '</div>'
+          + '<button class="ur-tl-makeup-btn" ' + makeupBtnAttr + '>결석·보강</button>'
+          + '</div>';
+      });
+
+      html += '</div></div>'; // close group-rows + group
     });
   });
   html += '</div>';
@@ -14550,22 +14597,68 @@ function urMakeupCardTap(id) {
 }
 
 var _krMakeupCtx = {};
+var _krCalYear = 0, _krCalMonth = 0, _krCalSelected = '';
+
+function krCalRender() {
+  var titleEl = document.getElementById('krCalTitle');
+  var gridEl  = document.getElementById('krCalGrid');
+  if (!titleEl || !gridEl) return;
+  titleEl.textContent = _krCalYear + '년 ' + (_krCalMonth + 1) + '월';
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var firstDay = new Date(_krCalYear, _krCalMonth, 1).getDay();
+  var daysInMonth = new Date(_krCalYear, _krCalMonth + 1, 0).getDate();
+  var html = '';
+  for (var i = 0; i < firstDay; i++) html += '<div class="kr-cal-day empty"></div>';
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dt = new Date(_krCalYear, _krCalMonth, d);
+    var iso = _krCalYear + '-' + String(_krCalMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var cls = 'kr-cal-day';
+    var dow = dt.getDay();
+    if (dt < today) cls += ' past';
+    else if (dt.getTime() === today.getTime()) cls += ' today';
+    if (iso === _krCalSelected) cls += ' selected';
+    if (dow === 0) cls += ' sun';
+    if (dow === 6) cls += ' sat';
+    var isPast = dt < today;
+    html += '<div class="' + cls + '"' + (isPast ? '' : ' onclick="krCalSelect(\'' + iso + '\')"') + '>' + d + '</div>';
+  }
+  gridEl.innerHTML = html;
+}
+
+function krCalMove(dir) {
+  _krCalMonth += dir;
+  if (_krCalMonth > 11) { _krCalMonth = 0; _krCalYear++; }
+  if (_krCalMonth < 0)  { _krCalMonth = 11; _krCalYear--; }
+  krCalRender();
+}
+
+function krCalSelect(iso) {
+  _krCalSelected = iso;
+  var inp = document.getElementById('krMakeupDateInput');
+  if (inp) inp.value = iso;
+  krCalRender();
+}
 
 function urOpenMakeupSheet(dateStr, name, color, label) {
   _krMakeupCtx = { originalDate: dateStr, academyName: name, color: color, label: label };
   var overlay = document.getElementById('krMakeupOverlay');
   var origEl  = document.getElementById('krMakeupOrigDate');
-  var inp     = document.getElementById('krMakeupDateInput');
   if (!overlay) return;
   if (origEl) origEl.textContent = name + ' · ' + dateStr;
-  if (inp) {
-    // 기본값: 결석일 + 7일 (dateStr은 YYYY-MM-DD 또는 한국어 날짜)
-    var isoStr = dateStr.replace(/년\s*/,'').replace(/월\s*/,'-').replace(/일/,'').trim();
-    if (isoStr.split('-').length !== 3) isoStr = new Date().toISOString().slice(0,10);
-    var d = new Date(isoStr); d.setDate(d.getDate() + 7);
-    inp.value = isNaN(d.getTime()) ? '' : d.toISOString().slice(0,10);
-    inp.min = new Date().toISOString().slice(0,10);
-  }
+
+  // 기본 선택: 결석일 +7일
+  var isoStr = dateStr;
+  var d = new Date(isoStr); d.setDate(d.getDate() + 7);
+  if (isNaN(d.getTime())) d = new Date();
+  var defIso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  _krCalYear     = d.getFullYear();
+  _krCalMonth    = d.getMonth();
+  _krCalSelected = defIso;
+  var inp = document.getElementById('krMakeupDateInput');
+  if (inp) inp.value = defIso;
+  krCalRender();
+
   overlay.classList.add('open');
 }
 
@@ -15282,7 +15375,18 @@ window.addEventListener('DOMContentLoaded', function() {
           <div class="kr-makeup-title">결석 · 보강 신청</div>
           <div class="kr-makeup-sub" id="krMakeupOrigDate"></div>
           <div class="kr-makeup-field-label">보강 날짜 선택</div>
-          <input class="kr-makeup-date-input" type="date" id="krMakeupDateInput">
+          <div class="kr-cal" id="krMakeupCal">
+            <div class="kr-cal-nav">
+              <button class="kr-cal-arr" onclick="krCalMove(-1)">&#8249;</button>
+              <span class="kr-cal-title" id="krCalTitle"></span>
+              <button class="kr-cal-arr" onclick="krCalMove(1)">&#8250;</button>
+            </div>
+            <div class="kr-cal-dow">
+              <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+            </div>
+            <div class="kr-cal-grid" id="krCalGrid"></div>
+          </div>
+          <input type="hidden" id="krMakeupDateInput">
           <button class="kr-makeup-submit" onclick="urSubmitMakeupRequest()">보강 신청하기</button>
           <button class="kr-makeup-cancel" onclick="urCloseMakeupSheet()">취소</button>
         </div>
