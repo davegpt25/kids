@@ -3290,7 +3290,7 @@
 .ur-makeup-card-status { font-size: 11px; font-weight: 700; color: #F97316; }
 .ur-makeup-card.confirmed .ur-makeup-card-status { color: #16A34A; }
 /* 보강 신청 바텀시트 */
-.kr-makeup-overlay { display: none; position: absolute; inset: 0; z-index: 80; background: rgba(0,0,0,0.4); align-items: flex-end; }
+.kr-makeup-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.4); align-items: flex-end; }
 .kr-makeup-overlay.open { display: flex; }
 .kr-makeup-panel { background: #fff; width: 100%; border-radius: 20px 20px 0 0; padding: 20px 16px 32px; }
 .kr-makeup-handle { width: 36px; height: 4px; background: #E5E7EB; border-radius: 2px; margin: 0 auto 18px; }
@@ -14468,7 +14468,8 @@ function urRenderTimeline() {
       var isToday = e.date.toDateString() === todayStr;
       var dayNum = e.date.getDate();
       var dayName = dayNames[e.date.getDay()];
-      var dateStr = e.date.getFullYear() + '년 ' + (e.date.getMonth()+1) + '월 ' + e.date.getDate() + '일';
+      var mm = String(e.date.getMonth()+1).padStart(2,'0'); var dd = String(e.date.getDate()).padStart(2,'0');
+      var dateStr = e.date.getFullYear() + '-' + mm + '-' + dd;
       var makeupBtnAttr = 'onclick="urOpenMakeupSheet(\'' + dateStr + '\',\'' + _escHtml(e.name).replace(/'/g,"\\'") + '\',\'' + e.color + '\',\'' + _escHtml(e.label).replace(/'/g,"\\'") + '\')"';
       html += '<div class="ur-timeline-item' + (isToday ? ' tl-today' : '') + '">'
         + '<div class="ur-tl-date-col">'
@@ -14558,9 +14559,11 @@ function urOpenMakeupSheet(dateStr, name, color, label) {
   if (!overlay) return;
   if (origEl) origEl.textContent = name + ' · ' + dateStr;
   if (inp) {
-    // 기본값: 결석일 + 7일
-    var d = new Date(dateStr); d.setDate(d.getDate() + 7);
-    inp.value = d.toISOString().slice(0,10);
+    // 기본값: 결석일 + 7일 (dateStr은 YYYY-MM-DD 또는 한국어 날짜)
+    var isoStr = dateStr.replace(/년\s*/,'').replace(/월\s*/,'-').replace(/일/,'').trim();
+    if (isoStr.split('-').length !== 3) isoStr = new Date().toISOString().slice(0,10);
+    var d = new Date(isoStr); d.setDate(d.getDate() + 7);
+    inp.value = isNaN(d.getTime()) ? '' : d.toISOString().slice(0,10);
     inp.min = new Date().toISOString().slice(0,10);
   }
   overlay.classList.add('open');
@@ -15272,6 +15275,18 @@ window.addEventListener('DOMContentLoaded', function() {
 
     <!-- ── 스케줄 탭 ── -->
     <div class="ur-page" id="urPageSchedule">
+      <!-- 보강 신청 바텀시트 -->
+      <div class="kr-makeup-overlay" id="krMakeupOverlay" onclick="if(event.target===this)urCloseMakeupSheet()">
+        <div class="kr-makeup-panel">
+          <div class="kr-makeup-handle"></div>
+          <div class="kr-makeup-title">결석 · 보강 신청</div>
+          <div class="kr-makeup-sub" id="krMakeupOrigDate"></div>
+          <div class="kr-makeup-field-label">보강 날짜 선택</div>
+          <input class="kr-makeup-date-input" type="date" id="krMakeupDateInput">
+          <button class="kr-makeup-submit" onclick="urSubmitMakeupRequest()">보강 신청하기</button>
+          <button class="kr-makeup-cancel" onclick="urCloseMakeupSheet()">취소</button>
+        </div>
+      </div>
       <div class="ur-sched-header">
         <div style="display:flex;align-items:center;gap:6px;">
           <div class="ur-sched-title" id="urSchedHeaderTitle">스케줄</div>
@@ -15599,19 +15614,6 @@ window.addEventListener('DOMContentLoaded', function() {
     </div>
 
     <!-- 옵션 바텀시트 -->
-    <!-- 보강 신청 바텀시트 -->
-    <div class="kr-makeup-overlay" id="krMakeupOverlay" onclick="if(event.target===this)urCloseMakeupSheet()">
-      <div class="kr-makeup-panel">
-        <div class="kr-makeup-handle"></div>
-        <div class="kr-makeup-title">결석 · 보강 신청</div>
-        <div class="kr-makeup-sub" id="krMakeupOrigDate"></div>
-        <div class="kr-makeup-field-label">보강 날짜 선택</div>
-        <input class="kr-makeup-date-input" type="date" id="krMakeupDateInput">
-        <button class="kr-makeup-submit" onclick="urSubmitMakeupRequest()">보강 신청하기</button>
-        <button class="kr-makeup-cancel" onclick="urCloseMakeupSheet()">취소</button>
-      </div>
-    </div>
-
     <div class="ur-ai-sheet-overlay" id="urAiSheetOverlay" onclick="urCloseAiOptions(event)">
       <div class="ur-ai-sheet-panel">
         <div class="ur-ai-sheet-title">조건 설정</div>
