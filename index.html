@@ -12009,12 +12009,17 @@ var _ktCoreStatusChecked = false;
 function ktCheckCoreStatus(callback) {
   if (!_urUser) { _ktIsCore = false; callback(); return; }
   if (_ktCoreStatusChecked) { callback(); return; }
+  // 이미 콜백 대기 중이면 중복 요청 방지
+  if (_ktCoreStatusPending) { _ktCoreStatusPending.push(callback); return; }
+  _ktCoreStatusPending = [callback];
   ktGetUserPoints(function(total) {
     _ktIsCore = ktGetTier(total).name === '핵심 학부모';
     _ktCoreStatusChecked = true;
-    callback();
+    var cbs = _ktCoreStatusPending; _ktCoreStatusPending = null;
+    cbs.forEach(function(cb) { cb(); });
   });
 }
+var _ktCoreStatusPending = null;
 
 function ktGetUserPoints(callback) {
   if (!_urUser) { callback(0); return; }
@@ -12159,8 +12164,8 @@ function ktShowSubtab(idx) {
     if (tab) tab.classList.toggle('active', i === idx);
     if (panel) panel.classList.toggle('active', i === idx);
   }
-  if (idx === 0) rvLoadFeed();
-  if (idx === 1) qaRenderFeed();
+  if (idx === 0) { _rvCache ? rvRenderRows(_rvCache) : rvRenderFeed(); }
+  if (idx === 1) { _qaCache ? qaRenderFeedRows(_qaCache) : qaRenderFeed(); }
 }
 
 function rvRenderFeed() {
@@ -12173,28 +12178,47 @@ function rvRenderFeed() {
   }
   var wrap = document.getElementById('rvFeedWrap');
   if (!wrap) return;
+  // 캐시가 있으면 즉시 렌더링
+  if (_rvCache) {
+    rvRenderRows(_rvCache);
+    ktCheckCoreStatus(function() {});
+    return;
+  }
   wrap.innerHTML = '<div class="rv-empty">불러오는 중...</div>';
-  ktCheckCoreStatus(function() { rvLoadFeed(); });
+  // ktCheckCoreStatus + 데이터 패치 병렬 실행
+  var coreReady = false, dataReady = false, rows = null;
+  function tryRender() { if (coreReady && dataReady) rvRenderRows(rows); }
+  ktCheckCoreStatus(function() { coreReady = true; tryRender(); });
+  rvLoadFeed(function(r) { rows = r; dataReady = true; tryRender(); });
 }
 
-function rvLoadFeed() {
-  if (_rvDemoMode) { rvRenderRows([]); return; }
-  var query = sbClient()
+var _rvCache = null, _rvCacheTs = 0;
+var _rvCacheMs = 60000; // 1분 캐시
+
+function rvLoadFeed(callback) {
+  if (_rvDemoMode) {
+    if (callback) callback([]); else rvRenderRows([]);
+    return;
+  }
+  var now = Date.now();
+  if (_rvCache && (now - _rvCacheTs) < _rvCacheMs) {
+    if (callback) { callback(_rvCache); return; }
+    rvRenderRows(_rvCache);
+    return;
+  }
+  sbClient()
     .from('reviews')
     .select('id, academy_id, rating, body, created_at, academy_region, user_email')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
-    .limit(50);
-
-  query.then(function(res) {
-    if (res.error) { rvRenderRows([]); return; }
-    var rows = res.data || [];
-    if (_rvWishOnly) {
-      var wished = urGetWishlist();
-      rows = rows.filter(function(r) { return wished.indexOf(r.academy_id) >= 0; });
-    }
-    rvRenderRows(rows);
-  }).catch(function() { rvRenderRows([]); });
+    .limit(30)
+    .then(function(res) {
+      var data = (!res.error && res.data) ? res.data : [];
+      _rvCache = data; _rvCacheTs = Date.now();
+      if (callback) callback(data); else rvRenderRows(data);
+    }).catch(function() {
+      if (callback) callback([]); else rvRenderRows([]);
+    });
 }
 
 function rvRenderRows(rows) {
@@ -12215,8 +12239,10 @@ function rvRenderRows(rows) {
     wrap.innerHTML = toolbar + emptyHtml;
   } else {
     var acs = window.KR_SYNC ? KR_SYNC.getMergedAcademies() : (window.UR_ACADEMIES || []);
+    var acMap = {};
+    acs.forEach(function(a) { acMap[a.id] = a.name; });
     var cards = displayRows.map(function(r) {
-      var acName = r._acName || (function() { var ac = acs.find(function(a) { return a.id === r.academy_id; }); return ac ? ac.name : '학원 #' + r.academy_id; })();
+      var acName = r._acName || acMap[r.academy_id] || ('학원 #' + r.academy_id);
       var region = r._region || (r.academy_region ? r.academy_region + ' 학부모' : '학부모');
       var safeRating = Math.round(Math.min(5, Math.max(0, r.rating || 0)));
       var stars = '★'.repeat(safeRating) + '☆'.repeat(5 - safeRating);
@@ -12398,8 +12424,18 @@ function rvOpenDemoUserPanel(el) {
 function qaRenderFeed() {
   var wrap = document.getElementById('qaFeedWrap');
   if (!wrap) return;
+  // 캐시가 있으면 즉시 렌더링 후 백그라운드에서 상태 확인
+  if (_qaCache) {
+    qaRenderFeedRows(_qaCache);
+    ktCheckCoreStatus(function() {});
+    return;
+  }
   wrap.innerHTML = '<div class="rv-empty">불러오는 중...</div>';
-  ktCheckCoreStatus(function() { qaLoadFeed(); });
+  // ktCheckCoreStatus와 데이터 패치를 병렬 실행
+  var coreReady = false, dataReady = false, rows = null;
+  function tryRender() { if (coreReady && dataReady) qaRenderFeedRows(rows); }
+  ktCheckCoreStatus(function() { coreReady = true; tryRender(); });
+  qaLoadFeed(function(r) { rows = r; dataReady = true; tryRender(); });
 }
 
 function qaRenderFeedRows(rows) {
@@ -12434,16 +12470,29 @@ function qaRenderFeedRows(rows) {
   wrap.innerHTML = toolbar + cards;
 }
 
-function qaLoadFeed() {
-  if (_qaDemoMode) { qaRenderFeedRows([]); return; }
+var _qaCache = null, _qaCacheTs = 0;
+var _qaCacheMs = 60000;
+
+function qaLoadFeed(callback) {
+  if (_qaDemoMode) {
+    if (callback) callback([]); else qaRenderFeedRows([]);
+    return;
+  }
+  var now = Date.now();
+  if (_qaCache && (now - _qaCacheTs) < _qaCacheMs) {
+    if (callback) { callback(_qaCache); return; }
+    qaRenderFeedRows(_qaCache);
+    return;
+  }
   sbClient()
     .from('qa_posts')
     .select('id, title, body, user_email, created_at')
     .order('created_at', { ascending: false })
-    .limit(50)
+    .limit(30)
     .then(function(res) {
-      if (res.error) { qaRenderFeedRows([]); return; }
-      qaRenderFeedRows(res.data || []);
+      var data = (!res.error && res.data) ? res.data : [];
+      _qaCache = data; _qaCacheTs = Date.now();
+      if (callback) callback(data); else qaRenderFeedRows(data);
     })
     .catch(function() { qaRenderFeedRows([]); });
 }
