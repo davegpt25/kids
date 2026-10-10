@@ -3274,6 +3274,34 @@
 .ur-tl-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 3px; }
 .ur-tl-sub { font-size: 12px; color: #6B7280; }
 .ur-tl-sub-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+/* ── 보강 기능 ── */
+.ur-tl-makeup-btn { font-size: 11px; font-weight: 700; color: #9CA3AF; background: #F4F4F5; border: none; border-radius: 100px; padding: 4px 10px; cursor: pointer; margin-left: auto; flex-shrink: 0; white-space: nowrap; }
+.ur-tl-makeup-btn:active { background: #FFE8D6; color: #F97316; }
+.ur-makeup-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 800; color: #F97316; background: #FFF4E8; border-radius: 100px; padding: 2px 8px; }
+.ur-makeup-badge.confirmed { color: #16A34A; background: #ECFDF5; }
+.ur-makeup-section { padding: 12px 16px 4px; }
+.ur-makeup-section-title { font-size: 12px; font-weight: 800; color: #9CA3AF; letter-spacing: 0.3px; margin-bottom: 8px; }
+.ur-makeup-card { display: flex; align-items: center; gap: 10px; background: #FFF4E8; border-radius: 12px; padding: 11px 13px; margin-bottom: 8px; cursor: pointer; }
+.ur-makeup-card.confirmed { background: #ECFDF5; }
+.ur-makeup-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ur-makeup-card-info { flex: 1; min-width: 0; }
+.ur-makeup-card-name { font-size: 13px; font-weight: 700; color: #111827; }
+.ur-makeup-card-date { font-size: 11px; color: #6B7280; margin-top: 2px; }
+.ur-makeup-card-status { font-size: 11px; font-weight: 700; color: #F97316; }
+.ur-makeup-card.confirmed .ur-makeup-card-status { color: #16A34A; }
+/* 보강 신청 바텀시트 */
+.kr-makeup-overlay { display: none; position: absolute; inset: 0; z-index: 80; background: rgba(0,0,0,0.4); align-items: flex-end; }
+.kr-makeup-overlay.open { display: flex; }
+.kr-makeup-panel { background: #fff; width: 100%; border-radius: 20px 20px 0 0; padding: 20px 16px 32px; }
+.kr-makeup-handle { width: 36px; height: 4px; background: #E5E7EB; border-radius: 2px; margin: 0 auto 18px; }
+.kr-makeup-title { font-size: 15px; font-weight: 800; color: #1A1A1A; margin-bottom: 4px; }
+.kr-makeup-sub { font-size: 12px; color: #9CA3AF; margin-bottom: 18px; }
+.kr-makeup-field-label { font-size: 11px; font-weight: 700; color: #6B7280; margin-bottom: 6px; }
+.kr-makeup-date-input { width: 100%; box-sizing: border-box; border: 1.5px solid #E5E7EB; border-radius: 12px; padding: 12px 14px; font-size: 15px; color: #111827; outline: none; margin-bottom: 18px; }
+.kr-makeup-date-input:focus { border-color: #F97316; }
+.kr-makeup-submit { width: 100%; background: #F97316; color: #fff; border: none; border-radius: 13px; padding: 14px; font-size: 15px; font-weight: 800; cursor: pointer; }
+.kr-makeup-submit:disabled { background: #E5E7EB; color: #9CA3AF; cursor: default; }
+.kr-makeup-cancel { width: 100%; background: none; border: none; color: #9CA3AF; font-size: 14px; font-weight: 600; padding: 12px; cursor: pointer; margin-top: 4px; }
 .ur-journey-hint { font-size: 11px; color: #9CA3AF; margin-bottom: 12px; line-height: 1.5; }
 .ur-journey-track {
   display: flex; align-items: flex-start; overflow-x: auto;
@@ -14440,6 +14468,8 @@ function urRenderTimeline() {
       var isToday = e.date.toDateString() === todayStr;
       var dayNum = e.date.getDate();
       var dayName = dayNames[e.date.getDay()];
+      var dateStr = e.date.getFullYear() + '년 ' + (e.date.getMonth()+1) + '월 ' + e.date.getDate() + '일';
+      var makeupBtnAttr = 'onclick="urOpenMakeupSheet(\'' + dateStr + '\',\'' + _escHtml(e.name).replace(/'/g,"\\'") + '\',\'' + e.color + '\',\'' + _escHtml(e.label).replace(/'/g,"\\'") + '\')"';
       html += '<div class="ur-timeline-item' + (isToday ? ' tl-today' : '') + '">'
         + '<div class="ur-tl-date-col">'
         +   '<div class="ur-tl-day-num' + (isToday ? ' tl-today' : '') + '">' + dayNum + '</div>'
@@ -14452,11 +14482,110 @@ function urRenderTimeline() {
         +     '<span class="ur-tl-sub">' + _escHtml(e.label) + (e.timeLabel ? ' · ' + _escHtml(e.timeLabel) : '') + '</span>'
         +   '</div>'
         + '</div>'
+        + '<button class="ur-tl-makeup-btn" ' + makeupBtnAttr + '>결석·보강</button>'
         + '</div>';
     });
   });
   html += '</div>';
   wrap.innerHTML = html;
+
+  // 보강 섹션 렌더링 (타임라인 위에 삽입)
+  urRenderMakeupSection(wrap);
+}
+
+// ── 📚 보강수업 기능 ──────────────────────────────────────
+function krGetMakeups() {
+  try { return JSON.parse(localStorage.getItem('kr_makeup_requests') || '[]'); } catch(e) { return []; }
+}
+function krSaveMakeups(arr) { localStorage.setItem('kr_makeup_requests', JSON.stringify(arr)); }
+function krAddMakeup(obj) {
+  var arr = krGetMakeups();
+  arr.push(obj);
+  krSaveMakeups(arr);
+}
+function krUpdateMakeupStatus(id, status) {
+  var arr = krGetMakeups();
+  arr = arr.map(function(m) { return m.id === id ? Object.assign({}, m, { status: status }) : m; });
+  krSaveMakeups(arr);
+}
+function krDeleteMakeup(id) {
+  krSaveMakeups(krGetMakeups().filter(function(m) { return m.id !== id; }));
+}
+
+function urRenderMakeupSection(wrap) {
+  var makeups = krGetMakeups();
+  if (!makeups.length) return;
+  var html = '<div class="ur-makeup-section"><div class="ur-makeup-section-title">보강 예정</div>';
+  makeups.forEach(function(m) {
+    var isPending = m.status === 'pending';
+    html += '<div class="ur-makeup-card' + (isPending ? '' : ' confirmed') + '" onclick="urMakeupCardTap(\'' + m.id + '\')">'
+      + '<div class="ur-makeup-dot" style="background:' + m.color + '"></div>'
+      + '<div class="ur-makeup-card-info">'
+      +   '<div class="ur-makeup-card-name">' + _escHtml(m.academyName) + '</div>'
+      +   '<div class="ur-makeup-card-date">원래: ' + m.originalDate + ' → 보강: ' + m.makeupDate + '</div>'
+      + '</div>'
+      + '<div class="ur-makeup-card-status">' + (isPending ? '⏳ 대기중' : '✅ 확정') + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  wrap.insertAdjacentHTML('afterbegin', html);
+}
+
+function urMakeupCardTap(id) {
+  var makeups = krGetMakeups();
+  var m = makeups.find(function(x) { return x.id === id; });
+  if (!m) return;
+  if (m.status === 'pending') {
+    if (confirm(m.academyName + ' 보강을 확정 처리할까요?\n(' + m.makeupDate + ')')) {
+      krUpdateMakeupStatus(id, 'confirmed');
+      urRenderTimeline();
+    }
+  } else {
+    if (confirm('보강을 삭제할까요?')) {
+      krDeleteMakeup(id);
+      urRenderTimeline();
+    }
+  }
+}
+
+var _krMakeupCtx = {};
+
+function urOpenMakeupSheet(dateStr, name, color, label) {
+  _krMakeupCtx = { originalDate: dateStr, academyName: name, color: color, label: label };
+  var overlay = document.getElementById('krMakeupOverlay');
+  var origEl  = document.getElementById('krMakeupOrigDate');
+  var inp     = document.getElementById('krMakeupDateInput');
+  if (!overlay) return;
+  if (origEl) origEl.textContent = name + ' · ' + dateStr;
+  if (inp) {
+    // 기본값: 결석일 + 7일
+    var d = new Date(dateStr); d.setDate(d.getDate() + 7);
+    inp.value = d.toISOString().slice(0,10);
+    inp.min = new Date().toISOString().slice(0,10);
+  }
+  overlay.classList.add('open');
+}
+
+function urCloseMakeupSheet() {
+  var overlay = document.getElementById('krMakeupOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function urSubmitMakeupRequest() {
+  var inp = document.getElementById('krMakeupDateInput');
+  if (!inp || !inp.value) return;
+  var makeupDateRaw = new Date(inp.value);
+  var makeupDate = makeupDateRaw.getFullYear() + '년 ' + (makeupDateRaw.getMonth()+1) + '월 ' + makeupDateRaw.getDate() + '일';
+  krAddMakeup({
+    id: 'mk_' + Date.now(),
+    academyName: _krMakeupCtx.academyName,
+    color: _krMakeupCtx.color,
+    originalDate: _krMakeupCtx.originalDate,
+    makeupDate: makeupDate,
+    status: 'pending'
+  });
+  urCloseMakeupSheet();
+  if (_urSchedViewMode === 'timeline') urRenderTimeline();
 }
 
 // ── 🔔 하원 알림 — 여정 라인 + 학원별 푸시 토글 ──────────
@@ -15470,6 +15599,19 @@ window.addEventListener('DOMContentLoaded', function() {
     </div>
 
     <!-- 옵션 바텀시트 -->
+    <!-- 보강 신청 바텀시트 -->
+    <div class="kr-makeup-overlay" id="krMakeupOverlay" onclick="if(event.target===this)urCloseMakeupSheet()">
+      <div class="kr-makeup-panel">
+        <div class="kr-makeup-handle"></div>
+        <div class="kr-makeup-title">결석 · 보강 신청</div>
+        <div class="kr-makeup-sub" id="krMakeupOrigDate"></div>
+        <div class="kr-makeup-field-label">보강 날짜 선택</div>
+        <input class="kr-makeup-date-input" type="date" id="krMakeupDateInput">
+        <button class="kr-makeup-submit" onclick="urSubmitMakeupRequest()">보강 신청하기</button>
+        <button class="kr-makeup-cancel" onclick="urCloseMakeupSheet()">취소</button>
+      </div>
+    </div>
+
     <div class="ur-ai-sheet-overlay" id="urAiSheetOverlay" onclick="urCloseAiOptions(event)">
       <div class="ur-ai-sheet-panel">
         <div class="ur-ai-sheet-title">조건 설정</div>
